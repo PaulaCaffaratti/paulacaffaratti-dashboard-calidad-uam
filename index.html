@@ -699,6 +699,14 @@ color:#17698c;
 
 }
 
+.badge.nuestro{
+
+background:#fff3e5;
+
+color:#a25a00;
+
+}
+
 
 /* MODAL */
 
@@ -1411,6 +1419,10 @@ Pendiente
 En poder del cliente
 </option>
 
+<option value="NUESTRO">
+En nuestro poder / corrección
+</option>
+
 </select>
 
 </div>
@@ -1732,6 +1744,26 @@ const futuro =
 !vencido;
 
 
+const cliente =
+doc.en_poder_cliente === true;
+
+
+/*
+Todo documento presentado que no esté liberado
+ni en poder del cliente se considera
+EN NUESTRO PODER / CORRECCIÓN.
+Esto también respeta el override manual.
+*/
+
+const nuestro =
+
+presentado &&
+
+!liberado &&
+
+!cliente;
+
+
 return {
 
 ...doc,
@@ -1749,7 +1781,10 @@ _futuro:
 futuro,
 
 _cliente:
-doc.en_poder_cliente === true
+cliente,
+
+_nuestro:
+nuestro
 
 };
 
@@ -2480,7 +2515,7 @@ lib:0,
 
 cliente:0,
 
-gestion:0,
+nuestro:0,
 
 vencido:0,
 
@@ -2511,9 +2546,9 @@ else if(doc._futuro){
 grupos[esp].futuro++;
 
 }
-else if(doc._presentado){
+else if(doc._nuestro){
 
-grupos[esp].gestion++;
+grupos[esp].nuestro++;
 
 }
 
@@ -2581,11 +2616,11 @@ backgroundColor:
 
 {
 
-label:"Presentados en gestión",
+label:"En nuestro poder / corrección",
 
 data:
 labels.map(
-x => grupos[x].gestion
+x => grupos[x].nuestro
 ),
 
 backgroundColor:
@@ -2867,6 +2902,16 @@ return false;
 }
 
 
+if(
+situacion === "NUESTRO" &&
+!doc._nuestro
+){
+
+return false;
+
+}
+
+
 return true;
 
 });
@@ -2977,6 +3022,17 @@ if(doc._cliente){
 return `
 <span class="badge cliente">
 EN PODER CLIENTE
+</span>
+`;
+
+}
+
+
+if(doc._nuestro){
+
+return `
+<span class="badge nuestro">
+EN NUESTRO PODER / CORRECCIÓN
 </span>
 `;
 
