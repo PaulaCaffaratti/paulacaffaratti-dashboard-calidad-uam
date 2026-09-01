@@ -1,480 +1,961 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Administración | Calidad UAM</title>
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-<!-- SUPABASE -->
+<title>
+Administración | Calidad UAM
+</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- LECTOR EXCEL -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
 
 <style>
 
 *{
-  box-sizing:border-box;
+box-sizing:border-box;
 }
 
 :root{
-  --azul:#0c356a;
-  --azul2:#174f8a;
-  --celeste:#60c5e8;
-  --verde:#179447;
-  --rojo:#d83c3c;
-  --naranja:#f28c28;
-  --violeta:#5145e5;
-  --gris:#687787;
-  --gris2:#eef2f5;
-  --fondo:#f4f7f9;
-  --blanco:#ffffff;
+
+--azul:#0c356a;
+--azul2:#174f8a;
+
+--celeste:#60c5e8;
+
+--verde:#179447;
+--verdeClaro:#eaf8ef;
+
+--rojo:#d83c3c;
+--rojoClaro:#fdecec;
+
+--naranja:#f28c28;
+--naranjaClaro:#fff3e5;
+
+--violeta:#5145e5;
+
+--gris:#687787;
+--grisClaro:#e7edf1;
+
+--fondo:#f4f7f9;
+
 }
+
 
 body{
-  margin:0;
-  font-family:Arial,Helvetica,sans-serif;
-  background:var(--fondo);
-  color:#1d2a36;
+
+margin:0;
+
+font-family:
+Arial,
+Helvetica,
+sans-serif;
+
+background:
+var(--fondo);
+
+color:#1d2a36;
+
 }
 
+
+/* HEADER */
+
 header{
-  background:white;
-  border-bottom:1px solid #dde5ea;
+
+background:white;
+
+border-bottom:
+1px solid #dde5ea;
+
 }
 
 .topbar{
-  max-width:1450px;
-  margin:auto;
-  min-height:78px;
-  padding:14px 26px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:20px;
+
+max-width:1500px;
+
+margin:auto;
+
+min-height:78px;
+
+padding:
+14px 26px;
+
+display:flex;
+
+align-items:center;
+
+justify-content:
+space-between;
+
+gap:20px;
+
 }
 
 .marca{
-  display:flex;
-  align-items:center;
-  gap:14px;
+
+display:flex;
+
+align-items:center;
+
+gap:14px;
+
 }
 
-.linea{
-  width:7px;
-  height:46px;
-  background:var(--celeste);
-  border-radius:10px;
+.marcaBarra{
+
+width:7px;
+
+height:48px;
+
+background:
+var(--celeste);
+
+border-radius:8px;
+
 }
 
 .marca h1{
-  margin:0 0 4px;
-  color:var(--azul);
-  font-size:22px;
+
+margin:0 0 4px;
+
+color:
+var(--azul);
+
+font-size:22px;
+
 }
 
 .marca p{
-  margin:0;
-  color:var(--gris);
-  font-size:13px;
+
+margin:0;
+
+color:
+var(--gris);
+
+font-size:13px;
+
 }
 
 .usuario{
-  font-size:13px;
-  color:var(--gris);
-  text-align:right;
+
+font-size:12px;
+
+color:
+var(--gris);
+
+text-align:right;
+
 }
 
 .usuario strong{
-  color:var(--azul);
+
+color:
+var(--azul);
+
 }
+
+
+/* MAIN */
 
 main{
-  max-width:1450px;
-  margin:auto;
-  padding:28px;
+
+max-width:1500px;
+
+margin:auto;
+
+padding:28px;
+
 }
+
 
 .card{
-  background:white;
-  border:1px solid #e2e8ed;
-  border-radius:15px;
-  padding:24px;
-  box-shadow:0 3px 12px rgba(15,50,80,.05);
-  margin-bottom:20px;
+
+background:white;
+
+border:
+1px solid #e1e8ed;
+
+border-radius:15px;
+
+padding:24px;
+
+box-shadow:
+0 3px 12px rgba(20,50,80,.05);
+
+margin-bottom:20px;
+
 }
 
+
+/* LOGIN */
+
 .login{
-  max-width:480px;
-  margin:60px auto;
+
+max-width:480px;
+
+margin:
+60px auto;
+
 }
 
 .login h2{
-  color:var(--azul);
-  margin-top:0;
+
+margin-top:0;
+
+color:
+var(--azul);
+
 }
 
 label{
-  display:block;
-  font-size:12px;
-  font-weight:bold;
-  color:var(--gris);
-  margin:17px 0 7px;
+
+display:block;
+
+font-size:11px;
+
+font-weight:bold;
+
+color:
+var(--gris);
+
+margin:
+17px 0 7px;
+
+}
+
+input,
+select,
+textarea{
+
+font-family:inherit;
+
 }
 
 input[type="email"],
 input[type="password"]{
-  width:100%;
-  height:45px;
-  border:1px solid #ced7de;
-  border-radius:8px;
-  padding:0 12px;
-  font-size:14px;
+
+width:100%;
+
+height:45px;
+
+border:
+1px solid #ced7de;
+
+border-radius:8px;
+
+padding:
+0 12px;
+
 }
+
 
 button{
-  border:0;
-  border-radius:8px;
-  padding:12px 18px;
-  font-weight:bold;
-  cursor:pointer;
-  font-size:13px;
+
+border:0;
+
+border-radius:8px;
+
+padding:
+12px 18px;
+
+font-weight:bold;
+
+cursor:pointer;
+
 }
 
-.btn-primary{
-  background:var(--azul);
-  color:white;
+
+.btnPrimario{
+
+background:
+var(--azul);
+
+color:white;
+
 }
 
-.btn-primary:hover{
-  background:var(--azul2);
+.btnVerde{
+
+background:
+var(--verde);
+
+color:white;
+
 }
 
-.btn-verde{
-  background:var(--verde);
-  color:white;
+.btnGris{
+
+background:#e8edf1;
+
+color:#40505d;
+
 }
 
-.btn-rojo{
-  background:var(--rojo);
-  color:white;
+.btnRojo{
+
+background:
+var(--rojo);
+
+color:white;
+
 }
 
-.btn-gris{
-  background:#e9eef2;
-  color:#3b4b59;
-}
-
-.btn-login{
-  width:100%;
-  margin-top:22px;
-}
-
-.toolbar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:15px;
-  margin-bottom:24px;
-}
-
-.toolbar h2{
-  margin:0;
-  color:var(--azul);
-}
-
-.modulos{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:14px;
-  margin-bottom:25px;
-}
-
-.modulo{
-  background:white;
-  border:1px solid #e0e7ec;
-  border-radius:12px;
-  padding:18px;
-  text-align:center;
-}
-
-.modulo.activo{
-  border:2px solid var(--celeste);
-}
-
-.modulo-icono{
-  font-size:27px;
-  margin-bottom:7px;
-}
-
-.modulo strong{
-  color:var(--azul);
-  font-size:13px;
-}
-
-.modulo small{
-  display:block;
-  margin-top:5px;
-  color:var(--gris);
-}
-
-.carga{
-  border:2px dashed #c9d6df;
-  background:#fafcfd;
-  border-radius:13px;
-  padding:30px;
-  text-align:center;
-}
-
-.carga h3{
-  color:var(--azul);
-  margin-top:0;
-}
-
-.file-input{
-  margin:15px 0;
-}
-
-.archivo-nombre{
-  color:var(--gris);
-  font-size:13px;
-  margin:10px;
-}
 
 .estado{
-  margin-top:15px;
-  border-radius:8px;
-  padding:12px;
-  display:none;
+
+display:none;
+
+margin-top:15px;
+
+padding:12px;
+
+border-radius:8px;
+
+font-size:12px;
+
 }
 
 .estado.ok{
-  display:block;
-  background:#eaf8ef;
-  color:#15773a;
+
+display:block;
+
+background:
+var(--verdeClaro);
+
+color:
+var(--verde);
+
 }
 
 .estado.error{
-  display:block;
-  background:#fdecec;
-  color:#b72c2c;
+
+display:block;
+
+background:
+var(--rojoClaro);
+
+color:
+var(--rojo);
+
 }
 
 .estado.info{
-  display:block;
-  background:#eaf6fd;
-  color:#155a88;
+
+display:block;
+
+background:#eaf6fd;
+
+color:#155a88;
+
 }
 
+
+/* TOOLBAR */
+
+.toolbar{
+
+display:flex;
+
+align-items:center;
+
+justify-content:
+space-between;
+
+gap:15px;
+
+margin-bottom:25px;
+
+}
+
+.toolbar h2{
+
+margin:0;
+
+color:
+var(--azul);
+
+}
+
+.toolbar p{
+
+color:
+var(--gris);
+
+font-size:12px;
+
+}
+
+
+/* TABS */
+
+.tabs{
+
+display:flex;
+
+gap:10px;
+
+flex-wrap:wrap;
+
+margin-bottom:20px;
+
+}
+
+.tab{
+
+background:white;
+
+border:
+1px solid #dce5eb;
+
+color:
+var(--gris);
+
+}
+
+.tab.activo{
+
+background:
+var(--azul);
+
+color:white;
+
+}
+
+
+/* SECCIONES */
+
+.seccionAdmin{
+
+display:none;
+
+}
+
+.seccionAdmin.activa{
+
+display:block;
+
+}
+
+
+/* CARGA EXCEL */
+
+.carga{
+
+border:
+2px dashed #c9d6df;
+
+background:#fafcfd;
+
+border-radius:13px;
+
+padding:30px;
+
+text-align:center;
+
+}
+
+.carga h3{
+
+margin-top:0;
+
+color:
+var(--azul);
+
+}
+
+
+/* KPIs */
+
 .kpis{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:14px;
-  margin:22px 0;
+
+display:grid;
+
+grid-template-columns:
+repeat(5,1fr);
+
+gap:14px;
+
+margin:
+22px 0;
+
 }
 
 .kpi{
-  background:white;
-  border:1px solid #e1e8ed;
-  border-radius:12px;
-  padding:17px;
-  border-left:5px solid var(--celeste);
+
+background:white;
+
+border:
+1px solid #e1e8ed;
+
+border-left:
+5px solid var(--celeste);
+
+border-radius:12px;
+
+padding:17px;
+
 }
 
 .kpi.verde{
-  border-left-color:var(--verde);
+
+border-left-color:
+var(--verde);
+
 }
 
 .kpi.rojo{
-  border-left-color:var(--rojo);
+
+border-left-color:
+var(--rojo);
+
 }
 
 .kpi.naranja{
-  border-left-color:var(--naranja);
+
+border-left-color:
+var(--naranja);
+
 }
 
 .kpi.violeta{
-  border-left-color:var(--violeta);
+
+border-left-color:
+var(--violeta);
+
 }
 
 .kpi span{
-  font-size:11px;
-  text-transform:uppercase;
-  color:var(--gris);
-  font-weight:bold;
+
+font-size:10px;
+
+text-transform:uppercase;
+
+font-weight:bold;
+
+color:
+var(--gris);
+
 }
 
 .kpi strong{
-  display:block;
-  margin-top:8px;
-  font-size:27px;
-  color:var(--azul);
+
+display:block;
+
+font-size:28px;
+
+color:
+var(--azul);
+
+margin-top:8px;
+
 }
 
-.tabla-wrap{
-  overflow:auto;
-  max-height:520px;
-  border:1px solid #e2e7eb;
-  border-radius:10px;
+
+/* TABLAS */
+
+.tablaWrap{
+
+overflow:auto;
+
+max-height:650px;
+
+border:
+1px solid #e1e8ed;
+
+border-radius:10px;
+
 }
 
 table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:12px;
+
+width:100%;
+
+border-collapse:collapse;
+
+font-size:11px;
+
 }
 
 thead{
-  position:sticky;
-  top:0;
-  z-index:5;
+
+position:sticky;
+
+top:0;
+
+z-index:4;
+
 }
 
 th{
-  background:var(--azul);
-  color:white;
-  padding:10px;
-  text-align:left;
-  white-space:nowrap;
+
+background:
+var(--azul);
+
+color:white;
+
+padding:10px;
+
+text-align:left;
+
+white-space:nowrap;
+
 }
 
 td{
-  padding:9px 10px;
-  border-bottom:1px solid #e7ecef;
-  vertical-align:top;
+
+padding:
+9px 10px;
+
+border-bottom:
+1px solid #e5eaee;
+
+vertical-align:top;
+
 }
 
 tr:hover td{
-  background:#f7fbfd;
+
+background:#f8fbfd;
+
 }
+
+
+/* ESTADO MANUAL */
+
+.estadoAutomatico{
+
+font-weight:bold;
+
+font-size:10px;
+
+padding:
+5px 8px;
+
+border-radius:15px;
+
+display:inline-block;
+
+background:#edf2f5;
+
+color:#526575;
+
+}
+
+.estadoEfectivo{
+
+font-weight:bold;
+
+font-size:10px;
+
+padding:
+5px 8px;
+
+border-radius:15px;
+
+display:inline-block;
+
+}
+
+.estadoEfectivo.LIBERADO{
+
+background:
+var(--verdeClaro);
+
+color:
+var(--verde);
+
+}
+
+.estadoEfectivo.EN_PODER_CLIENTE{
+
+background:#eceafd;
+
+color:#493cad;
+
+}
+
+.estadoEfectivo.EN_NUESTRO_PODER{
+
+background:
+var(--naranjaClaro);
+
+color:#a25a00;
+
+}
+
+.estadoEfectivo.VENCIDO{
+
+background:
+var(--rojoClaro);
+
+color:
+var(--rojo);
+
+}
+
+.estadoEfectivo.PENDIENTE{
+
+background:#edf2f5;
+
+color:#526575;
+
+}
+
+.estadoEfectivo.PRESENTADO{
+
+background:#e8f6fc;
+
+color:#17678a;
+
+}
+
+
+.selectEstado{
+
+min-width:190px;
+
+height:35px;
+
+border:
+1px solid #ccd7de;
+
+border-radius:7px;
+
+background:white;
+
+padding:
+0 7px;
+
+}
+
+.inputObs{
+
+min-width:250px;
+
+height:35px;
+
+border:
+1px solid #ccd7de;
+
+border-radius:7px;
+
+padding:
+0 8px;
+
+}
+
+.btnGuardar{
+
+padding:
+8px 11px;
+
+font-size:10px;
+
+background:
+var(--azul);
+
+color:white;
+
+}
+
+
+/* BUSCADOR */
+
+.filtros{
+
+display:flex;
+
+flex-wrap:wrap;
+
+gap:10px;
+
+margin-bottom:15px;
+
+}
+
+.filtros input,
+.filtros select{
+
+height:38px;
+
+border:
+1px solid #ccd7de;
+
+border-radius:7px;
+
+padding:
+0 9px;
+
+background:white;
+
+}
+
+
+/* BADGES */
 
 .badge{
-  display:inline-block;
-  padding:5px 8px;
-  border-radius:20px;
-  font-size:10px;
-  font-weight:bold;
+
+font-size:9px;
+
+font-weight:bold;
+
+padding:
+5px 8px;
+
+border-radius:15px;
+
+display:inline-block;
+
 }
 
-.badge.exacto{
-  background:#eaf8ef;
-  color:#15773a;
+.badge.ok{
+
+background:
+var(--verdeClaro);
+
+color:
+var(--verde);
+
 }
 
-.badge.normalizado{
-  background:#fff3e5;
-  color:#a75b00;
-}
+.badge.alerta{
 
-.badge.manual{
-  background:#eeeafd;
-  color:#4b38a6;
+background:
+var(--naranjaClaro);
+
+color:#a25a00;
+
 }
 
 .badge.error{
-  background:#fdecec;
-  color:#b62d2d;
+
+background:
+var(--rojoClaro);
+
+color:
+var(--rojo);
+
 }
 
-.select-doc{
-  width:280px;
-  max-width:100%;
-  padding:7px;
-}
 
-.acciones{
-  margin-top:20px;
-  display:flex;
-  justify-content:flex-end;
-  gap:10px;
-}
+/* OTROS */
 
 .advertencia{
-  background:#fff7e8;
-  color:#865400;
-  border-left:4px solid var(--naranja);
-  padding:13px 15px;
-  border-radius:7px;
-  margin-bottom:18px;
-  font-size:13px;
+
+background:
+var(--naranjaClaro);
+
+border-left:
+4px solid var(--naranja);
+
+color:#795000;
+
+padding:
+12px;
+
+border-radius:7px;
+
+margin-bottom:15px;
+
+font-size:12px;
+
 }
 
 .oculto{
-  display:none !important;
+
+display:none !important;
+
 }
 
-.loader{
-  display:inline-block;
-  width:17px;
-  height:17px;
-  border:3px solid rgba(255,255,255,.35);
-  border-top-color:white;
-  border-radius:50%;
-  animation:girar .8s linear infinite;
-  vertical-align:middle;
-  margin-right:7px;
+
+@media(max-width:1100px){
+
+.kpis{
+
+grid-template-columns:
+repeat(2,1fr);
+
 }
 
-@keyframes girar{
-  to{transform:rotate(360deg);}
 }
 
-@media(max-width:1050px){
 
-  .modulos{
-    grid-template-columns:repeat(2,1fr);
-  }
+@media(max-width:650px){
 
-  .kpis{
-    grid-template-columns:repeat(2,1fr);
-  }
+main{
+
+padding:14px;
+
 }
 
-@media(max-width:600px){
+.kpis{
 
-  main{
-    padding:14px;
-  }
+grid-template-columns:1fr;
 
-  .modulos,
-  .kpis{
-    grid-template-columns:1fr;
-  }
+}
 
-  .toolbar{
-    align-items:flex-start;
-    flex-direction:column;
-  }
+.toolbar{
+
+flex-direction:column;
+
+align-items:flex-start;
+
+}
+
 }
 
 </style>
+
 </head>
 
+
 <body>
+
 
 <header>
 
 <div class="topbar">
 
-  <div class="marca">
 
-    <div class="linea"></div>
+<div class="marca">
 
-    <div>
-      <h1>DUPLICAR NORTE UAM</h1>
-      <p>Administración de Indicadores de Calidad</p>
-    </div>
+<div class="marcaBarra"></div>
 
-  </div>
+<div>
 
-  <div id="usuarioHeader" class="usuario oculto">
+<h1>
+DUPLICAR NORTE UAM
+</h1>
 
-    Sesión iniciada como<br>
+<p>
+Administración de Indicadores de Calidad
+</p>
 
-    <strong id="emailHeader"></strong>
+</div>
 
-  </div>
+</div>
+
+
+<div
+id="usuarioHeader"
+class="usuario oculto">
+
+Sesión iniciada como
+
+<br>
+
+<strong id="emailHeader"></strong>
+
+</div>
+
 
 </div>
 
@@ -483,380 +964,616 @@ tr:hover td{
 
 <main>
 
-<!-- =========================================================
-LOGIN
-========================================================= -->
 
-<section id="loginBox" class="card login">
+<!-- LOGIN -->
 
-  <h2>🔐 Administración</h2>
+<section
+id="loginBox"
+class="card login">
 
-  <p style="color:#687787;font-size:13px;line-height:1.5;">
-    Acceso exclusivo para usuarios autorizados a actualizar
-    información del Dashboard de Calidad.
-  </p>
+<h2>
+🔐 Administración
+</h2>
 
-  <label>Email</label>
+<p
+style="
+color:#687787;
+font-size:13px;
+line-height:1.5;
+">
 
-  <input
-    id="email"
-    type="email"
-    autocomplete="username"
-    placeholder="usuario@empresa.com"
-  >
+Acceso exclusivo para usuarios autorizados.
 
-  <label>Contraseña</label>
+</p>
 
-  <input
-    id="password"
-    type="password"
-    autocomplete="current-password"
-    placeholder="Contraseña"
-  >
 
-  <button
-    id="btnLogin"
-    class="btn-primary btn-login"
-    onclick="iniciarSesion()"
-  >
-    INGRESAR
-  </button>
+<label>
+Email
+</label>
 
-  <div id="loginEstado" class="estado"></div>
+<input
+id="email"
+type="email">
+
+
+<label>
+Contraseña
+</label>
+
+<input
+id="password"
+type="password">
+
+
+<button
+id="btnLogin"
+class="btnPrimario"
+style="
+width:100%;
+margin-top:22px;
+"
+onclick="iniciarSesion()">
+
+INGRESAR
+
+</button>
+
+
+<div
+id="loginEstado"
+class="estado">
+</div>
+
 
 </section>
 
 
-<!-- =========================================================
-ADMIN
-========================================================= -->
+<!-- ADMIN -->
 
-<section id="adminBox" class="oculto">
+<section
+id="adminBox"
+class="oculto">
 
-  <div class="toolbar">
 
-    <div>
+<div class="toolbar">
 
-      <h2>Actualización de información</h2>
 
-      <p style="color:#687787;font-size:13px;margin-bottom:0;">
-        Seleccioná el módulo que querés actualizar.
-      </p>
+<div>
 
-    </div>
+<h2>
+Administración de Documentación
+</h2>
 
-    <button
-      class="btn-gris"
-      onclick="cerrarSesion()"
-    >
-      Cerrar sesión
-    </button>
+<p>
+Actualización automática por Excel y correcciones manuales.
+</p>
 
-  </div>
+</div>
 
 
-  <!-- MODULOS -->
+<button
+class="btnGris"
+onclick="cerrarSesion()">
 
-  <div class="modulos">
+Cerrar sesión
 
-    <div class="modulo activo">
+</button>
 
-      <div class="modulo-icono">📄</div>
 
-      <strong>Documentación</strong>
+</div>
 
-      <small>Disponible</small>
 
-    </div>
+<div class="tabs">
 
-    <div class="modulo">
 
-      <div class="modulo-icono">👁️</div>
+<button
+id="tabExcel"
+class="tab activo"
+onclick="mostrarAdmin('excel',this)">
 
-      <strong>Blister</strong>
+📄 CARGA EXCEL
 
-      <small>Próximamente</small>
+</button>
 
-    </div>
 
-    <div class="modulo">
+<button
+id="tabManual"
+class="tab"
+onclick="mostrarAdmin('manual',this)">
 
-      <div class="modulo-icono">⚠️</div>
+✏️ ESTADOS MANUALES
 
-      <strong>Hallazgos</strong>
+</button>
 
-      <small>Próximamente</small>
 
-    </div>
+</div>
 
-    <div class="modulo">
 
-      <div class="modulo-icono">🎓</div>
+<!-- =======================================================
+     EXCEL
+======================================================= -->
 
-      <strong>Capacitaciones</strong>
+<section
+id="seccionExcel"
+class="seccionAdmin activa">
 
-      <small>Próximamente</small>
 
-    </div>
+<div class="card">
 
-    <div class="modulo">
 
-      <div class="modulo-icono">🏗️</div>
+<div class="carga">
 
-      <strong>Producción</strong>
 
-      <small>Próximamente</small>
+<h3>
+📄 Actualizar Registro de Archivos
+</h3>
 
-    </div>
 
-  </div>
+<p
+style="
+font-size:12px;
+color:#687787;
+">
 
+Seleccioná el Excel exportado del registro documental.
 
-  <!-- CARGA -->
+</p>
 
-  <div class="card">
 
-    <div class="carga">
+<input
+id="archivoExcel"
+type="file"
+accept=".xlsx,.xls"
+onchange="archivoSeleccionado()">
 
-      <h3>📄 Actualizar Registro de Archivos</h3>
 
-      <p style="font-size:13px;color:#687787;">
-        Seleccioná el Excel exportado del registro documental.
-      </p>
+<div
+id="nombreArchivo"
+style="
+margin:12px;
+font-size:12px;
+color:#687787;
+">
 
-      <input
-        id="archivoExcel"
-        class="file-input"
-        type="file"
-        accept=".xlsx,.xls"
-        onchange="archivoSeleccionado()"
-      >
+Ningún archivo seleccionado
 
-      <div
-        id="nombreArchivo"
-        class="archivo-nombre"
-      >
-        Ningún archivo seleccionado
-      </div>
+</div>
 
-      <button
-        id="btnAnalizar"
-        class="btn-primary"
-        onclick="analizarExcel()"
-      >
-        ANALIZAR EXCEL
-      </button>
 
-      <div
-        id="estadoCarga"
-        class="estado"
-      ></div>
+<button
+class="btnPrimario"
+onclick="analizarExcel()">
 
-    </div>
+ANALIZAR EXCEL
 
-  </div>
+</button>
 
 
-  <!-- RESULTADO -->
+<div
+id="estadoCarga"
+class="estado">
+</div>
 
-  <div
-    id="resultadoAnalisis"
-    class="oculto"
-  >
 
-    <div class="kpis">
+</div>
 
-      <div class="kpi">
+</div>
 
-        <span>Filas Excel</span>
 
-        <strong id="kpiFilas">0</strong>
+<div
+id="resultadoAnalisis"
+class="oculto">
 
-      </div>
 
-      <div class="kpi verde">
+<div class="kpis">
 
-        <span>Vinculadas</span>
 
-        <strong id="kpiVinculados">0</strong>
+<div class="kpi">
 
-      </div>
+<span>
+Filas Excel
+</span>
 
-      <div class="kpi naranja">
+<strong id="kFilas">
+0
+</strong>
 
-        <span>DQ / DO normalizados</span>
+</div>
 
-        <strong id="kpiNormalizados">0</strong>
 
-      </div>
+<div class="kpi verde">
 
-      <div class="kpi rojo">
+<span>
+Vinculadas
+</span>
 
-        <span>Sin vincular</span>
+<strong id="kVinculadas">
+0
+</strong>
 
-        <strong id="kpiSinVincular">0</strong>
+</div>
 
-      </div>
 
-      <div class="kpi violeta">
+<div class="kpi naranja">
 
-        <span>Documentos afectados</span>
+<span>
+DQ / DO
+</span>
 
-        <strong id="kpiDocumentos">0</strong>
+<strong id="kNormalizadas">
+0
+</strong>
 
-      </div>
+</div>
 
-    </div>
 
+<div class="kpi rojo">
 
-    <div class="card">
+<span>
+Desestimadas
+</span>
 
-      <h3 style="color:#0c356a;margin-top:0;">
-        Vista previa del cruce
-      </h3>
+<strong id="kDesestimadas">
+0
+</strong>
 
-      <div class="advertencia">
+</div>
 
-        El sistema todavía <strong>no modificó Supabase</strong>.
 
-        Revisá especialmente las filas amarillas o rojas.
+<div class="kpi violeta">
 
-        Las diferencias tipo <strong>DQ-QA / DO-QA</strong>
-        se muestran como coincidencia normalizada.
+<span>
+Documentos afectados
+</span>
 
-      </div>
+<strong id="kDocsAfectados">
+0
+</strong>
 
-      <div class="tabla-wrap">
+</div>
 
-        <table>
 
-          <thead>
+</div>
 
-            <tr>
-              <th>Archivo / Código detectado</th>
-              <th>Descripción Excel</th>
-              <th>Tipo emisión</th>
-              <th>Fecha</th>
-              <th>Documento oficial</th>
-              <th>Coincidencia</th>
-            </tr>
 
-          </thead>
+<div class="card">
 
-          <tbody id="tablaPreview"></tbody>
 
-        </table>
+<div class="advertencia">
 
-      </div>
+Las filas que no se puedan vincular al Maestro Oficial
+se consideran desestimadas y no modifican el estado
+de ningún documento.
 
+</div>
 
-      <div class="acciones">
 
-        <button
-          class="btn-gris"
-          onclick="cancelarAnalisis()"
-        >
-          CANCELAR
-        </button>
+<div class="tablaWrap">
 
-        <button
-          id="btnConfirmar"
-          class="btn-verde"
-          onclick="confirmarActualizacion()"
-        >
-          CONFIRMAR ACTUALIZACIÓN
-        </button>
 
-      </div>
+<table>
 
-      <div
-        id="estadoConfirmacion"
-        class="estado"
-      ></div>
 
-    </div>
+<thead>
 
-  </div>
+<tr>
 
+<th>
+Código detectado
+</th>
 
-  <!-- ÚLTIMA CARGA -->
+<th>
+Descripción
+</th>
 
-  <div class="card">
+<th>
+Emisión
+</th>
 
-    <h3 style="color:#0c356a;margin-top:0;">
-      Última actualización documental
-    </h3>
+<th>
+Fecha
+</th>
 
-    <div id="ultimaCarga">
+<th>
+Documento oficial
+</th>
 
-      Consultando...
+<th>
+Vinculación
+</th>
 
-    </div>
+</tr>
 
-  </div>
+</thead>
+
+
+<tbody id="tablaPreview">
+</tbody>
+
+
+</table>
+
+
+</div>
+
+
+<div
+style="
+margin-top:18px;
+display:flex;
+justify-content:flex-end;
+gap:10px;
+">
+
+
+<button
+class="btnGris"
+onclick="cancelarAnalisis()">
+
+CANCELAR
+
+</button>
+
+
+<button
+id="btnConfirmar"
+class="btnVerde"
+onclick="confirmarActualizacion()">
+
+CONFIRMAR ACTUALIZACIÓN
+
+</button>
+
+
+</div>
+
+
+<div
+id="estadoConfirmacion"
+class="estado">
+</div>
+
+
+</div>
+
+
+</div>
+
 
 </section>
+
+
+<!-- =======================================================
+     MANUAL
+======================================================= -->
+
+<section
+id="seccionManual"
+class="seccionAdmin">
+
+
+<div class="card">
+
+
+<div
+style="
+margin-bottom:20px;
+">
+
+<h3
+style="
+margin-top:0;
+color:#0c356a;
+">
+
+✏️ Estados manuales de documentación
+
+</h3>
+
+
+<p
+style="
+font-size:12px;
+color:#687787;
+line-height:1.5;
+">
+
+El estado manual tiene prioridad sobre el estado automático
+del Excel. Elegí <strong>Sin override</strong> para que el documento
+vuelva a usar automáticamente el estado del registro.
+
+</p>
+
+</div>
+
+
+<div class="filtros">
+
+
+<input
+id="buscarManual"
+placeholder="Buscar código o documento..."
+style="min-width:280px;"
+oninput="filtrarManual()">
+
+
+<select
+id="filtroManual"
+onchange="filtrarManual()">
+
+<option value="">
+Todos
+</option>
+
+<option value="CON_MANUAL">
+Con estado manual
+</option>
+
+<option value="SIN_MANUAL">
+Sin estado manual
+</option>
+
+</select>
+
+
+</div>
+
+
+<div class="tablaWrap">
+
+
+<table>
+
+
+<thead>
+
+<tr>
+
+<th>
+Código cliente
+</th>
+
+<th>
+Documento
+</th>
+
+<th>
+Estado automático
+</th>
+
+<th>
+Estado manual
+</th>
+
+<th>
+Observación
+</th>
+
+<th>
+Estado efectivo
+</th>
+
+<th>
+Último cambio
+</th>
+
+<th></th>
+
+</tr>
+
+</thead>
+
+
+<tbody id="tablaManual">
+</tbody>
+
+
+</table>
+
+
+</div>
+
+
+<div
+id="estadoManualMensaje"
+class="estado">
+</div>
+
+
+</div>
+
+
+</section>
+
+
+</section>
+
 
 </main>
 
 
 <script>
 
+
 /* ============================================================
 SUPABASE
 ============================================================ */
 
+
 const SUPABASE_URL =
-  "https://mzgbtejfgsrskiuymtwh.supabase.co";
+"https://mzgbtejfgsrskiuymtwh.supabase.co";
+
 
 const SUPABASE_KEY =
-  "sb_publishable_Wen9hxBnae8wRrEEaP5lOQ_aNl9OCGd";
+"sb_publishable_Wen9hxBnae8wRrEEaP5lOQ_aNl9OCGd";
 
 
 const supabaseClient =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+window.supabase.createClient(
+
+SUPABASE_URL,
+
+SUPABASE_KEY
+
+);
 
 
 /* ============================================================
 VARIABLES
 ============================================================ */
 
+
 let usuarioActual = null;
 
 let maestro = [];
 
+let estadosActuales = [];
+
 let equivalencias = [];
+
+let archivoActual = null;
 
 let filasExcel = [];
 
 let filasProcesadas = [];
-
-let archivoActual = null;
 
 
 /* ============================================================
 INICIO
 ============================================================ */
 
+
 document.addEventListener(
-  "DOMContentLoaded",
-  async () => {
 
-    const {
-      data: { session }
-    } =
-    await supabaseClient.auth.getSession();
+"DOMContentLoaded",
 
-    if(session){
+async () => {
 
-      await validarUsuario(session.user);
 
-    }
+const {
 
-  }
+data:{
+session
+}
+
+} =
+
+await supabaseClient
+.auth
+.getSession();
+
+
+if(session){
+
+await validarUsuario(
+session.user
+);
+
+}
+
+
+}
+
 );
 
 
@@ -864,144 +1581,187 @@ document.addEventListener(
 LOGIN
 ============================================================ */
 
+
 async function iniciarSesion(){
 
-  const email =
-    document
-      .getElementById("email")
-      .value
-      .trim();
 
-  const password =
-    document
-      .getElementById("password")
-      .value;
+const email =
 
-  if(!email || !password){
-
-    mostrarEstado(
-      "loginEstado",
-      "Completá email y contraseña.",
-      "error"
-    );
-
-    return;
-  }
+document
+.getElementById("email")
+.value
+.trim();
 
 
-  const boton =
-    document.getElementById("btnLogin");
+const password =
 
-  boton.disabled = true;
-
-  boton.innerHTML =
-    '<span class="loader"></span>Ingresando...';
+document
+.getElementById("password")
+.value;
 
 
-  const {
-    data,
-    error
-  } =
-  await supabaseClient.auth.signInWithPassword({
-    email,
-    password
-  });
+if(!email || !password){
+
+mostrarEstado(
+
+"loginEstado",
+
+"Completá email y contraseña.",
+
+"error"
+
+);
+
+return;
+
+}
 
 
-  boton.disabled = false;
+const {
 
-  boton.innerHTML = "INGRESAR";
+data,
+error
+
+} =
+
+await supabaseClient
+.auth
+.signInWithPassword({
+
+email,
+password
+
+});
 
 
-  if(error){
+if(error){
 
-    mostrarEstado(
-      "loginEstado",
-      "No se pudo iniciar sesión: " +
-      error.message,
-      "error"
-    );
+mostrarEstado(
 
-    return;
-  }
+"loginEstado",
+
+"No se pudo iniciar sesión: " +
+error.message,
+
+"error"
+
+);
+
+return;
+
+}
 
 
-  await validarUsuario(data.user);
+await validarUsuario(
+data.user
+);
 
 }
 
 
 /* ============================================================
-VALIDAR ADMIN
+VALIDACIÓN ADMIN
 ============================================================ */
+
 
 async function validarUsuario(user){
 
-  const {
-    data,
-    error
-  } =
-  await supabaseClient
 
-    .from("usuarios_admin")
+const {
 
-    .select(
-      "email,puede_cargar,activo"
-    )
+data,
+error
 
-    .eq(
-      "user_id",
-      user.id
-    )
+} =
 
-    .maybeSingle();
+await supabaseClient
 
+.from(
+"usuarios_admin"
+)
 
-  if(
-    error ||
-    !data ||
-    !data.activo ||
-    !data.puede_cargar
-  ){
+.select(
+"email,puede_cargar,activo"
+)
 
-    await supabaseClient.auth.signOut();
+.eq(
+"user_id",
+user.id
+)
 
-    mostrarEstado(
-      "loginEstado",
-      "Este usuario no tiene permiso para cargar información.",
-      "error"
-    );
-
-    return;
-  }
+.maybeSingle();
 
 
-  usuarioActual = user;
+if(
+error ||
+!data ||
+!data.activo ||
+!data.puede_cargar
+){
 
-  document
-    .getElementById("loginBox")
-    .classList
-    .add("oculto");
-
-  document
-    .getElementById("adminBox")
-    .classList
-    .remove("oculto");
-
-  document
-    .getElementById("usuarioHeader")
-    .classList
-    .remove("oculto");
-
-  document
-    .getElementById("emailHeader")
-    .textContent =
-      user.email;
+await supabaseClient
+.auth
+.signOut();
 
 
-  await cargarMaestro();
+mostrarEstado(
 
-  await cargarUltimaCarga();
+"loginEstado",
+
+"Este usuario no tiene autorización.",
+
+"error"
+
+);
+
+return;
+
+}
+
+
+usuarioActual =
+user;
+
+
+document
+.getElementById(
+"loginBox"
+)
+.classList
+.add(
+"oculto"
+);
+
+
+document
+.getElementById(
+"adminBox"
+)
+.classList
+.remove(
+"oculto"
+);
+
+
+document
+.getElementById(
+"usuarioHeader"
+)
+.classList
+.remove(
+"oculto"
+);
+
+
+document
+.getElementById(
+"emailHeader"
+)
+.textContent =
+user.email;
+
+
+await cargarDatos();
 
 }
 
@@ -1010,101 +1770,851 @@ async function validarUsuario(user){
 LOGOUT
 ============================================================ */
 
+
 async function cerrarSesion(){
 
-  await supabaseClient.auth.signOut();
+await supabaseClient
+.auth
+.signOut();
 
-  location.reload();
-
-}
-
-
-/* ============================================================
-CARGAR MAESTRO
-============================================================ */
-
-async function cargarMaestro(){
-
-  const {
-    data,
-    error
-  } =
-  await supabaseClient
-
-    .from("documentos_maestro")
-
-    .select(
-      "id,item,especialidad,codigo_pecom,codigo_oldelval,descripcion,fecha_prevista_presentacion,inicio_actividad"
-    )
-
-    .eq("activo",true)
-
-    .order("item");
-
-
-  if(error){
-
-    mostrarEstado(
-      "estadoCarga",
-      "No se pudo leer el Maestro Oficial: " +
-      error.message,
-      "error"
-    );
-
-    return;
-  }
-
-
-  maestro = data || [];
-
-
-  const {
-    data: eqData
-  } =
-  await supabaseClient
-
-    .from("documentos_equivalencias")
-
-    .select(
-      "documento_id,codigo_alternativo"
-    )
-
-    .eq("confirmado",true);
-
-
-  equivalencias =
-    eqData || [];
+location.reload();
 
 }
 
 
 /* ============================================================
-ARCHIVO
+CARGAR DATOS
 ============================================================ */
+
+
+async function cargarDatos(){
+
+
+const {
+
+data:docs,
+error:errorDocs
+
+} =
+
+await supabaseClient
+
+.from(
+"documentos_maestro"
+)
+
+.select(`
+id,
+item,
+especialidad,
+codigo_pecom,
+codigo_oldelval,
+descripcion,
+fecha_prevista_presentacion,
+estado_manual,
+observacion_estado_manual,
+estado_manual_usuario,
+estado_manual_fecha
+`)
+
+.eq(
+"activo",
+true
+)
+
+.order(
+"item"
+);
+
+
+if(errorDocs){
+
+throw errorDocs;
+
+}
+
+
+maestro =
+docs || [];
+
+
+const {
+
+data:estados
+
+} =
+
+await supabaseClient
+
+.from(
+"documentos_estado_actual"
+)
+
+.select(`
+documento_id,
+revision_actual,
+estado_actual,
+presentado,
+liberado,
+observado,
+fecha_ultima_emision
+`);
+
+
+estadosActuales =
+estados || [];
+
+
+const {
+
+data:eq
+
+} =
+
+await supabaseClient
+
+.from(
+"documentos_equivalencias"
+)
+
+.select(
+"documento_id,codigo_alternativo"
+)
+
+.eq(
+"confirmado",
+true
+);
+
+
+equivalencias =
+eq || [];
+
+
+pintarTablaManual();
+
+}
+
+
+/* ============================================================
+NAVEGACIÓN ADMIN
+============================================================ */
+
+
+function mostrarAdmin(
+tipo,
+boton
+){
+
+
+document
+
+.querySelectorAll(
+".seccionAdmin"
+)
+
+.forEach(
+x =>
+x.classList.remove(
+"activa"
+)
+);
+
+
+document
+
+.querySelectorAll(
+".tab"
+)
+
+.forEach(
+x =>
+x.classList.remove(
+"activo"
+)
+);
+
+
+boton.classList.add(
+"activo"
+);
+
+
+if(tipo === "excel"){
+
+document
+.getElementById(
+"seccionExcel"
+)
+.classList
+.add(
+"activa"
+);
+
+}
+else{
+
+document
+.getElementById(
+"seccionManual"
+)
+.classList
+.add(
+"activa"
+);
+
+
+pintarTablaManual();
+
+}
+
+
+}
+
+
+/* ============================================================
+ESTADOS MANUALES
+============================================================ */
+
+
+function obtenerEstadoAutomatico(doc){
+
+
+const estado =
+estadosActuales
+.find(
+x =>
+String(x.documento_id) ===
+String(doc.id)
+);
+
+
+if(!estado){
+
+return "PENDIENTE";
+
+}
+
+
+if(estado.liberado){
+
+return "LIBERADO";
+
+}
+
+
+if(estado.observado){
+
+return "EN_NUESTRO_PODER";
+
+}
+
+
+if(estado.presentado){
+
+return "PRESENTADO";
+
+}
+
+
+return "PENDIENTE";
+
+}
+
+
+function obtenerEstadoEfectivo(doc){
+
+
+if(doc.estado_manual){
+
+return doc.estado_manual;
+
+}
+
+
+return obtenerEstadoAutomatico(
+doc
+);
+
+}
+
+
+/* ============================================================
+TABLA MANUAL
+============================================================ */
+
+
+function pintarTablaManual(
+lista = null
+){
+
+
+const datos =
+lista || maestro;
+
+
+const tbody =
+document.getElementById(
+"tablaManual"
+);
+
+
+if(!datos.length){
+
+tbody.innerHTML = `
+
+<tr>
+
+<td colspan="8">
+
+No hay documentos.
+
+</td>
+
+</tr>
+
+`;
+
+return;
+
+}
+
+
+tbody.innerHTML =
+
+datos
+.map(doc => {
+
+
+const automatico =
+obtenerEstadoAutomatico(
+doc
+);
+
+
+const efectivo =
+obtenerEstadoEfectivo(
+doc
+);
+
+
+return `
+
+<tr>
+
+
+<td>
+
+<strong>
+
+${escapar(
+doc.codigo_oldelval ||
+doc.codigo_pecom ||
+""
+)}
+
+</strong>
+
+</td>
+
+
+<td>
+
+${escapar(
+doc.descripcion
+)}
+
+</td>
+
+
+<td>
+
+<span class="estadoAutomatico">
+
+${textoEstado(
+automatico
+)}
+
+</span>
+
+</td>
+
+
+<td>
+
+<select
+id="estado_${doc.id}"
+class="selectEstado">
+
+<option value=""
+${!doc.estado_manual ? "selected" : ""}>
+
+Sin override
+
+</option>
+
+
+<option value="LIBERADO"
+${doc.estado_manual === "LIBERADO" ? "selected" : ""}>
+
+Liberado
+
+</option>
+
+
+<option value="EN_PODER_CLIENTE"
+${doc.estado_manual === "EN_PODER_CLIENTE" ? "selected" : ""}>
+
+En poder del cliente
+
+</option>
+
+
+<option value="EN_NUESTRO_PODER"
+${doc.estado_manual === "EN_NUESTRO_PODER" ? "selected" : ""}>
+
+En nuestro poder / corrección
+
+</option>
+
+
+<option value="PRESENTADO"
+${doc.estado_manual === "PRESENTADO" ? "selected" : ""}>
+
+Presentado
+
+</option>
+
+
+<option value="VENCIDO"
+${doc.estado_manual === "VENCIDO" ? "selected" : ""}>
+
+Vencido
+
+</option>
+
+
+<option value="PENDIENTE"
+${doc.estado_manual === "PENDIENTE" ? "selected" : ""}>
+
+Pendiente
+
+</option>
+
+
+</select>
+
+</td>
+
+
+<td>
+
+<input
+id="obs_${doc.id}"
+class="inputObs"
+value="${escaparAtributo(
+doc.observacion_estado_manual || ""
+)}"
+placeholder="Motivo / comentario">
+
+</td>
+
+
+<td>
+
+<span
+class="estadoEfectivo ${efectivo}">
+
+${textoEstado(
+efectivo
+)}
+
+</span>
+
+</td>
+
+
+<td>
+
+${doc.estado_manual_fecha
+?
+formatearFechaHora(
+doc.estado_manual_fecha
+)
+:
+"-"
+}
+
+${doc.estado_manual_usuario
+?
+"<br><small>" +
+escapar(
+doc.estado_manual_usuario
+)
++
+"</small>"
+:
+""
+}
+
+</td>
+
+
+<td>
+
+<button
+class="btnGuardar"
+onclick="guardarEstadoManual(${doc.id})">
+
+GUARDAR
+
+</button>
+
+</td>
+
+
+</tr>
+
+`;
+
+})
+.join("");
+
+}
+
+
+/* ============================================================
+FILTRAR MANUAL
+============================================================ */
+
+
+function filtrarManual(){
+
+
+const buscar =
+
+normalizarTexto(
+
+document
+.getElementById(
+"buscarManual"
+)
+.value
+
+);
+
+
+const filtro =
+
+document
+.getElementById(
+"filtroManual"
+)
+.value;
+
+
+const lista =
+
+maestro.filter(doc => {
+
+
+const texto =
+
+normalizarTexto(
+
+(doc.codigo_oldelval || "")
+
++
+
+" "
+
++
+
+(doc.codigo_pecom || "")
+
++
+
+" "
+
++
+
+(doc.descripcion || "")
+
+);
+
+
+if(
+buscar &&
+!texto.includes(
+buscar
+)
+){
+
+return false;
+
+}
+
+
+if(
+filtro ===
+"CON_MANUAL" &&
+!doc.estado_manual
+){
+
+return false;
+
+}
+
+
+if(
+filtro ===
+"SIN_MANUAL" &&
+doc.estado_manual
+){
+
+return false;
+
+}
+
+
+return true;
+
+});
+
+
+pintarTablaManual(
+lista
+);
+
+}
+
+
+/* ============================================================
+GUARDAR ESTADO MANUAL
+============================================================ */
+
+
+async function guardarEstadoManual(
+documentoId
+){
+
+
+const doc =
+maestro.find(
+x =>
+x.id === documentoId
+);
+
+
+if(!doc){
+
+return;
+
+}
+
+
+const nuevoEstado =
+
+document
+.getElementById(
+"estado_" + documentoId
+)
+.value;
+
+
+const observacion =
+
+document
+.getElementById(
+"obs_" + documentoId
+)
+.value
+.trim();
+
+
+const estadoAnterior =
+doc.estado_manual || null;
+
+
+try{
+
+
+/*
+HISTORIAL
+*/
+
+const {
+
+error:errorHistorial
+
+} =
+
+await supabaseClient
+
+.from(
+"documentos_estado_manual_historial"
+)
+
+.insert({
+
+documento_id:
+documentoId,
+
+estado_anterior:
+estadoAnterior,
+
+estado_nuevo:
+nuevoEstado || null,
+
+observacion:
+observacion || null,
+
+usuario:
+usuarioActual.email
+
+});
+
+
+if(errorHistorial){
+
+throw errorHistorial;
+
+}
+
+
+/*
+ACTUALIZAR MAESTRO
+*/
+
+const {
+
+error:errorUpdate
+
+} =
+
+await supabaseClient
+
+.from(
+"documentos_maestro"
+)
+
+.update({
+
+estado_manual:
+nuevoEstado || null,
+
+observacion_estado_manual:
+nuevoEstado
+?
+(
+observacion || null
+)
+:
+null,
+
+estado_manual_usuario:
+nuevoEstado
+?
+usuarioActual.email
+:
+null,
+
+estado_manual_fecha:
+nuevoEstado
+?
+new Date().toISOString()
+:
+null
+
+})
+
+.eq(
+"id",
+documentoId
+);
+
+
+if(errorUpdate){
+
+throw errorUpdate;
+
+}
+
+
+mostrarEstado(
+
+"estadoManualMensaje",
+
+"✓ Estado actualizado correctamente.",
+
+"ok"
+
+);
+
+
+await cargarDatos();
+
+
+}
+catch(error){
+
+
+mostrarEstado(
+
+"estadoManualMensaje",
+
+"No se pudo guardar: " +
+error.message,
+
+"error"
+
+);
+
+
+}
+
+}
+
+
+/* ============================================================
+EXCEL
+============================================================ */
+
 
 function archivoSeleccionado(){
 
-  const input =
-    document.getElementById(
-      "archivoExcel"
-    );
 
-  archivoActual =
-    input.files[0] || null;
+const input =
+document.getElementById(
+"archivoExcel"
+);
 
 
-  document
-    .getElementById("nombreArchivo")
-    .textContent =
-      archivoActual
-        ? archivoActual.name
-        : "Ningún archivo seleccionado";
+archivoActual =
+input.files[0] || null;
 
 
-  document
-    .getElementById("resultadoAnalisis")
-    .classList
-    .add("oculto");
+document
+.getElementById(
+"nombreArchivo"
+)
+.textContent =
+
+archivoActual
+?
+archivoActual.name
+:
+"Ningún archivo seleccionado";
+
+
+document
+.getElementById(
+"resultadoAnalisis"
+)
+.classList
+.add(
+"oculto"
+);
 
 }
 
@@ -1113,125 +2623,132 @@ function archivoSeleccionado(){
 ANALIZAR EXCEL
 ============================================================ */
 
+
 async function analizarExcel(){
 
-  if(!archivoActual){
 
-    mostrarEstado(
-      "estadoCarga",
-      "Seleccioná primero un archivo Excel.",
-      "error"
-    );
-
-    return;
-  }
+if(!archivoActual){
 
 
-  if(!maestro.length){
+mostrarEstado(
 
-    await cargarMaestro();
-  }
+"estadoCarga",
 
+"Seleccioná un Excel.",
 
-  mostrarEstado(
-    "estadoCarga",
-    "Leyendo y analizando el archivo...",
-    "info"
-  );
+"error"
 
+);
 
-  try{
+return;
 
-    const buffer =
-      await archivoActual.arrayBuffer();
-
-    const workbook =
-      XLSX.read(
-        buffer,
-        {
-          type:"array",
-          cellDates:true
-        }
-      );
+}
 
 
-    let nombreHoja =
-      workbook.SheetNames.find(
-        n =>
-        normalizarTexto(n) ===
-        "archivos"
-      );
+try{
 
 
-    if(!nombreHoja){
-
-      nombreHoja =
-        workbook.SheetNames[0];
-    }
+const buffer =
+await archivoActual
+.arrayBuffer();
 
 
-    const hoja =
-      workbook.Sheets[nombreHoja];
+const workbook =
+XLSX.read(
+buffer,
+{
+type:"array",
+cellDates:true
+}
+);
 
 
-    filasExcel =
-      XLSX.utils.sheet_to_json(
-        hoja,
-        {
-          defval:"",
-          raw:false
-        }
-      );
+let hojaNombre =
+
+workbook
+.SheetNames
+.find(
+x =>
+normalizarTexto(x) ===
+"archivos"
+);
 
 
-    if(!filasExcel.length){
+if(!hojaNombre){
 
-      throw new Error(
-        "La hoja seleccionada no contiene registros."
-      );
+hojaNombre =
+workbook.SheetNames[0];
 
-    }
-
-
-    filasProcesadas =
-      filasExcel
-        .map(
-          (fila,index) =>
-            procesarFila(
-              fila,
-              index
-            )
-        )
-        .filter(
-          x =>
-            x.nombre ||
-            x.descripcion ||
-            x.codigoDetectado
-        );
+}
 
 
-    pintarResultado();
+filasExcel =
+
+XLSX.utils
+.sheet_to_json(
+
+workbook
+.Sheets[hojaNombre],
+
+{
+defval:"",
+raw:false
+}
+
+);
 
 
-    mostrarEstado(
-      "estadoCarga",
-      "Excel analizado correctamente. Revisá la vista previa antes de confirmar.",
-      "ok"
-    );
+filasProcesadas =
 
-  }
-  catch(error){
+filasExcel
 
-    console.error(error);
+.map(
+(fila,index) =>
+procesarFila(
+fila,
+index
+)
+)
 
-    mostrarEstado(
-      "estadoCarga",
-      "No se pudo leer el Excel: " +
-      error.message,
-      "error"
-    );
+.filter(
+x =>
+x.nombre ||
+x.descripcion ||
+x.codigoDetectado
+);
 
-  }
+
+pintarPreview();
+
+
+mostrarEstado(
+
+"estadoCarga",
+
+"Excel analizado correctamente.",
+
+"ok"
+
+);
+
+
+}
+catch(error){
+
+
+mostrarEstado(
+
+"estadoCarga",
+
+"No se pudo leer el Excel: " +
+error.message,
+
+"error"
+
+);
+
+
+}
 
 }
 
@@ -1240,163 +2757,150 @@ async function analizarExcel(){
 PROCESAR FILA
 ============================================================ */
 
-function procesarFila(fila,index){
 
-  const nombre =
-    obtenerCampo(
-      fila,
-      [
-        "Nombre",
-        "nombre"
-      ]
-    );
+function procesarFila(
+fila,
+index
+){
 
 
-  const descripcion =
-    obtenerCampo(
-      fila,
-      [
-        "Descripción",
-        "Descripcion",
-        "descripcion"
-      ]
-    );
+const nombre =
+obtenerCampo(
+fila,
+[
+"Nombre"
+]
+);
 
 
-  const tipoEmision =
-    String(
-      obtenerCampo(
-        fila,
-        [
-          "Tipos de Emision",
-          "Tipos de Emisión",
-          "Tipo de Emision",
-          "Tipo de Emisión"
-        ]
-      ) || ""
-    )
-    .trim()
-    .toUpperCase();
+const descripcion =
+obtenerCampo(
+fila,
+[
+"Descripción",
+"Descripcion"
+]
+);
 
 
-  const tipo =
-    obtenerCampo(
-      fila,
-      ["Tipo"]
-    );
+const tipoEmision =
+
+String(
+
+obtenerCampo(
+fila,
+[
+"Tipos de Emision",
+"Tipos de Emisión"
+]
+)
+
+|| ""
+
+)
+.trim()
+.toUpperCase();
 
 
-  const revision =
-    obtenerCampo(
-      fila,
-      [
-        "Revision",
-        "Revisión"
-      ]
-    );
+const revision =
+obtenerCampo(
+fila,
+[
+"Revision",
+"Revisión"
+]
+);
 
 
-  const transmision =
-    obtenerCampo(
-      fila,
-      [
-        "Número de transmision",
-        "Número de transmisión",
-        "Numero de transmision"
-      ]
-    );
+const transmision =
+obtenerCampo(
+fila,
+[
+"Número de transmision",
+"Número de transmisión"
+]
+);
 
 
-  const fechaRaw =
-    obtenerCampo(
-      fila,
-      [
-        "Fecha de emisión",
-        "Fecha de emision"
-      ]
-    );
+const fechaRaw =
+obtenerCampo(
+fila,
+[
+"Fecha de emisión",
+"Fecha de emision"
+]
+);
 
 
-  const ultimaActualizacion =
-    obtenerCampo(
-      fila,
-      [
-        "Última actualización",
-        "Ultima actualización",
-        "Ultima actualizacion"
-      ]
-    );
+const actualizadoPor =
+obtenerCampo(
+fila,
+[
+"Actualizado por"
+]
+);
 
 
-  const actualizadoPor =
-    obtenerCampo(
-      fila,
-      [
-        "Actualizado por"
-      ]
-    );
+const codigoDetectado =
+extraerCodigo(
+nombre
+);
 
 
-  const codigoDetectado =
-    extraerCodigo(
-      nombre
-    );
+const match =
+buscarDocumento(
+codigoDetectado,
+descripcion
+);
 
 
-  const match =
-    buscarDocumento(
-      codigoDetectado,
-      descripcion
-    );
+return {
 
+indice:index,
 
-  return {
+nombre,
 
-    indice:index,
+descripcion,
 
-    filaOriginal:fila,
+tipoEmision,
 
-    nombre,
+revision,
 
-    descripcion,
+transmision,
 
-    codigoDetectado,
+fechaRaw,
 
-    tipoEmision,
+fechaISO:
+convertirFechaISO(
+fechaRaw
+),
 
-    tipo,
+actualizadoPor,
 
-    revision,
+codigoDetectado,
 
-    transmision,
+documentoId:
+match
+?
+match.documento.id
+:
+null,
 
-    fechaRaw,
+documento:
+match
+?
+match.documento
+:
+null,
 
-    fechaISO:
-      convertirFechaISO(
-        fechaRaw
-      ),
+metodo:
+match
+?
+match.metodo
+:
+"DESESTIMADO"
 
-    ultimaActualizacion,
-
-    actualizadoPor,
-
-    documentoId:
-      match
-        ? match.documento.id
-        : null,
-
-    documento:
-      match
-        ? match.documento
-        : null,
-
-    metodo:
-      match
-        ? match.metodo
-        : "SIN_VINCULAR"
-
-  };
+};
 
 }
 
@@ -1405,1789 +2909,1379 @@ function procesarFila(fila,index){
 BUSCAR DOCUMENTO
 ============================================================ */
 
+
 function buscarDocumento(
-  codigo,
-  descripcion
+codigo,
+descripcion
 ){
 
-  if(codigo){
 
-    const exacto =
-      maestro.find(
-        d =>
-        normalizarCodigo(
-          d.codigo_oldelval
-        ) ===
-        normalizarCodigo(codigo)
-      );
+if(codigo){
 
 
-    if(exacto){
+const exacto =
 
-      return {
-        documento:exacto,
-        metodo:"EXACTO"
-      };
+maestro.find(
 
-    }
+d =>
+normalizarCodigo(
+d.codigo_oldelval
+)
+===
+normalizarCodigo(
+codigo
+)
 
-
-    const equivalente =
-      equivalencias.find(
-        e =>
-        normalizarCodigo(
-          e.codigo_alternativo
-        ) ===
-        normalizarCodigo(codigo)
-      );
+);
 
 
-    if(equivalente){
+if(exacto){
 
-      const doc =
-        maestro.find(
-          d =>
-          d.id ===
-          equivalente.documento_id
-        );
+return {
 
+documento:exacto,
 
-      if(doc){
+metodo:"EXACTO"
 
-        return {
-          documento:doc,
-          metodo:"EQUIVALENCIA"
-        };
-
-      }
-
-    }
-
-
-    /*
-    ---------------------------------------
-    CASO DQ-QA / DO-QA
-    ---------------------------------------
-    */
-
-    const codigoFlexible =
-      normalizarDQDO(codigo);
-
-
-    const candidatos =
-      maestro.filter(
-        d =>
-        normalizarDQDO(
-          d.codigo_oldelval
-        ) ===
-        codigoFlexible
-      );
-
-
-    if(candidatos.length === 1){
-
-      return {
-        documento:candidatos[0],
-        metodo:"NORMALIZADO_DQ_DO"
-      };
-
-    }
-
-  }
-
-
-  /*
-  La descripción solamente se utiliza
-  como sugerencia si es muy parecida.
-  NO vincula automáticamente una
-  coincidencia dudosa.
-  */
-
-  const sugerido =
-    mejorCoincidenciaDescripcion(
-      descripcion
-    );
-
-
-  if(
-    sugerido &&
-    sugerido.score >= 0.92
-  ){
-
-    return {
-      documento:sugerido.documento,
-      metodo:"DESCRIPCION"
-    };
-
-  }
-
-
-  return null;
+};
 
 }
 
 
-/* ============================================================
-NORMALIZAR CÓDIGOS
-============================================================ */
+/*
+EQUIVALENCIA
+*/
 
-function normalizarCodigo(valor){
+const eq =
 
-  return String(valor || "")
+equivalencias.find(
 
-    .toUpperCase()
+e =>
+normalizarCodigo(
+e.codigo_alternativo
+)
+===
+normalizarCodigo(
+codigo
+)
 
-    .replace(/\s+/g,"")
-
-    .replace(/_/g,"-")
-
-    .trim();
-
-}
-
-
-function normalizarDQDO(valor){
-
-  return normalizarCodigo(valor)
-
-    .replace(
-      /-(DQ|DO)-QA-/,
-      "-XX-QA-"
-    );
-
-}
+);
 
 
-/* ============================================================
-EXTRAER CÓDIGO DESDE NOMBRE
-============================================================ */
-
-function extraerCodigo(nombre){
-
-  const texto =
-    String(nombre || "")
-      .toUpperCase();
+if(eq){
 
 
-  const patron =
-    /ODV-ALVS-25033-[A-Z]{2}-[A-Z]{2}-\d{3}/;
+const doc =
+
+maestro.find(
+d =>
+d.id ===
+eq.documento_id
+);
 
 
-  const encontrado =
-    texto.match(patron);
+if(doc){
 
+return {
 
-  return encontrado
-    ? encontrado[0]
-    : "";
+documento:doc,
+
+metodo:"EQUIVALENCIA"
+
+};
 
 }
 
 
-/* ============================================================
-DESCRIPCIÓN SIMILAR
-============================================================ */
+}
 
-function mejorCoincidenciaDescripcion(
-  descripcion
+
+/*
+DQ / DO
+*/
+
+const flexible =
+normalizarDQDO(
+codigo
+);
+
+
+const candidatos =
+
+maestro.filter(
+
+d =>
+normalizarDQDO(
+d.codigo_oldelval
+)
+===
+flexible
+
+);
+
+
+if(
+candidatos.length === 1
 ){
 
-  const objetivo =
-    limpiarDescripcion(
-      descripcion
-    );
+return {
 
+documento:
+candidatos[0],
 
-  if(!objetivo){
+metodo:
+"NORMALIZADO_DQ_DO"
 
-    return null;
-  }
-
-
-  let mejor = null;
-
-
-  maestro.forEach(doc => {
-
-    const candidato =
-      limpiarDescripcion(
-        doc.descripcion
-      );
-
-
-    const score =
-      similitud(
-        objetivo,
-        candidato
-      );
-
-
-    if(
-      !mejor ||
-      score > mejor.score
-    ){
-
-      mejor = {
-        documento:doc,
-        score
-      };
-
-    }
-
-  });
-
-
-  return mejor;
+};
 
 }
 
 
-function limpiarDescripcion(texto){
-
-  return normalizarTexto(texto)
-
-    .replace(
-      /[^a-z0-9 ]/g,
-      " "
-    )
-
-    .replace(
-      /\s+/g,
-      " "
-    )
-
-    .trim();
-
 }
 
 
-function similitud(a,b){
-
-  if(!a || !b){
-    return 0;
-  }
-
-
-  const palabrasA =
-    new Set(
-      a.split(" ")
-      .filter(x => x.length > 2)
-    );
-
-
-  const palabrasB =
-    new Set(
-      b.split(" ")
-      .filter(x => x.length > 2)
-    );
-
-
-  if(
-    !palabrasA.size ||
-    !palabrasB.size
-  ){
-    return 0;
-  }
-
-
-  let iguales = 0;
-
-
-  palabrasA.forEach(p => {
-
-    if(
-      palabrasB.has(p)
-    ){
-      iguales++;
-    }
-
-  });
-
-
-  return (
-    2 * iguales
-  ) /
-  (
-    palabrasA.size +
-    palabrasB.size
-  );
+return null;
 
 }
 
 
 /* ============================================================
-PINTAR PREVIEW
+PREVIEW
 ============================================================ */
 
-function pintarResultado(){
 
-  const tbody =
-    document.getElementById(
-      "tablaPreview"
-    );
+function pintarPreview(){
 
 
-  tbody.innerHTML = "";
+const vinculadas =
+
+filasProcesadas.filter(
+x =>
+x.documentoId
+);
 
 
-  let vinculados = 0;
+const desestimadas =
 
-  let normalizados = 0;
-
-  let sinVincular = 0;
-
-  const docs =
-    new Set();
+filasProcesadas.filter(
+x =>
+!x.documentoId
+);
 
 
-  filasProcesadas.forEach(
-    (fila,index) => {
+const normalizadas =
 
-      if(fila.documentoId){
-
-        vinculados++;
-
-        docs.add(
-          fila.documentoId
-        );
-
-      }
-      else{
-
-        sinVincular++;
-
-      }
+filasProcesadas.filter(
+x =>
+x.metodo ===
+"NORMALIZADO_DQ_DO"
+);
 
 
-      if(
-        fila.metodo ===
-        "NORMALIZADO_DQ_DO"
-      ){
+const docs =
 
-        normalizados++;
+new Set(
 
-      }
+vinculadas.map(
+x =>
+x.documentoId
+)
 
-
-      const tr =
-        document.createElement("tr");
+);
 
 
-      const documentoTexto =
-        fila.documento
-        ?
-        `
-          <strong>
-          ${escapar(
-            fila.documento.codigo_oldelval
-          )}
-          </strong>
-          <br>
-          ${escapar(
-            fila.documento.descripcion
-          )}
-        `
-        :
-        crearSelectorManual(
-          index
-        );
+setTexto(
+"kFilas",
+filasProcesadas.length
+);
 
 
-      tr.innerHTML = `
-
-        <td>
-
-          <strong>
-          ${escapar(
-            fila.codigoDetectado ||
-            fila.nombre
-          )}
-          </strong>
-
-          <br>
-
-          <span style="color:#687787">
-          ${escapar(fila.nombre)}
-          </span>
-
-        </td>
-
-        <td>
-          ${escapar(
-            fila.descripcion
-          )}
-        </td>
-
-        <td>
-          ${escapar(
-            fila.tipoEmision
-          )}
-        </td>
-
-        <td>
-          ${escapar(
-            fila.fechaRaw
-          )}
-        </td>
-
-        <td>
-          ${documentoTexto}
-        </td>
-
-        <td>
-          ${badgeMetodo(
-            fila.metodo
-          )}
-        </td>
-
-      `;
+setTexto(
+"kVinculadas",
+vinculadas.length
+);
 
 
-      tbody.appendChild(tr);
-
-    });
-
-
-  document
-    .getElementById("kpiFilas")
-    .textContent =
-      filasProcesadas.length;
+setTexto(
+"kNormalizadas",
+normalizadas.length
+);
 
 
-  document
-    .getElementById("kpiVinculados")
-    .textContent =
-      vinculados;
+setTexto(
+"kDesestimadas",
+desestimadas.length
+);
 
 
-  document
-    .getElementById("kpiNormalizados")
-    .textContent =
-      normalizados;
+setTexto(
+"kDocsAfectados",
+docs.size
+);
 
 
-  document
-    .getElementById("kpiSinVincular")
-    .textContent =
-      sinVincular;
+document
+.getElementById(
+"tablaPreview"
+)
+.innerHTML =
+
+filasProcesadas
+.map(
+fila => `
+
+<tr>
+
+<td>
+
+${escapar(
+fila.codigoDetectado ||
+fila.nombre
+)}
+
+</td>
+
+<td>
+
+${escapar(
+fila.descripcion
+)}
+
+</td>
+
+<td>
+
+${escapar(
+fila.tipoEmision
+)}
+
+</td>
+
+<td>
+
+${escapar(
+fila.fechaRaw
+)}
+
+</td>
+
+<td>
+
+${fila.documento
+?
+"<strong>" +
+escapar(
+fila.documento.codigo_oldelval
+)
++
+"</strong><br>" +
+escapar(
+fila.documento.descripcion
+)
+:
+"-"
+}
+
+</td>
+
+<td>
+
+${fila.documento
+?
+'<span class="badge ok">' +
+escapar(
+fila.metodo
+)
++
+"</span>"
+:
+'<span class="badge error">DESESTIMADO</span>'
+}
+
+</td>
+
+</tr>
+
+`
+)
+.join("");
 
 
-  document
-    .getElementById("kpiDocumentos")
-    .textContent =
-      docs.size;
-
-
-  document
-    .getElementById(
-      "resultadoAnalisis"
-    )
-    .classList
-    .remove("oculto");
+document
+.getElementById(
+"resultadoAnalisis"
+)
+.classList
+.remove(
+"oculto"
+);
 
 }
 
 
 /* ============================================================
-SELECT MANUAL
+CONFIRMAR EXCEL
 ============================================================ */
 
-function crearSelectorManual(index){
-
-  let html = `
-
-  <select
-    class="select-doc"
-    onchange="
-      vincularManual(
-        ${index},
-        this.value
-      )
-    "
-  >
-
-    <option value="">
-      -- Seleccionar documento --
-    </option>
-
-  `;
-
-
-  maestro.forEach(doc => {
-
-    html += `
-
-      <option value="${doc.id}">
-
-        ${escapar(
-          doc.codigo_oldelval
-        )}
-
-        -
-
-        ${escapar(
-          doc.descripcion
-        )}
-
-      </option>
-
-    `;
-
-  });
-
-
-  html += "</select>";
-
-
-  return html;
-
-}
-
-
-function vincularManual(
-  indiceFila,
-  documentoId
-){
-
-  const fila =
-    filasProcesadas[
-      indiceFila
-    ];
-
-
-  if(!fila){
-    return;
-  }
-
-
-  if(!documentoId){
-
-    fila.documentoId = null;
-
-    fila.documento = null;
-
-    fila.metodo =
-      "SIN_VINCULAR";
-
-  }
-  else{
-
-    const doc =
-      maestro.find(
-        d =>
-        String(d.id) ===
-        String(documentoId)
-      );
-
-
-    fila.documentoId =
-      doc.id;
-
-    fila.documento =
-      doc;
-
-    fila.metodo =
-      "MANUAL";
-
-  }
-
-
-  pintarResultado();
-
-}
-
-
-/* ============================================================
-BADGE
-============================================================ */
-
-function badgeMetodo(metodo){
-
-  if(metodo === "EXACTO"){
-
-    return `
-      <span class="badge exacto">
-      EXACTO
-      </span>
-    `;
-
-  }
-
-
-  if(metodo === "EQUIVALENCIA"){
-
-    return `
-      <span class="badge exacto">
-      EQUIVALENCIA
-      </span>
-    `;
-
-  }
-
-
-  if(
-    metodo ===
-    "NORMALIZADO_DQ_DO"
-  ){
-
-    return `
-      <span class="badge normalizado">
-      DQ / DO
-      </span>
-    `;
-
-  }
-
-
-  if(
-    metodo ===
-    "DESCRIPCION"
-  ){
-
-    return `
-      <span class="badge normalizado">
-      DESCRIPCIÓN
-      </span>
-    `;
-
-  }
-
-
-  if(metodo === "MANUAL"){
-
-    return `
-      <span class="badge manual">
-      MANUAL
-      </span>
-    `;
-
-  }
-
-
-  return `
-    <span class="badge error">
-    SIN VINCULAR
-    </span>
-  `;
-
-}
-
-
-/* ============================================================
-CONFIRMAR ACTUALIZACIÓN
-============================================================ */
 
 async function confirmarActualizacion(){
 
-  if(!usuarioActual){
 
-    return;
-  }
+const boton =
+document.getElementById(
+"btnConfirmar"
+);
 
 
-  const sinVincular =
-    filasProcesadas.filter(
-      f =>
-      !f.documentoId
-    );
+boton.disabled =
+true;
 
 
-  if(sinVincular.length){
+try{
 
-    const seguir =
-      confirm(
 
-        "Hay " +
+const desestimadas =
 
-        sinVincular.length +
+filasProcesadas.filter(
+x =>
+!x.documentoId
+);
 
-        " filas sin vincular.\n\n" +
 
-        "Esas filas se guardarán para revisión pero NO modificarán el estado de ningún documento.\n\n" +
+const {
 
-        "¿Querés continuar?"
+data:carga,
+error:errorCarga
 
-      );
+} =
 
+await supabaseClient
 
-    if(!seguir){
+.from(
+"cargas_excel"
+)
 
-      return;
+.insert({
 
-    }
+tipo_archivo:
+"DOCUMENTACION_REGISTRO",
 
-  }
+nombre_archivo:
+archivoActual.name,
 
+usuario:
+usuarioActual.email,
 
-  const boton =
-    document.getElementById(
-      "btnConfirmar"
-    );
+cantidad_registros:
+filasProcesadas.length,
 
+registros_sin_vincular:
+desestimadas.length,
 
-  boton.disabled = true;
+estado:
+"PROCESANDO"
 
-  boton.innerHTML =
-    '<span class="loader"></span>Actualizando...';
+})
 
+.select()
 
-  mostrarEstado(
-    "estadoConfirmacion",
-    "Procesando actualización...",
-    "info"
-  );
+.single();
 
 
-  try{
+if(errorCarga){
 
-    /*
-    ========================================
-    CREAR REGISTRO DE CARGA
-    ========================================
-    */
+throw errorCarga;
 
-    const {
-      data:carga,
-      error:errorCarga
-    } =
-    await supabaseClient
+}
 
-      .from("cargas_excel")
 
-      .insert({
+/*
+REGISTROS
+*/
 
-        tipo_archivo:
-          "DOCUMENTACION_REGISTRO",
+const registros =
 
-        nombre_archivo:
-          archivoActual.name,
+filasProcesadas.map(
+fila => ({
 
-        usuario:
-          usuarioActual.email,
+carga_id:
+carga.id,
 
-        cantidad_registros:
-          filasProcesadas.length,
+documento_id:
+fila.documentoId,
 
-        registros_sin_vincular:
-          sinVincular.length,
+codigo_detectado:
+fila.codigoDetectado,
 
-        estado:
-          "PROCESANDO"
+nombre_archivo:
+fila.nombre,
 
-      })
+descripcion_detectada:
+fila.descripcion,
 
-      .select()
+revision:
+String(
+fila.revision || ""
+),
 
-      .single();
+tipo_emision:
+fila.tipoEmision,
 
+numero_transmision:
+fila.transmision,
 
-    if(errorCarga){
+fecha_emision:
+fila.fechaISO,
 
-      throw errorCarga;
+actualizado_por:
+fila.actualizadoPor,
 
-    }
+vinculado:
+!!fila.documentoId,
 
+metodo_vinculacion:
+fila.metodo
 
-    /*
-    ========================================
-    GUARDAR REGISTROS DEL EXCEL
-    ========================================
-    */
+})
 
-    const registros =
-      filasProcesadas.map(
-        fila => ({
+);
 
-          carga_id:
-            carga.id,
 
-          documento_id:
-            fila.documentoId,
+for(
+let i=0;
+i<registros.length;
+i+=100
+){
 
-          codigo_detectado:
-            fila.codigoDetectado,
 
-          nombre_archivo:
-            fila.nombre,
+const {
 
-          descripcion_detectada:
-            fila.descripcion,
+error
 
-          revision:
-            String(
-              fila.revision || ""
-            ),
+} =
 
-          tipo_emision:
-            fila.tipoEmision,
+await supabaseClient
 
-          numero_transmision:
-            fila.transmision,
+.from(
+"documentos_registro"
+)
 
-          fecha_emision:
-            fila.fechaISO,
+.insert(
 
-          actualizado_por:
-            fila.actualizadoPor,
+registros.slice(
+i,
+i+100
+)
 
-          vinculado:
-            !!fila.documentoId,
+);
 
-          metodo_vinculacion:
-            fila.metodo
 
-        })
-      );
+if(error){
 
+throw error;
 
-    /*
-    Insertar por bloques.
-    */
+}
 
-    const TAMANO_BLOQUE = 100;
 
+}
 
-    for(
-      let i=0;
-      i<registros.length;
-      i+=TAMANO_BLOQUE
-    ){
 
-      const bloque =
-        registros.slice(
-          i,
-          i+TAMANO_BLOQUE
-        );
+/*
+ESTADOS
+*/
 
+const agrupados =
+agruparPorDocumento(
+filasProcesadas
+);
 
-      const {
-        error
-      } =
-      await supabaseClient
 
-        .from(
-          "documentos_registro"
-        )
+const estados =
 
-        .insert(bloque);
+Object
+.values(
+agrupados
+)
 
+.map(
+calcularEstadoDocumento
+)
 
-      if(error){
+.filter(Boolean);
 
-        throw error;
 
-      }
+if(estados.length){
 
-    }
 
+const {
 
-    /*
-    ========================================
-    ACTUALIZAR ESTADO ACTUAL
-    ========================================
-    */
+error
 
-    const agrupados =
-      agruparPorDocumento(
-        filasProcesadas
-      );
+} =
 
+await supabaseClient
 
-    const estados = [];
+.from(
+"documentos_estado_actual"
+)
 
+.upsert(
 
-    Object.values(
-      agrupados
-    )
-    .forEach(grupo => {
+estados,
 
-      const estado =
-        calcularEstadoDocumento(
-          grupo
-        );
+{
+onConflict:
+"documento_id"
+}
 
+);
 
-      if(estado){
 
-        estados.push(estado);
+if(error){
 
-      }
+throw error;
 
-    });
+}
 
 
-    if(estados.length){
+}
 
-      const {
-        error:errorEstados
-      } =
-      await supabaseClient
 
-        .from(
-          "documentos_estado_actual"
-        )
+/*
+FINALIZAR
+*/
 
-        .upsert(
-          estados,
-          {
-            onConflict:
-              "documento_id"
-          }
-        );
+const {
 
+error:errorFinal
 
-      if(errorEstados){
+} =
 
-        throw errorEstados;
+await supabaseClient
 
-      }
+.from(
+"cargas_excel"
+)
 
-    }
+.update({
 
+estado:
+"PROCESADO",
 
-    /*
-    ========================================
-    GUARDAR EQUIVALENCIAS CONFIRMADAS
-    ========================================
-    */
+registros_actualizados:
+Object.keys(
+agrupados
+).length,
 
-    const equivalenciasNuevas =
-      filasProcesadas
+registros_sin_vincular:
+desestimadas.length
 
-        .filter(
-          f =>
-          f.documentoId &&
-          f.codigoDetectado &&
-          (
-            f.metodo ===
-            "MANUAL" ||
-            f.metodo ===
-            "NORMALIZADO_DQ_DO"
-          )
-        )
+})
 
-        .map(
-          f => ({
+.eq(
+"id",
+carga.id
+);
 
-            documento_id:
-              f.documentoId,
 
-            codigo_alternativo:
-              f.codigoDetectado,
+if(errorFinal){
 
-            descripcion_alternativa:
-              f.descripcion,
+throw errorFinal;
 
-            confirmado:true,
+}
 
-            usuario:
-              usuarioActual.email
 
-          })
-        );
+mostrarEstado(
 
+"estadoConfirmacion",
 
-    const unicas =
-      [];
+"✓ Actualización completada. " +
 
-    const usados =
-      new Set();
+Object.keys(
+agrupados
+).length +
 
+" documentos actualizados y " +
 
-    equivalenciasNuevas
-      .forEach(e => {
+desestimadas.length +
 
-        const key =
-          normalizarCodigo(
-            e.codigo_alternativo
-          );
+" registros desestimados.",
 
+"ok"
 
-        if(
-          key &&
-          !usados.has(key)
-        ){
+);
 
-          usados.add(key);
 
-          unicas.push(e);
+await cargarDatos();
 
-        }
 
-      });
+}
+catch(error){
 
 
-    if(unicas.length){
+mostrarEstado(
 
-      const {
-        error:errorEq
-      } =
-      await supabaseClient
+"estadoConfirmacion",
 
-        .from(
-          "documentos_equivalencias"
-        )
+"Error: " +
+error.message,
 
-        .upsert(
-          unicas,
-          {
-            onConflict:
-              "codigo_alternativo"
-          }
-        );
+"error"
 
+);
 
-      if(errorEq){
 
-        throw errorEq;
+}
+finally{
 
-      }
 
-    }
+boton.disabled =
+false;
 
 
-    /*
-    ========================================
-    FINALIZAR CARGA
-    ========================================
-    */
-
-    const docsAfectados =
-      Object.keys(
-        agrupados
-      ).length;
-
-
-    const {
-      error:errorFinal
-    } =
-    await supabaseClient
-
-      .from("cargas_excel")
-
-      .update({
-
-        estado:
-          "PROCESADO",
-
-        registros_actualizados:
-          docsAfectados,
-
-        registros_sin_vincular:
-          sinVincular.length,
-
-        observaciones:
-          "Actualización realizada desde admin.html"
-
-      })
-
-      .eq(
-        "id",
-        carga.id
-      );
-
-
-    if(errorFinal){
-
-      throw errorFinal;
-
-    }
-
-
-    mostrarEstado(
-      "estadoConfirmacion",
-
-      "✓ Actualización completada. " +
-
-      docsAfectados +
-
-      " documentos actualizaron su estado.",
-
-      "ok"
-    );
-
-
-    boton.innerHTML =
-      "ACTUALIZACIÓN COMPLETADA";
-
-
-    await cargarUltimaCarga();
-
-    await cargarMaestro();
-
-  }
-  catch(error){
-
-    console.error(error);
-
-    mostrarEstado(
-      "estadoConfirmacion",
-      "Error durante la actualización: " +
-      error.message,
-      "error"
-    );
-
-
-    boton.disabled = false;
-
-    boton.innerHTML =
-      "CONFIRMAR ACTUALIZACIÓN";
-
-  }
+}
 
 }
 
 
 /* ============================================================
-AGRUPAR POR DOCUMENTO
+AGRUPACIÓN
 ============================================================ */
+
 
 function agruparPorDocumento(
-  filas
+filas
 ){
 
-  const resultado = {};
+
+const grupos = {};
 
 
-  filas.forEach(fila => {
-
-    if(!fila.documentoId){
-
-      return;
-
-    }
+filas.forEach(f => {
 
 
-    if(
-      !resultado[
-        fila.documentoId
-      ]
-    ){
+if(!f.documentoId){
 
-      resultado[
-        fila.documentoId
-      ] = [];
+return;
 
-    }
+}
 
 
-    resultado[
-      fila.documentoId
-    ].push(fila);
+if(
+!grupos[
+f.documentoId
+]
+){
 
-  });
+grupos[
+f.documentoId
+] = [];
+
+}
 
 
-  return resultado;
+grupos[
+f.documentoId
+]
+.push(f);
+
+
+});
+
+
+return grupos;
 
 }
 
 
 /* ============================================================
-CALCULAR ESTADO ACTUAL
+CALCULAR ESTADO
 ============================================================ */
+
 
 function calcularEstadoDocumento(
-  filas
+filas
 ){
 
-  if(!filas.length){
 
-    return null;
+if(!filas.length){
 
-  }
+return null;
 
-
-  const filasOrdenadas =
-    [...filas]
-    .sort(
-      (a,b) => {
-
-        const fechaA =
-          a.fechaISO
-          ?
-          new Date(a.fechaISO)
-          :
-          new Date(0);
+}
 
 
-        const fechaB =
-          b.fechaISO
-          ?
-          new Date(b.fechaISO)
-          :
-          new Date(0);
+const ordenadas =
+
+[...filas]
+
+.sort(
+
+(a,b) =>
+
+fechaMillis(
+a.fechaISO
+)
+-
+fechaMillis(
+b.fechaISO
+)
+
+);
 
 
-        return fechaA - fechaB;
+const ultima =
 
-      }
-    );
-
-
-  const estadosRespuesta =
-    [
-      "LIB",
-      "APR",
-      "APC",
-      "OBS",
-      "REC"
-    ];
+ordenadas[
+ordenadas.length - 1
+];
 
 
-  const respuestas =
-    filasOrdenadas.filter(
-      f =>
-      estadosRespuesta.includes(
-        f.tipoEmision
-      )
-    );
+const respuestas =
+
+ordenadas.filter(
+
+f =>
+[
+"LIB",
+"OBS",
+"APC",
+"ACO",
+"REC"
+]
+.includes(
+f.tipoEmision
+)
+
+);
 
 
-  /*
-  Si existe devolución del cliente,
-  usamos la última devolución.
+const ultimaRespuesta =
 
-  Si todavía no existe devolución,
-  usamos la última emisión.
-  */
-
-  const ultima =
-    respuestas.length
-    ?
-    respuestas[
-      respuestas.length - 1
-    ]
-    :
-    filasOrdenadas[
-      filasOrdenadas.length - 1
-    ];
+respuestas.length
+?
+respuestas[
+respuestas.length - 1
+]
+:
+ultima;
 
 
-  /*
-  Si encontramos el documento en el
-  registro, consideramos que fue
-  presentado al menos una vez.
-  */
-
-  const presentado =
-    filasOrdenadas.length > 0;
+const presentado =
+ordenadas.length > 0;
 
 
-  const estadoActual =
-    ultima.tipoEmision ||
-    (
-      presentado
-      ?
-      "PRESENTADO"
-      :
-      ""
-    );
+const estadoActual =
+ultimaRespuesta.tipoEmision ||
+"PRESENTADO";
 
 
-  return {
+return {
 
-    documento_id:
-      ultima.documentoId,
+documento_id:
+ultima.documentoId,
 
-    revision_actual:
-      String(
-        ultima.revision || ""
-      ),
+revision_actual:
+String(
+ultima.revision || ""
+),
 
-    estado_actual:
-      estadoActual,
+estado_actual:
+estadoActual,
 
-    fecha_ultima_emision:
-      ultima.fechaISO,
+fecha_ultima_emision:
+ultima.fechaISO,
 
-    numero_transmision:
-      ultima.transmision,
+numero_transmision:
+ultima.transmision,
 
-    presentado:
-      presentado,
+presentado:
+presentado,
 
-    liberado:
-      estadoActual === "LIB",
+liberado:
+estadoActual ===
+"LIB",
 
-    observado:
-      estadoActual === "OBS",
+observado:
+[
+"OBS",
+"APC",
+"ACO",
+"REC"
+]
+.includes(
+estadoActual
+),
 
-    fecha_actualizacion:
-      new Date()
-        .toISOString()
+fecha_actualizacion:
+new Date()
+.toISOString()
 
-  };
+};
 
 }
 
 
 /* ============================================================
-ÚLTIMA CARGA
+CANCELAR
 ============================================================ */
 
-async function cargarUltimaCarga(){
 
-  const contenedor =
-    document.getElementById(
-      "ultimaCarga"
-    );
+function cancelarAnalisis(){
 
 
-  const {
-    data,
-    error
-  } =
-  await supabaseClient
+filasProcesadas = [];
 
-    .from("cargas_excel")
-
-    .select("*")
-
-    .eq(
-      "tipo_archivo",
-      "DOCUMENTACION_REGISTRO"
-    )
-
-    .order(
-      "fecha_carga",
-      {
-        ascending:false
-      }
-    )
-
-    .limit(1);
+filasExcel = [];
 
 
-  if(
-    error ||
-    !data ||
-    !data.length
-  ){
-
-    contenedor.innerHTML =
-      `
-        <span style="color:#687787">
-        Todavía no hay cargas registradas.
-        </span>
-      `;
-
-    return;
-
-  }
-
-
-  const carga =
-    data[0];
-
-
-  contenedor.innerHTML = `
-
-    <div
-      style="
-        display:grid;
-        grid-template-columns:
-        repeat(auto-fit,minmax(180px,1fr));
-        gap:15px;
-      "
-    >
-
-      <div>
-
-        <small style="color:#687787">
-        Fecha
-        </small>
-
-        <br>
-
-        <strong>
-        ${formatearFechaHora(
-          carga.fecha_carga
-        )}
-        </strong>
-
-      </div>
-
-      <div>
-
-        <small style="color:#687787">
-        Archivo
-        </small>
-
-        <br>
-
-        <strong>
-        ${escapar(
-          carga.nombre_archivo
-        )}
-        </strong>
-
-      </div>
-
-      <div>
-
-        <small style="color:#687787">
-        Usuario
-        </small>
-
-        <br>
-
-        <strong>
-        ${escapar(
-          carga.usuario || "-"
-        )}
-        </strong>
-
-      </div>
-
-      <div>
-
-        <small style="color:#687787">
-        Registros
-        </small>
-
-        <br>
-
-        <strong>
-        ${carga.cantidad_registros || 0}
-        </strong>
-
-      </div>
-
-      <div>
-
-        <small style="color:#687787">
-        Sin vincular
-        </small>
-
-        <br>
-
-        <strong>
-        ${carga.registros_sin_vincular || 0}
-        </strong>
-
-      </div>
-
-    </div>
-
-  `;
+document
+.getElementById(
+"resultadoAnalisis"
+)
+.classList
+.add(
+"oculto"
+);
 
 }
 
 
 /* ============================================================
-FECHAS
+UTILIDADES EXCEL
 ============================================================ */
 
-function convertirFechaISO(valor){
 
-  if(!valor){
+function normalizarCodigo(
+valor
+){
 
-    return null;
+return String(
+valor || ""
+)
 
-  }
+.toUpperCase()
 
+.replace(
+/\s+/g,
+""
+)
 
-  if(valor instanceof Date){
+.replace(
+/_/g,
+"-"
+)
 
-    if(
-      !isNaN(
-        valor.getTime()
-      )
-    ){
-
-      return valor
-        .toISOString()
-        .slice(0,10);
-
-    }
-
-  }
-
-
-  const texto =
-    String(valor)
-      .trim()
-      .toLowerCase();
-
-
-  /*
-  Formato:
-  16 de jun. de 2026
-  */
-
-  const meses = {
-
-    ene:1,
-    enero:1,
-
-    feb:2,
-    febrero:2,
-
-    mar:3,
-    marzo:3,
-
-    abr:4,
-    abril:4,
-
-    may:5,
-    mayo:5,
-
-    jun:6,
-    junio:6,
-
-    jul:7,
-    julio:7,
-
-    ago:8,
-    agosto:8,
-
-    sep:9,
-    sept:9,
-    septiembre:9,
-
-    oct:10,
-    octubre:10,
-
-    nov:11,
-    noviembre:11,
-
-    dic:12,
-    diciembre:12
-
-  };
-
-
-  const limpio =
-    texto
-      .replace(/\./g,"")
-      .replace(
-        /\s+\d{1,2}:\d{2}.*$/,
-        ""
-      )
-      .trim();
-
-
-  const match =
-    limpio.match(
-      /(\d{1,2})\s+de\s+([a-záéíóú]+)\s+de\s+(\d{4})/
-    );
-
-
-  if(match){
-
-    const dia =
-      Number(match[1]);
-
-    const mesTexto =
-      quitarAcentos(
-        match[2]
-      );
-
-    const mes =
-      meses[mesTexto];
-
-
-    const anio =
-      Number(match[3]);
-
-
-    if(mes){
-
-      return (
-        anio +
-        "-" +
-        String(mes)
-          .padStart(2,"0") +
-        "-" +
-        String(dia)
-          .padStart(2,"0")
-      );
-
-    }
-
-  }
-
-
-  /*
-  dd/mm/yyyy
-  */
-
-  const match2 =
-    limpio.match(
-      /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/
-    );
-
-
-  if(match2){
-
-    return (
-      match2[3] +
-      "-" +
-      match2[2]
-        .padStart(2,"0") +
-      "-" +
-      match2[1]
-        .padStart(2,"0")
-    );
-
-  }
-
-
-  return null;
+.trim();
 
 }
 
 
-/* ============================================================
-UTILIDADES
-============================================================ */
+function normalizarDQDO(
+valor
+){
+
+return normalizarCodigo(
+valor
+)
+
+.replace(
+/-(DQ|DO)-QA-/,
+"-XX-QA-"
+);
+
+}
+
+
+function extraerCodigo(
+nombre
+){
+
+const texto =
+String(
+nombre || ""
+)
+.toUpperCase();
+
+
+const match =
+texto.match(
+
+/ODV-ALVS-25033-[A-Z]{2}-[A-Z]{2}-\d{3}/
+
+);
+
+
+return match
+?
+match[0]
+:
+"";
+
+}
+
 
 function obtenerCampo(
-  objeto,
-  nombres
+objeto,
+nombres
 ){
 
-  const keys =
-    Object.keys(objeto);
+
+const claves =
+Object.keys(
+objeto
+);
 
 
-  for(
-    const nombre of nombres
-  ){
-
-    const buscado =
-      normalizarTexto(nombre);
+for(
+const nombre of nombres
+){
 
 
-    const encontrado =
-      keys.find(
-        key =>
-        normalizarTexto(key) ===
-        buscado
-      );
+const objetivo =
+normalizarTexto(
+nombre
+);
 
 
-    if(encontrado){
+const encontrada =
 
-      return objeto[
-        encontrado
-      ];
+claves.find(
 
-    }
+k =>
+normalizarTexto(
+k
+)
+===
+objetivo
 
-  }
-
-
-  return "";
-
-}
+);
 
 
-function normalizarTexto(valor){
+if(encontrada){
 
-  return quitarAcentos(
-    String(valor || "")
-      .toLowerCase()
-      .trim()
-  );
+return objeto[
+encontrada
+];
 
 }
 
 
-function quitarAcentos(texto){
+}
 
-  return String(texto || "")
 
-    .normalize("NFD")
-
-    .replace(
-      /[\u0300-\u036f]/g,
-      ""
-    );
+return "";
 
 }
 
 
-function escapar(valor){
+/* ============================================================
+FECHA EXCEL
+============================================================ */
 
-  return String(valor ?? "")
 
-    .replace(/&/g,"&amp;")
+function convertirFechaISO(
+valor
+){
 
-    .replace(/</g,"&lt;")
 
-    .replace(/>/g,"&gt;")
+if(!valor){
 
-    .replace(/"/g,"&quot;")
-
-    .replace(/'/g,"&#039;");
+return null;
 
 }
 
 
-function formatearFechaHora(valor){
+if(
+valor instanceof Date &&
+!isNaN(
+valor.getTime()
+)
+){
 
-  if(!valor){
+return valor
+.toISOString()
+.slice(
+0,
+10
+);
 
-    return "-";
-
-  }
+}
 
 
-  return new Date(valor)
+const texto =
 
-    .toLocaleString(
-      "es-AR"
-    );
+normalizarTexto(
+valor
+)
+
+.replace(
+/\./g,
+""
+);
+
+
+const meses = {
+
+ene:1,
+enero:1,
+
+feb:2,
+febrero:2,
+
+mar:3,
+marzo:3,
+
+abr:4,
+abril:4,
+
+may:5,
+mayo:5,
+
+jun:6,
+junio:6,
+
+jul:7,
+julio:7,
+
+ago:8,
+agosto:8,
+
+sep:9,
+sept:9,
+septiembre:9,
+
+oct:10,
+octubre:10,
+
+nov:11,
+noviembre:11,
+
+dic:12,
+diciembre:12
+
+};
+
+
+const m =
+
+texto.match(
+
+/(\d{1,2})\s+de\s+([a-z]+)\s+de\s+(\d{4})/
+
+);
+
+
+if(m){
+
+
+const mes =
+meses[
+m[2]
+];
+
+
+if(mes){
+
+return (
+
+m[3]
+
++
+
+"-"
+
++
+
+String(
+mes
+).padStart(
+2,
+"0"
+)
+
++
+
+"-"
+
++
+
+String(
+m[1]
+).padStart(
+2,
+"0"
+)
+
+);
+
+}
+
+
+}
+
+
+const m2 =
+
+texto.match(
+
+/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/
+
+);
+
+
+if(m2){
+
+return (
+
+m2[3]
+
++
+
+"-"
+
++
+
+m2[2]
+.padStart(
+2,
+"0"
+)
+
++
+
+"-"
+
++
+
+m2[1]
+.padStart(
+2,
+"0"
+)
+
+);
+
+}
+
+
+return null;
+
+}
+
+
+/* ============================================================
+TEXTOS
+============================================================ */
+
+
+function textoEstado(
+estado
+){
+
+
+const textos = {
+
+LIBERADO:
+"LIBERADO",
+
+EN_PODER_CLIENTE:
+"EN PODER DEL CLIENTE",
+
+EN_NUESTRO_PODER:
+"EN NUESTRO PODER / CORRECCIÓN",
+
+PRESENTADO:
+"PRESENTADO",
+
+VENCIDO:
+"VENCIDO",
+
+PENDIENTE:
+"PENDIENTE"
+
+};
+
+
+return textos[
+estado
+]
+||
+estado
+||
+"-";
+
+}
+
+
+/* ============================================================
+UTILIDADES GENERALES
+============================================================ */
+
+
+function normalizarTexto(
+valor
+){
+
+return String(
+valor || ""
+)
+
+.toLowerCase()
+
+.normalize("NFD")
+
+.replace(
+/[\u0300-\u036f]/g,
+""
+)
+
+.trim();
+
+}
+
+
+function fechaMillis(
+valor
+){
+
+if(!valor){
+
+return 0;
+
+}
+
+
+const x =
+new Date(
+valor
+);
+
+
+return isNaN(
+x.getTime()
+)
+?
+0
+:
+x.getTime();
+
+}
+
+
+function formatearFechaHora(
+valor
+){
+
+if(!valor){
+
+return "-";
+
+}
+
+
+return new Date(
+valor
+)
+.toLocaleString(
+"es-AR"
+);
+
+}
+
+
+function escapar(
+valor
+){
+
+return String(
+valor ?? ""
+)
+
+.replace(
+/&/g,
+"&amp;"
+)
+
+.replace(
+/</g,
+"&lt;"
+)
+
+.replace(
+/>/g,
+"&gt;"
+)
+
+.replace(
+/"/g,
+"&quot;"
+)
+
+.replace(
+/'/g,
+"&#039;"
+);
+
+}
+
+
+function escaparAtributo(
+valor
+){
+
+return escapar(
+valor
+);
+
+}
+
+
+function setTexto(
+id,
+valor
+){
+
+const x =
+document.getElementById(
+id
+);
+
+
+if(x){
+
+x.textContent =
+valor;
+
+}
 
 }
 
 
 function mostrarEstado(
-  id,
-  texto,
-  tipo
+id,
+texto,
+tipo
 ){
 
-  const el =
-    document.getElementById(id);
+const x =
+document.getElementById(
+id
+);
 
 
-  el.className =
-    "estado " + tipo;
+x.className =
+"estado " +
+tipo;
 
 
-  el.textContent =
-    texto;
-
-}
-
-
-function cancelarAnalisis(){
-
-  filasExcel = [];
-
-  filasProcesadas = [];
-
-
-  document
-    .getElementById(
-      "resultadoAnalisis"
-    )
-    .classList
-    .add("oculto");
-
-
-  mostrarEstado(
-    "estadoCarga",
-    "Análisis cancelado. Podés seleccionar otro archivo.",
-    "info"
-  );
+x.textContent =
+texto;
 
 }
 
 </script>
+
 
 </body>
 </html>
