@@ -73,6 +73,12 @@ tr:hover td{background:#f8fbfd}
 .histItem{padding:12px 4px;border-bottom:1px solid #e5eaee;font-size:12px}
 .histItem strong{color:var(--azul)}
 .aviso{background:var(--naranjaClaro);border-left:4px solid var(--naranja);padding:12px;border-radius:8px;font-size:12px;color:#795000;margin-bottom:18px}
+
+.editorModalGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.editorModalGrid .full{grid-column:span 2}
+.editorModal input,.editorModal select,.editorModal textarea{pointer-events:auto!important;user-select:text!important;-webkit-user-select:text!important;background:#fff!important;color:#1d2a36!important}
+.editorModal input:focus,.editorModal select:focus,.editorModal textarea:focus{outline:2px solid #60c5e8;outline-offset:1px}
+@media(max-width:700px){.editorModalGrid{grid-template-columns:1fr}.editorModalGrid .full{grid-column:span 1}}
 @media(max-width:1050px){.gridForm{grid-template-columns:repeat(2,1fr)}.span4{grid-column:span 2}.filtros{grid-template-columns:1fr 1fr}.resumen{grid-template-columns:1fr 1fr}}
 @media(max-width:650px){main{padding:14px}.gridForm,.filtros,.resumen{grid-template-columns:1fr}.span2,.span4{grid-column:span 1}.toolbar{align-items:flex-start;flex-direction:column}}
 </style>
@@ -218,6 +224,34 @@ tr:hover td{background:#f8fbfd}
     </div>
   </section>
 </main>
+
+<div id="modalEditarFondo" class="modalFondo" onclick="cerrarEditarFondo(event)">
+  <div class="modal editorModal">
+    <div class="toolbar">
+      <div>
+        <h3 style="margin:0;color:var(--azul)">✏️ Editar documento</h3>
+        <p style="margin:5px 0 0;color:var(--gris);font-size:12px">Modificá los campos y guardá los cambios.</p>
+      </div>
+      <button class="btnGris" onclick="cerrarEditor()">Cerrar</button>
+    </div>
+    <div class="editorModalGrid">
+      <div><label>Ítem</label><input id="eItem" type="number" min="1"></div>
+      <div><label>Especialidad</label><input id="eEspecialidad" type="text"></div>
+      <div><label>Código Pecom</label><input id="ePecom" type="text"></div>
+      <div><label>Código cliente / Oldelval</label><input id="eOldelval" type="text"></div>
+      <div class="full"><label>Descripción / nombre del documento</label><textarea id="eDescripcion"></textarea></div>
+      <div><label>Fecha prevista de presentación</label><input id="eFechaPrevista" type="date"></div>
+      <div><label>Inicio de actividad</label><input id="eInicioActividad" type="date"></div>
+      <div><label>Estado en el maestro</label><select id="eActivo"><option value="true">ACTIVO</option><option value="false">DESACTIVADO</option></select></div>
+      <div><label>Motivo / observación</label><input id="eMotivo" type="text" placeholder="Ej: corrección de código..."></div>
+    </div>
+    <div class="acciones" style="margin-top:18px">
+      <button id="btnGuardarEditor" class="btnVerde" onclick="guardarEdicionModal()">💾 GUARDAR CAMBIOS</button>
+      <button class="btnGris" onclick="cerrarEditor()">CANCELAR</button>
+    </div>
+    <div id="editorEstado" class="estado"></div>
+  </div>
+</div>
 
 <div id="modalFondo" class="modalFondo" onclick="cerrarModalFondo(event)">
   <div class="modal">
@@ -387,47 +421,84 @@ function editarDocumento(id){
 
   idEditando = d.id;
 
-  // Garantiza que todos los campos sean realmente editables
-  const camposEditables = [
-    "fItem","fEspecialidad","fPecom","fOldelval",
-    "fDescripcion","fFechaPrevista","fInicioActividad",
-    "fActivo","fMotivo"
-  ];
+  document.getElementById("eItem").value = d.item ?? "";
+  document.getElementById("eEspecialidad").value = d.especialidad ?? "";
+  document.getElementById("ePecom").value = d.codigo_pecom ?? "";
+  document.getElementById("eOldelval").value = d.codigo_oldelval ?? "";
+  document.getElementById("eDescripcion").value = d.descripcion ?? "";
+  document.getElementById("eFechaPrevista").value = soloFecha(d.fecha_prevista_presentacion);
+  document.getElementById("eInicioActividad").value = soloFecha(d.inicio_actividad);
+  document.getElementById("eActivo").value = d.activo===true ? "true" : "false";
+  document.getElementById("eMotivo").value = "";
+  ocultarEstado("editorEstado");
 
-  camposEditables.forEach(campoId => {
-    const el = document.getElementById(campoId);
-    if(!el) return;
-    el.removeAttribute("readonly");
-    el.removeAttribute("disabled");
-    el.disabled = false;
-    el.readOnly = false;
-    el.style.pointerEvents = "auto";
-  });
+  document.getElementById("modalEditarFondo").classList.add("visible");
 
-  document.getElementById("tituloForm").textContent = "✏️ Editar documento";
-  document.getElementById("fItem").value = d.item ?? "";
-  document.getElementById("fEspecialidad").value = d.especialidad ?? "";
-  document.getElementById("fPecom").value = d.codigo_pecom ?? "";
-  document.getElementById("fOldelval").value = d.codigo_oldelval ?? "";
-  document.getElementById("fDescripcion").value = d.descripcion ?? "";
-  document.getElementById("fFechaPrevista").value = soloFecha(d.fecha_prevista_presentacion);
-  document.getElementById("fInicioActividad").value = soloFecha(d.inicio_actividad);
-  document.getElementById("fActivo").value = d.activo===true ? "true" : "false";
-  document.getElementById("fMotivo").value = "";
+  setTimeout(()=>{
+    const el=document.getElementById("eEspecialidad");
+    if(el) el.focus();
+  },100);
+}
 
-  document.getElementById("btnGuardar").textContent = "💾 GUARDAR CAMBIOS";
-  document.getElementById("btnCancelar").classList.remove("oculto");
-  ocultarEstado("formEstado");
+function cerrarEditor(){
+  document.getElementById("modalEditarFondo").classList.remove("visible");
+  idEditando=null;
+}
 
-  window.scrollTo({top:0,behavior:"smooth"});
+function cerrarEditarFondo(e){
+  if(e.target.id==="modalEditarFondo") cerrarEditor();
+}
 
-  setTimeout(() => {
-    const primerCampo = document.getElementById("fItem");
-    if(primerCampo){
-      primerCampo.focus();
-      primerCampo.select();
-    }
-  },350);
+function obtenerFormularioEdicion(){
+  const itemTxt = document.getElementById("eItem").value;
+  return {
+    item: itemTxt ? Number(itemTxt) : null,
+    especialidad: nulo(document.getElementById("eEspecialidad").value),
+    codigo_pecom: nulo(document.getElementById("ePecom").value),
+    codigo_oldelval: nulo(document.getElementById("eOldelval").value),
+    descripcion: nulo(document.getElementById("eDescripcion").value),
+    fecha_prevista_presentacion: nulo(document.getElementById("eFechaPrevista").value),
+    inicio_actividad: nulo(document.getElementById("eInicioActividad").value),
+    activo: document.getElementById("eActivo").value==="true"
+  };
+}
+
+async function guardarEdicionModal(){
+  if(!idEditando) return;
+  const nuevo = obtenerFormularioEdicion();
+  const errorValidacion = validarFormulario(nuevo);
+  if(errorValidacion){
+    mostrarEstado("editorEstado",errorValidacion,"error");
+    return;
+  }
+
+  const anterior = maestro.find(d=>Number(d.id)===Number(idEditando));
+  if(!anterior){
+    mostrarEstado("editorEstado","No se encontró el documento.","error");
+    return;
+  }
+
+  const motivo = nulo(document.getElementById("eMotivo").value);
+  const btn=document.getElementById("btnGuardarEditor");
+  btn.disabled=true;
+  mostrarEstado("editorEstado","Guardando cambios...","info");
+
+  try{
+    const {error} = await supabaseClient
+      .from("documentos_maestro")
+      .update(nuevo)
+      .eq("id",idEditando);
+    if(error) throw error;
+
+    await guardarHistorial(anterior,nuevo,"MODIFICACION",motivo,idEditando);
+    mostrarEstado("editorEstado","✓ Cambios guardados correctamente.","ok");
+    await cargarMaestro();
+    setTimeout(()=>cerrarEditor(),500);
+  }catch(e){
+    mostrarEstado("editorEstado","No se pudo guardar: "+e.message,"error");
+  }finally{
+    btn.disabled=false;
+  }
 }
 
 function cancelarEdicion(){
