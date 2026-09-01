@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Listado Base | Calidad UAM</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}
+:root{
+  --azul:#0c356a; --azul2:#174f8a; --celeste:#60c5e8;
+  --verde:#179447; --verdeClaro:#eaf8ef;
+  --rojo:#d83c3c; --rojoClaro:#fdecec;
+  --naranja:#f28c28; --naranjaClaro:#fff3e5;
+  --gris:#687787; --fondo:#f4f7f9; --blanco:#fff;
+}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--fondo);color:#1d2a36}
+header{background:white;border-bottom:1px solid #dde5ea}
+.topbar{max-width:1500px;margin:auto;min-height:78px;padding:14px 26px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.marca{display:flex;align-items:center;gap:14px}
+.marcaBarra{width:7px;height:48px;background:var(--celeste);border-radius:8px}
+.marca h1{margin:0 0 4px;color:var(--azul);font-size:22px}
+.marca p{margin:0;color:var(--gris);font-size:13px}
+.usuario{font-size:12px;color:var(--gris);text-align:right}
+.usuario strong{color:var(--azul)}
+main{max-width:1500px;margin:auto;padding:28px}
+.card{background:white;border:1px solid #e1e8ed;border-radius:15px;padding:24px;box-shadow:0 3px 12px rgba(20,50,80,.05);margin-bottom:20px}
+.login{max-width:480px;margin:60px auto}
+.login h2,.titulo{margin-top:0;color:var(--azul)}
+label{display:block;font-size:11px;font-weight:bold;color:var(--gris);margin:12px 0 6px}
+input,select,textarea,button{font-family:inherit}
+input,select,textarea{width:100%;border:1px solid #ced7de;border-radius:8px;padding:10px;background:white}
+input,select{height:42px}
+textarea{min-height:84px;resize:vertical}
+button{border:0;border-radius:8px;padding:11px 16px;font-weight:bold;cursor:pointer}
+.btnPrimario{background:var(--azul);color:white}
+.btnVerde{background:var(--verde);color:white}
+.btnGris{background:#e8edf1;color:#40505d}
+.btnRojo{background:var(--rojo);color:white}
+.btnNaranja{background:var(--naranja);color:white}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:20px}
+.toolbar h2{margin:0;color:var(--azul)}
+.toolbar p{margin:5px 0 0;color:var(--gris);font-size:12px}
+.acciones{display:flex;gap:8px;flex-wrap:wrap}
+.oculto{display:none!important}
+.estado{display:none;margin-top:14px;padding:12px;border-radius:8px;font-size:12px}
+.estado.ok{display:block;background:var(--verdeClaro);color:var(--verde)}
+.estado.error{display:block;background:var(--rojoClaro);color:var(--rojo)}
+.estado.info{display:block;background:#eaf6fd;color:#155a88}
+.gridForm{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.span2{grid-column:span 2}
+.span4{grid-column:span 4}
+.filtros{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-bottom:15px}
+.tablaWrap{overflow:auto;max-height:680px;border:1px solid #e1e8ed;border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead{position:sticky;top:0;z-index:4}
+th{background:var(--azul);color:white;padding:10px;text-align:left;white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid #e5eaee;vertical-align:top}
+tr:hover td{background:#f8fbfd}
+.badge{font-size:9px;font-weight:bold;padding:5px 8px;border-radius:15px;display:inline-block}
+.badge.ok{background:var(--verdeClaro);color:var(--verde)}
+.badge.off{background:#edf2f5;color:#526575}
+.linkBtn{padding:7px 9px;font-size:10px;background:#eaf6fd;color:#155a88}
+.resumen{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.kpi{background:white;border:1px solid #e1e8ed;border-left:5px solid var(--celeste);border-radius:12px;padding:16px}
+.kpi small{display:block;color:var(--gris);font-weight:bold;font-size:10px;text-transform:uppercase}
+.kpi strong{display:block;color:var(--azul);font-size:28px;margin-top:6px}
+.modalFondo{position:fixed;inset:0;background:rgba(10,30,50,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:999}
+.modalFondo.visible{display:flex}
+.modal{background:white;border-radius:15px;width:min(1050px,96vw);max-height:90vh;overflow:auto;padding:24px}
+.modal h3{margin-top:0;color:var(--azul)}
+.histItem{padding:12px 4px;border-bottom:1px solid #e5eaee;font-size:12px}
+.histItem strong{color:var(--azul)}
+.aviso{background:var(--naranjaClaro);border-left:4px solid var(--naranja);padding:12px;border-radius:8px;font-size:12px;color:#795000;margin-bottom:18px}
+@media(max-width:1050px){.gridForm{grid-template-columns:repeat(2,1fr)}.span4{grid-column:span 2}.filtros{grid-template-columns:1fr 1fr}.resumen{grid-template-columns:1fr 1fr}}
+@media(max-width:650px){main{padding:14px}.gridForm,.filtros,.resumen{grid-template-columns:1fr}.span2,.span4{grid-column:span 1}.toolbar{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<header>
+  <div class="topbar">
+    <div class="marca">
+      <div class="marcaBarra"></div>
+      <div>
+        <h1>DUPLICAR NORTE UAM</h1>
+        <p>Administración del Listado Base Documental</p>
+      </div>
+    </div>
+    <div id="usuarioHeader" class="usuario oculto">
+      Sesión iniciada como<br><strong id="emailHeader"></strong>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section id="loginBox" class="card login">
+    <h2>🔐 Administración</h2>
+    <p style="color:#687787;font-size:13px">Acceso exclusivo para usuarios autorizados.</p>
+    <label>Email</label>
+    <input id="email" type="email" autocomplete="username">
+    <label>Contraseña</label>
+    <input id="password" type="password" autocomplete="current-password">
+    <button class="btnPrimario" style="width:100%;margin-top:20px" onclick="iniciarSesion()">INGRESAR</button>
+    <div id="loginEstado" class="estado"></div>
+  </section>
+
+  <section id="app" class="oculto">
+    <div class="toolbar">
+      <div>
+        <h2>📋 Listado Base</h2>
+        <p>Alta, edición y desactivación del maestro oficial de documentación.</p>
+      </div>
+      <div class="acciones">
+        <button class="btnGris" onclick="window.location.href='admin.html'">← Volver al Admin</button>
+        <button class="btnGris" onclick="cerrarSesion()">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <div class="aviso">
+      Para conservar la trazabilidad, los documentos no se eliminan: se <strong>desactivan</strong>. El historial de estados y cargas queda vinculado al mismo ID interno.
+    </div>
+
+    <div class="resumen">
+      <div class="kpi"><small>Total registros</small><strong id="kTotal">0</strong></div>
+      <div class="kpi"><small>Activos</small><strong id="kActivos">0</strong></div>
+      <div class="kpi"><small>Desactivados</small><strong id="kInactivos">0</strong></div>
+    </div>
+
+    <div class="card">
+      <h3 class="titulo" id="tituloForm">➕ Agregar documento</h3>
+
+      <div class="gridForm">
+        <div>
+          <label>Ítem</label>
+          <input id="fItem" type="number" min="1">
+        </div>
+        <div>
+          <label>Especialidad</label>
+          <input id="fEspecialidad" type="text" placeholder="Ej: Calidad">
+        </div>
+        <div>
+          <label>Código Pecom</label>
+          <input id="fPecom" type="text" placeholder="AR-5-0338-Pr-...">
+        </div>
+        <div>
+          <label>Código cliente / Oldelval</label>
+          <input id="fOldelval" type="text" placeholder="ODV-ALVS-25033-...">
+        </div>
+        <div class="span2">
+          <label>Descripción / nombre del documento</label>
+          <textarea id="fDescripcion"></textarea>
+        </div>
+        <div>
+          <label>Fecha prevista de presentación</label>
+          <input id="fFechaPrevista" type="date">
+        </div>
+        <div>
+          <label>Inicio de actividad</label>
+          <input id="fInicioActividad" type="date">
+        </div>
+        <div>
+          <label>Estado en el maestro</label>
+          <select id="fActivo">
+            <option value="true">ACTIVO</option>
+            <option value="false">DESACTIVADO</option>
+          </select>
+        </div>
+        <div class="span2">
+          <label>Motivo / observación del cambio</label>
+          <input id="fMotivo" type="text" placeholder="Ej: corrección de código, incorporación al listado...">
+        </div>
+      </div>
+
+      <div class="acciones" style="margin-top:18px">
+        <button id="btnGuardar" class="btnVerde" onclick="guardarDocumento()">💾 GUARDAR</button>
+        <button id="btnCancelar" class="btnGris oculto" onclick="cancelarEdicion()">CANCELAR EDICIÓN</button>
+      </div>
+      <div id="formEstado" class="estado"></div>
+    </div>
+
+    <div class="card">
+      <div class="toolbar">
+        <div>
+          <h2>Documentos del maestro</h2>
+          <p id="cantidadVisible">0 documentos</p>
+        </div>
+      </div>
+
+      <div class="filtros">
+        <input id="buscar" placeholder="Buscar ítem, código, especialidad o descripción..." oninput="pintarTabla()">
+        <select id="filtroActivo" onchange="pintarTabla()">
+          <option value="">Todos</option>
+          <option value="ACTIVO">Solo activos</option>
+          <option value="INACTIVO">Solo desactivados</option>
+        </select>
+        <button class="btnPrimario" onclick="nuevoDocumento()">➕ NUEVO DOCUMENTO</button>
+      </div>
+
+      <div class="tablaWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Ítem</th>
+              <th>Especialidad</th>
+              <th>Código Pecom</th>
+              <th>Código cliente</th>
+              <th>Documento</th>
+              <th>Prevista</th>
+              <th>Inicio actividad</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaMaestro"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="modalFondo" class="modalFondo" onclick="cerrarModalFondo(event)">
+  <div class="modal">
+    <div class="toolbar">
+      <h3>🕘 Historial del documento</h3>
+      <button class="btnGris" onclick="cerrarHistorial()">Cerrar</button>
+    </div>
+    <div id="historialContenido"></div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://mzgbtejfgsrskiuymtwh.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Wen9hxBnae8wRrEEaP5lOQ_aNl9OCGd";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+let usuarioActual = null;
+let maestro = [];
+let idEditando = null;
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const { data:{session} } = await supabaseClient.auth.getSession();
+  if(session?.user){
+    const ok = await validarAdmin(session.user);
+    if(ok) abrirApp(session.user);
+  }
+});
+
+async function iniciarSesion(){
+  mostrarEstado("loginEstado","Ingresando...","info");
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  if(!email || !password){
+    mostrarEstado("loginEstado","Completá email y contraseña.","error");
+    return;
+  }
+  const {data,error} = await supabaseClient.auth.signInWithPassword({email,password});
+  if(error){
+    mostrarEstado("loginEstado","No se pudo ingresar: "+error.message,"error");
+    return;
+  }
+  const ok = await validarAdmin(data.user);
+  if(!ok){
+    await supabaseClient.auth.signOut();
+    mostrarEstado("loginEstado","Tu usuario no tiene permiso de administración.","error");
+    return;
+  }
+  abrirApp(data.user);
+}
+
+async function validarAdmin(user){
+  const {data,error} = await supabaseClient
+    .from("usuarios_admin")
+    .select("email,activo,puede_cargar")
+    .eq("email",user.email)
+    .maybeSingle();
+
+  if(error){
+    mostrarEstado("loginEstado","No se pudo validar el permiso: "+error.message,"error");
+    return false;
+  }
+  return !!(data && data.activo === true);
+}
+
+async function abrirApp(user){
+  usuarioActual = user;
+  document.getElementById("loginBox").classList.add("oculto");
+  document.getElementById("app").classList.remove("oculto");
+  document.getElementById("usuarioHeader").classList.remove("oculto");
+  document.getElementById("emailHeader").textContent = user.email;
+  await cargarMaestro();
+}
+
+async function cerrarSesion(){
+  await supabaseClient.auth.signOut();
+  location.reload();
+}
+
+async function cargarMaestro(){
+  mostrarEstado("formEstado","Cargando listado...","info");
+  const {data,error} = await supabaseClient
+    .from("documentos_maestro")
+    .select("id,item,especialidad,codigo_pecom,codigo_oldelval,descripcion,fecha_prevista_presentacion,inicio_actividad,activo")
+    .order("item",{ascending:true});
+
+  if(error){
+    mostrarEstado("formEstado","No se pudo cargar el maestro: "+error.message,"error");
+    return;
+  }
+
+  maestro = data || [];
+  document.getElementById("kTotal").textContent = maestro.length;
+  document.getElementById("kActivos").textContent = maestro.filter(x=>x.activo===true).length;
+  document.getElementById("kInactivos").textContent = maestro.filter(x=>x.activo!==true).length;
+
+  ocultarEstado("formEstado");
+  pintarTabla();
+
+  if(!idEditando){
+    sugerirProximoItem();
+  }
+}
+
+function pintarTabla(){
+  const q = normalizar(document.getElementById("buscar").value);
+  const estado = document.getElementById("filtroActivo").value;
+
+  const lista = maestro.filter(d=>{
+    if(estado==="ACTIVO" && d.activo!==true) return false;
+    if(estado==="INACTIVO" && d.activo===true) return false;
+
+    if(q){
+      const t = normalizar([
+        d.item,d.especialidad,d.codigo_pecom,d.codigo_oldelval,d.descripcion
+      ].join(" "));
+      if(!t.includes(q)) return false;
+    }
+    return true;
+  });
+
+  document.getElementById("cantidadVisible").textContent = lista.length+" documentos";
+
+  document.getElementById("tablaMaestro").innerHTML = lista.map(d=>`
+    <tr>
+      <td><strong>${esc(d.item ?? "")}</strong></td>
+      <td>${esc(d.especialidad || "-")}</td>
+      <td>${esc(d.codigo_pecom || "-")}</td>
+      <td><strong>${esc(d.codigo_oldelval || "-")}</strong></td>
+      <td>${esc(d.descripcion || "")}</td>
+      <td>${fechaAR(d.fecha_prevista_presentacion)}</td>
+      <td>${fechaAR(d.inicio_actividad)}</td>
+      <td>${d.activo===true
+        ? '<span class="badge ok">ACTIVO</span>'
+        : '<span class="badge off">DESACTIVADO</span>'}</td>
+      <td>
+        <div class="acciones">
+          <button class="linkBtn" onclick="editarDocumento(${Number(d.id)})">✏️ Editar</button>
+          <button class="linkBtn" onclick="verHistorial(${Number(d.id)})">🕘 Historial</button>
+          ${d.activo===true
+            ? `<button class="btnRojo" style="padding:7px 9px;font-size:10px" onclick="cambiarActivo(${Number(d.id)},false)">Desactivar</button>`
+            : `<button class="btnVerde" style="padding:7px 9px;font-size:10px" onclick="cambiarActivo(${Number(d.id)},true)">Reactivar</button>`}
+        </div>
+      </td>
+    </tr>
+  `).join("");
+}
+
+function nuevoDocumento(){
+  cancelarEdicion();
+  window.scrollTo({top:0,behavior:"smooth"});
+  document.getElementById("fEspecialidad").focus();
+}
+
+function editarDocumento(id){
+  const d = maestro.find(x=>Number(x.id)===Number(id));
+  if(!d) return;
+
+  idEditando = d.id;
+  document.getElementById("tituloForm").textContent = "✏️ Editar documento";
+  document.getElementById("fItem").value = d.item ?? "";
+  document.getElementById("fEspecialidad").value = d.especialidad ?? "";
+  document.getElementById("fPecom").value = d.codigo_pecom ?? "";
+  document.getElementById("fOldelval").value = d.codigo_oldelval ?? "";
+  document.getElementById("fDescripcion").value = d.descripcion ?? "";
+  document.getElementById("fFechaPrevista").value = soloFecha(d.fecha_prevista_presentacion);
+  document.getElementById("fInicioActividad").value = soloFecha(d.inicio_actividad);
+  document.getElementById("fActivo").value = d.activo===true ? "true" : "false";
+  document.getElementById("fMotivo").value = "";
+  document.getElementById("btnGuardar").textContent = "💾 GUARDAR CAMBIOS";
+  document.getElementById("btnCancelar").classList.remove("oculto");
+  ocultarEstado("formEstado");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function cancelarEdicion(){
+  idEditando = null;
+  document.getElementById("tituloForm").textContent = "➕ Agregar documento";
+  ["fEspecialidad","fPecom","fOldelval","fDescripcion","fFechaPrevista","fInicioActividad","fMotivo"].forEach(id=>{
+    document.getElementById(id).value="";
+  });
+  document.getElementById("fActivo").value="true";
+  document.getElementById("btnGuardar").textContent="💾 GUARDAR";
+  document.getElementById("btnCancelar").classList.add("oculto");
+  sugerirProximoItem();
+  ocultarEstado("formEstado");
+}
+
+function sugerirProximoItem(){
+  if(idEditando) return;
+  const max = maestro.reduce((m,d)=>Math.max(m,Number(d.item)||0),0);
+  document.getElementById("fItem").value = max+1;
+}
+
+function obtenerFormulario(){
+  const itemTxt = document.getElementById("fItem").value.trim();
+  return {
+    item: itemTxt ? Number(itemTxt) : null,
+    especialidad: nulo(document.getElementById("fEspecialidad").value),
+    codigo_pecom: nulo(document.getElementById("fPecom").value),
+    codigo_oldelval: nulo(document.getElementById("fOldelval").value),
+    descripcion: nulo(document.getElementById("fDescripcion").value),
+    fecha_prevista_presentacion: nulo(document.getElementById("fFechaPrevista").value),
+    inicio_actividad: nulo(document.getElementById("fInicioActividad").value),
+    activo: document.getElementById("fActivo").value==="true"
+  };
+}
+
+function validarFormulario(nuevo){
+  if(!nuevo.item || nuevo.item < 1) return "Ingresá un ítem válido.";
+  if(!nuevo.descripcion) return "Ingresá el nombre o descripción del documento.";
+  if(!nuevo.codigo_pecom && !nuevo.codigo_oldelval) return "Ingresá al menos uno de los códigos.";
+
+  const repetidoItem = maestro.find(d=>Number(d.item)===Number(nuevo.item) && Number(d.id)!==Number(idEditando));
+  if(repetidoItem) return "Ya existe otro documento con el ítem "+nuevo.item+".";
+
+  const pecom = normalizarCodigo(nuevo.codigo_pecom);
+  const old = normalizarCodigo(nuevo.codigo_oldelval);
+
+  const repetidoCodigo = maestro.find(d=>{
+    if(Number(d.id)===Number(idEditando)) return false;
+    return (pecom && normalizarCodigo(d.codigo_pecom)===pecom) ||
+           (old && normalizarCodigo(d.codigo_oldelval)===old);
+  });
+  if(repetidoCodigo) return "Ese código ya está usado por el ítem "+repetidoCodigo.item+".";
+
+  return "";
+}
+
+async function guardarDocumento(){
+  const nuevo = obtenerFormulario();
+  const errorValidacion = validarFormulario(nuevo);
+  if(errorValidacion){
+    mostrarEstado("formEstado",errorValidacion,"error");
+    return;
+  }
+
+  const motivo = nulo(document.getElementById("fMotivo").value);
+  const btn = document.getElementById("btnGuardar");
+  btn.disabled = true;
+  mostrarEstado("formEstado","Guardando...","info");
+
+  try{
+    if(idEditando){
+      const anterior = maestro.find(d=>Number(d.id)===Number(idEditando));
+      if(!anterior) throw new Error("No se encontró el documento a editar.");
+
+      const {error} = await supabaseClient
+        .from("documentos_maestro")
+        .update(nuevo)
+        .eq("id",idEditando);
+      if(error) throw error;
+
+      await guardarHistorial(anterior,nuevo,"MODIFICACION",motivo,idEditando);
+      mostrarEstado("formEstado","✓ Documento actualizado correctamente.","ok");
+    }else{
+      const {data,error} = await supabaseClient
+        .from("documentos_maestro")
+        .insert(nuevo)
+        .select("id")
+        .single();
+      if(error) throw error;
+
+      await guardarHistorial(null,nuevo,"ALTA",motivo,data.id);
+      mostrarEstado("formEstado","✓ Documento agregado al listado base.","ok");
+    }
+
+    idEditando = null;
+    await cargarMaestro();
+    cancelarEdicion();
+  }catch(e){
+    mostrarEstado("formEstado","No se pudo guardar: "+e.message,"error");
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+async function cambiarActivo(id,nuevoActivo){
+  const anterior = maestro.find(d=>Number(d.id)===Number(id));
+  if(!anterior) return;
+
+  const accion = nuevoActivo ? "REACTIVACION" : "DESACTIVACION";
+  const mensaje = nuevoActivo
+    ? "¿Querés reactivar este documento?"
+    : "¿Querés desactivar este documento? No se borrará su historial.";
+
+  if(!confirm(mensaje)) return;
+
+  const motivo = prompt("Motivo del cambio (opcional):") || null;
+
+  const nuevo = {...anterior,activo:nuevoActivo};
+  delete nuevo.id;
+
+  const {error} = await supabaseClient
+    .from("documentos_maestro")
+    .update({activo:nuevoActivo})
+    .eq("id",id);
+
+  if(error){
+    alert("No se pudo cambiar el estado: "+error.message);
+    return;
+  }
+
+  try{
+    await guardarHistorial(anterior,nuevo,accion,motivo,id);
+  }catch(e){
+    alert("El documento cambió de estado, pero no se pudo registrar el historial: "+e.message);
+  }
+
+  await cargarMaestro();
+}
+
+async function guardarHistorial(anterior,nuevo,accion,motivo,documentoId){
+  const payload = {
+    documento_id: documentoId,
+    accion,
+    item_anterior: anterior?.item ?? null,
+    item_nuevo: nuevo?.item ?? null,
+    especialidad_anterior: anterior?.especialidad ?? null,
+    especialidad_nueva: nuevo?.especialidad ?? null,
+    codigo_pecom_anterior: anterior?.codigo_pecom ?? null,
+    codigo_pecom_nuevo: nuevo?.codigo_pecom ?? null,
+    codigo_oldelval_anterior: anterior?.codigo_oldelval ?? null,
+    codigo_oldelval_nuevo: nuevo?.codigo_oldelval ?? null,
+    descripcion_anterior: anterior?.descripcion ?? null,
+    descripcion_nueva: nuevo?.descripcion ?? null,
+    fecha_prevista_anterior: anterior?.fecha_prevista_presentacion ?? null,
+    fecha_prevista_nueva: nuevo?.fecha_prevista_presentacion ?? null,
+    inicio_actividad_anterior: anterior?.inicio_actividad ?? null,
+    inicio_actividad_nueva: nuevo?.inicio_actividad ?? null,
+    activo_anterior: anterior?.activo ?? null,
+    activo_nuevo: nuevo?.activo ?? null,
+    usuario: usuarioActual?.email ?? null
+  };
+
+  // El SQL creado no tiene columna "motivo"; se conserva el motivo
+  // en la acción para no exigir otra migración.
+  if(motivo) payload.accion = accion+" · "+motivo;
+
+  const {error} = await supabaseClient
+    .from("documentos_maestro_historial")
+    .insert(payload);
+
+  if(error) throw error;
+}
+
+async function verHistorial(id){
+  const d = maestro.find(x=>Number(x.id)===Number(id));
+  document.getElementById("historialContenido").innerHTML = "Cargando...";
+
+  const {data,error} = await supabaseClient
+    .from("documentos_maestro_historial")
+    .select("*")
+    .eq("documento_id",id)
+    .order("fecha_cambio",{ascending:false});
+
+  if(error){
+    document.getElementById("historialContenido").innerHTML =
+      '<div class="estado error" style="display:block">'+esc(error.message)+'</div>';
+  }else if(!data?.length){
+    document.getElementById("historialContenido").innerHTML =
+      '<p style="color:#687787">Este documento todavía no tiene cambios registrados.</p>';
+  }else{
+    document.getElementById("historialContenido").innerHTML =
+      `<p><strong>${esc(d?.codigo_oldelval || d?.codigo_pecom || "")}</strong> — ${esc(d?.descripcion || "")}</p>` +
+      data.map(h=>`
+        <div class="histItem">
+          <strong>${esc(h.accion || "CAMBIO")}</strong>
+          <div>${new Date(h.fecha_cambio).toLocaleString("es-AR")} · ${esc(h.usuario || "-")}</div>
+          ${cambio(h.codigo_oldelval_anterior,h.codigo_oldelval_nuevo,"Código cliente")}
+          ${cambio(h.codigo_pecom_anterior,h.codigo_pecom_nuevo,"Código Pecom")}
+          ${cambio(h.descripcion_anterior,h.descripcion_nueva,"Descripción")}
+          ${cambio(h.especialidad_anterior,h.especialidad_nueva,"Especialidad")}
+          ${cambio(h.fecha_prevista_anterior,h.fecha_prevista_nueva,"Fecha prevista")}
+          ${cambio(h.inicio_actividad_anterior,h.inicio_actividad_nueva,"Inicio actividad")}
+          ${cambio(h.activo_anterior,h.activo_nuevo,"Activo")}
+        </div>
+      `).join("");
+  }
+
+  document.getElementById("modalFondo").classList.add("visible");
+}
+
+function cambio(a,b,etiqueta){
+  const va = a ?? "";
+  const vb = b ?? "";
+  if(String(va)===String(vb)) return "";
+  return `<div style="margin-top:5px"><strong>${esc(etiqueta)}:</strong> ${esc(va || "—")} → ${esc(vb || "—")}</div>`;
+}
+
+function cerrarHistorial(){document.getElementById("modalFondo").classList.remove("visible")}
+function cerrarModalFondo(e){if(e.target.id==="modalFondo") cerrarHistorial()}
+
+function mostrarEstado(id,texto,tipo){
+  const el=document.getElementById(id);
+  el.textContent=texto;
+  el.className="estado "+tipo;
+}
+function ocultarEstado(id){
+  const el=document.getElementById(id);
+  el.className="estado";
+  el.textContent="";
+}
+function nulo(v){
+  const s=String(v??"").trim();
+  return s ? s : null;
+}
+function normalizar(v){
+  return String(v??"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
+}
+function normalizarCodigo(v){
+  return String(v??"").toUpperCase().replace(/\s+/g,"").trim();
+}
+function soloFecha(v){
+  if(!v) return "";
+  return String(v).slice(0,10);
+}
+function fechaAR(v){
+  if(!v) return "-";
+  const p=String(v).slice(0,10).split("-");
+  if(p.length!==3) return esc(v);
+  return `${p[2]}/${p[1]}/${p[0]}`;
+}
+function esc(v){
+  return String(v??"")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+</script>
+</body>
+</html>
