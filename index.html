@@ -1,674 +1,1038 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Dashboard de Calidad | Duplicar Norte UAM</title>
+<title>Dashboard Calidad | Duplicar Norte UAM</title>
 
-<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- CHART JS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 
 *{
-  box-sizing:border-box;
+box-sizing:border-box;
 }
 
 :root{
-  --azul:#0b3568;
-  --azul2:#174f8a;
-  --celeste:#60c5e8;
-  --celesteClaro:#eaf8fd;
-  --verde:#179447;
-  --verdeClaro:#eaf8ef;
-  --rojo:#d83c3c;
-  --rojoClaro:#fdecec;
-  --naranja:#f28c28;
-  --naranjaClaro:#fff4e5;
-  --violeta:#5145e5;
-  --gris:#687787;
-  --gris2:#e8edf1;
-  --gris3:#f4f7f9;
-  --texto:#1d2a36;
-  --blanco:#ffffff;
-}
 
-html{
-  scroll-behavior:smooth;
+--azul:#0b3568;
+--azul2:#174f8a;
+--celeste:#60c5e8;
+
+--verde:#179447;
+--verdeClaro:#eaf8ef;
+
+--rojo:#dc3b3b;
+--rojoClaro:#fdecec;
+
+--naranja:#f28c28;
+--naranjaClaro:#fff3e5;
+
+--violeta:#5145e5;
+
+--gris:#687787;
+--grisClaro:#e8edf1;
+
+--fondo:#f4f7f9;
+--blanco:#ffffff;
+
 }
 
 body{
-  margin:0;
-  font-family:Arial,Helvetica,sans-serif;
-  background:var(--gris3);
-  color:var(--texto);
+
+margin:0;
+
+font-family:
+Arial,
+Helvetica,
+sans-serif;
+
+background:var(--fondo);
+
+color:#1d2a36;
+
 }
 
-/* ================================
-   HEADER
-================================ */
+
+/* HEADER */
 
 header{
-  background:white;
-  border-bottom:1px solid #dfe6eb;
-  position:sticky;
-  top:0;
-  z-index:100;
+
+background:white;
+
+border-bottom:
+1px solid #dde5ea;
+
 }
 
 .topbar{
-  max-width:1500px;
-  margin:auto;
-  min-height:78px;
-  padding:12px 28px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:20px;
+
+max-width:1500px;
+
+margin:auto;
+
+min-height:82px;
+
+padding:
+12px 30px;
+
+display:flex;
+
+align-items:center;
+
+justify-content:
+space-between;
+
+gap:20px;
+
 }
 
 .marca{
-  display:flex;
-  align-items:center;
-  gap:15px;
+
+display:flex;
+
+align-items:center;
+
+gap:15px;
+
 }
 
-.marca-barra{
-  width:7px;
-  height:48px;
-  border-radius:8px;
-  background:var(--celeste);
+.marcaBarra{
+
+width:8px;
+
+height:68px;
+
+border-radius:10px;
+
+background:var(--celeste);
+
 }
 
 .marca h1{
-  margin:0 0 3px;
-  font-size:22px;
-  color:var(--azul);
+
+margin:0;
+
+font-size:27px;
+
+color:var(--azul);
+
 }
 
 .marca p{
-  margin:0;
-  color:var(--gris);
-  font-size:13px;
+
+margin:
+5px 0 0;
+
+color:var(--gris);
+
+font-size:15px;
+
 }
 
 .actualizacion{
-  text-align:right;
+
+text-align:right;
+
 }
 
 .actualizacion small{
-  display:block;
-  color:var(--gris);
-  font-size:11px;
-  margin-bottom:4px;
+
+display:block;
+
+color:var(--gris);
+
+margin-bottom:7px;
+
 }
 
 .actualizacion strong{
-  color:var(--azul);
-  font-size:14px;
+
+color:var(--azul);
+
+font-size:16px;
+
 }
 
-/* ================================
-   MENU
-================================ */
+
+/* NAV */
 
 nav{
-  background:var(--azul);
+
+background:var(--azul);
+
 }
 
 .menu{
-  max-width:1500px;
-  margin:auto;
-  display:flex;
-  overflow-x:auto;
-  padding:0 18px;
+
+max-width:1500px;
+
+margin:auto;
+
+display:flex;
+
+overflow:auto;
+
 }
 
 .menu button{
-  border:0;
-  background:transparent;
-  color:rgba(255,255,255,.75);
-  padding:15px 18px;
-  white-space:nowrap;
-  cursor:pointer;
-  font-size:12px;
-  font-weight:bold;
-  border-bottom:4px solid transparent;
+
+border:0;
+
+background:transparent;
+
+color:#dbe6f1;
+
+padding:
+18px 24px;
+
+font-weight:bold;
+
+font-size:13px;
+
+cursor:pointer;
+
+border-bottom:
+5px solid transparent;
+
+white-space:nowrap;
+
 }
 
-.menu button:hover,
 .menu button.activo{
-  color:white;
-  border-bottom-color:var(--celeste);
+
+color:white;
+
+border-bottom-color:
+var(--celeste);
+
 }
 
-/* ================================
-   MAIN
-================================ */
+
+/* CONTENIDO */
 
 main{
-  max-width:1500px;
-  margin:auto;
-  padding:28px;
+
+max-width:1500px;
+
+margin:auto;
+
+padding:28px;
+
 }
 
 .seccion{
-  display:none;
+
+display:none;
+
 }
 
 .seccion.activa{
-  display:block;
+
+display:block;
+
 }
 
-.titulo{
-  margin-bottom:23px;
-}
 
-.titulo h2{
-  margin:0 0 5px;
-  color:var(--azul);
-  font-size:28px;
-}
-
-.titulo p{
-  margin:0;
-  color:var(--gris);
-  font-size:13px;
-}
-
-/* ================================
-   ESTADO CARGA
-================================ */
-
-.estado-carga{
-  background:white;
-  padding:30px;
-  border-radius:15px;
-  border:1px solid #e1e8ed;
-  text-align:center;
-}
-
-.estado-carga.error{
-  color:var(--rojo);
-}
-
-/* ================================
-   KPIS
-================================ */
+/* KPIS */
 
 .kpis{
-  display:grid;
-  grid-template-columns:repeat(6,1fr);
-  gap:14px;
-  margin-bottom:21px;
+
+display:grid;
+
+grid-template-columns:
+repeat(5,1fr);
+
+gap:17px;
+
+margin-bottom:28px;
+
 }
 
 .kpi{
-  background:white;
-  padding:18px;
-  border:1px solid #e2e8ed;
-  border-radius:14px;
-  box-shadow:0 3px 10px rgba(20,50,80,.04);
-  border-left:5px solid var(--celeste);
+
+background:white;
+
+border-radius:16px;
+
+padding:
+23px 24px;
+
+border:
+1px solid #e0e7ec;
+
+border-left:
+6px solid var(--celeste);
+
+box-shadow:
+0 4px 15px rgba(20,50,80,.05);
+
+min-height:145px;
+
 }
 
-.kpi.verde{
-  border-left-color:var(--verde);
+.kpi.click{
+
+cursor:pointer;
+
+transition:.18s;
+
 }
 
-.kpi.rojo{
-  border-left-color:var(--rojo);
-}
+.kpi.click:hover{
 
-.kpi.naranja{
-  border-left-color:var(--naranja);
-}
+transform:
+translateY(-3px);
 
-.kpi.violeta{
-  border-left-color:var(--violeta);
+box-shadow:
+0 8px 20px rgba(20,50,80,.12);
+
 }
 
 .kpi.azul{
-  border-left-color:var(--azul);
+border-left-color:var(--azul);
+}
+
+.kpi.verde{
+border-left-color:var(--verde);
+}
+
+.kpi.rojo{
+border-left-color:var(--rojo);
+}
+
+.kpi.naranja{
+border-left-color:var(--naranja);
+}
+
+.kpi.violeta{
+border-left-color:var(--violeta);
 }
 
 .kpi small{
-  display:block;
-  color:var(--gris);
-  font-size:10px;
-  font-weight:bold;
-  text-transform:uppercase;
-  letter-spacing:.5px;
-  margin-bottom:9px;
+
+display:block;
+
+font-size:11px;
+
+font-weight:bold;
+
+letter-spacing:.5px;
+
+color:var(--gris);
+
+text-transform:uppercase;
+
+margin-bottom:14px;
+
 }
 
 .kpi strong{
-  color:var(--azul);
-  font-size:29px;
+
+display:block;
+
+font-size:34px;
+
+color:var(--azul);
+
 }
 
 .kpi .sub{
-  color:var(--gris);
-  font-size:11px;
-  margin-top:7px;
+
+margin-top:10px;
+
+font-size:12px;
+
+color:var(--gris);
+
 }
 
-/* ================================
-   CARDS
-================================ */
+
+/* GRIDS */
+
+.grid2{
+
+display:grid;
+
+grid-template-columns:
+1.5fr 1fr;
+
+gap:22px;
+
+margin-bottom:22px;
+
+}
+
+.gridIgual{
+
+display:grid;
+
+grid-template-columns:
+1fr 1fr;
+
+gap:22px;
+
+margin-bottom:22px;
+
+}
+
+
+/* CARD */
 
 .card{
-  background:white;
-  border-radius:15px;
-  border:1px solid #e1e8ed;
-  padding:22px;
-  box-shadow:0 3px 12px rgba(20,50,80,.04);
+
+background:white;
+
+border-radius:16px;
+
+border:
+1px solid #e0e7ec;
+
+padding:26px;
+
+box-shadow:
+0 4px 15px rgba(20,50,80,.04);
+
 }
 
-.card-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:15px;
-  margin-bottom:18px;
+.cardHeader{
+
+display:flex;
+
+align-items:center;
+
+justify-content:
+space-between;
+
+gap:20px;
+
+margin-bottom:20px;
+
 }
 
-.card-header h3{
-  margin:0;
-  color:var(--azul);
-  font-size:17px;
+.cardHeader h2,
+.cardHeader h3{
+
+margin:0;
+
+color:var(--azul);
+
 }
 
 .tag{
-  display:inline-block;
-  padding:6px 10px;
-  border-radius:20px;
-  font-size:10px;
-  font-weight:bold;
-  background:var(--celesteClaro);
-  color:var(--azul);
+
+background:#eaf8fd;
+
+color:var(--azul);
+
+font-size:11px;
+
+font-weight:bold;
+
+padding:
+8px 12px;
+
+border-radius:20px;
+
 }
 
-.grid2{
-  display:grid;
-  grid-template-columns:1.6fr 1fr;
-  gap:20px;
-  margin-bottom:20px;
+
+/* CURVA */
+
+.chart{
+
+height:400px;
+
+position:relative;
+
 }
 
-.grid2-igual{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:20px;
-  margin-bottom:20px;
+
+/* ESTADO ESPECIALIDADES */
+
+.chartEspecialidad{
+
+height:390px;
+
 }
 
-/* ================================
-   PROGRESO
-================================ */
 
-.progreso-grande{
-  margin-top:8px;
-}
+/* RESUMEN PLAN */
 
-.progreso-texto{
-  display:flex;
-  justify-content:space-between;
-  align-items:end;
-  margin-bottom:8px;
-}
+.cumplimientoNumero{
 
-.progreso-texto strong{
-  font-size:36px;
-  color:var(--azul);
-}
+font-size:45px;
 
-.progreso-texto span{
-  color:var(--gris);
-  font-size:12px;
+font-weight:bold;
+
+color:var(--azul);
+
+margin:
+25px 0 15px;
+
 }
 
 .barra{
-  height:15px;
-  background:#e7edf1;
-  border-radius:20px;
-  overflow:hidden;
+
+width:100%;
+
+height:18px;
+
+border-radius:20px;
+
+background:#e4ebef;
+
+overflow:hidden;
+
 }
 
 .barra div{
-  height:100%;
-  background:var(--verde);
-  border-radius:20px;
+
+height:100%;
+
+background:var(--verde);
+
+border-radius:20px;
+
 }
 
-.metricas-plan{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-  margin-top:20px;
+.miniGrid{
+
+display:grid;
+
+grid-template-columns:
+repeat(3,1fr);
+
+gap:12px;
+
+margin-top:28px;
+
 }
 
-.metrica{
-  background:#f7f9fb;
-  border-radius:10px;
-  padding:13px;
-  text-align:center;
+.mini{
+
+background:#f7f9fb;
+
+border-radius:13px;
+
+padding:18px;
+
+text-align:center;
+
 }
 
-.metrica small{
-  display:block;
-  color:var(--gris);
-  margin-bottom:5px;
-  font-size:10px;
-  text-transform:uppercase;
-  font-weight:bold;
+.mini small{
+
+display:block;
+
+font-size:11px;
+
+font-weight:bold;
+
+color:var(--gris);
+
+margin-bottom:8px;
+
 }
 
-.metrica strong{
-  color:var(--azul);
-  font-size:21px;
+.mini strong{
+
+font-size:27px;
+
+color:var(--azul);
+
 }
 
-/* ================================
-   CHART
-================================ */
 
-.chart{
-  height:340px;
-  position:relative;
+/* TABLA */
+
+.filtros{
+
+display:flex;
+
+flex-wrap:wrap;
+
+gap:10px;
+
+margin-bottom:16px;
+
 }
 
-.chart.chico{
-  height:300px;
+.filtros input,
+.filtros select{
+
+height:40px;
+
+border:
+1px solid #ccd7df;
+
+border-radius:8px;
+
+padding:
+0 11px;
+
+background:white;
+
 }
 
-/* ================================
-   LISTADOS
-================================ */
+.tabla{
 
-.lista-documentos{
-  display:flex;
-  flex-direction:column;
-  gap:9px;
-}
+overflow:auto;
 
-.documento-item{
-  border:1px solid #e5eaee;
-  border-radius:10px;
-  padding:12px;
-}
+max-height:650px;
 
-.doc-top{
-  display:flex;
-  justify-content:space-between;
-  gap:15px;
-  margin-bottom:4px;
-}
+border:
+1px solid #e0e7ec;
 
-.doc-codigo{
-  font-size:11px;
-  color:var(--azul);
-  font-weight:bold;
-}
+border-radius:10px;
 
-.doc-fecha{
-  font-size:11px;
-  color:var(--gris);
-  white-space:nowrap;
-}
-
-.doc-desc{
-  font-size:12px;
-  color:#394957;
-}
-
-.doc-extra{
-  margin-top:6px;
-  color:var(--gris);
-  font-size:10px;
-}
-
-.vacio{
-  padding:18px;
-  text-align:center;
-  color:var(--gris);
-  background:#f8fafb;
-  border-radius:10px;
-  font-size:12px;
-}
-
-/* ================================
-   TABLE
-================================ */
-
-.tabla-cont{
-  overflow:auto;
-  max-height:610px;
-  border:1px solid #e2e8ed;
-  border-radius:10px;
 }
 
 table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:11px;
+
+width:100%;
+
+border-collapse:collapse;
+
+font-size:12px;
+
 }
 
 thead{
-  position:sticky;
-  top:0;
-  z-index:5;
+
+position:sticky;
+
+top:0;
+
+z-index:5;
+
 }
 
 th{
-  background:var(--azul);
-  color:white;
-  text-align:left;
-  padding:10px;
-  white-space:nowrap;
+
+background:var(--azul);
+
+color:white;
+
+padding:11px;
+
+text-align:left;
+
+white-space:nowrap;
+
 }
 
 td{
-  padding:9px 10px;
-  border-bottom:1px solid #e7ecef;
-  vertical-align:top;
+
+padding:
+10px 11px;
+
+border-bottom:
+1px solid #e5eaee;
+
 }
 
 tr:hover td{
-  background:#f8fbfd;
+
+background:#f8fbfd;
+
 }
 
-/* ================================
-   BADGES
-================================ */
-
 .badge{
-  display:inline-block;
-  padding:5px 8px;
-  border-radius:20px;
-  font-size:9px;
-  font-weight:bold;
-  white-space:nowrap;
+
+display:inline-block;
+
+font-size:10px;
+
+font-weight:bold;
+
+padding:
+5px 9px;
+
+border-radius:20px;
+
 }
 
 .badge.lib{
-  background:var(--verdeClaro);
-  color:var(--verde);
-}
 
-.badge.obs{
-  background:var(--naranjaClaro);
-  color:#a65b00;
+background:var(--verdeClaro);
+
+color:var(--verde);
+
 }
 
 .badge.vencido{
-  background:var(--rojoClaro);
-  color:var(--rojo);
-}
 
-.badge.presentado{
-  background:#eceafd;
-  color:#4e3dab;
+background:var(--rojoClaro);
+
+color:var(--rojo);
+
 }
 
 .badge.pendiente{
-  background:#eef2f5;
-  color:#546574;
+
+background:#edf1f4;
+
+color:#586876;
+
 }
 
-/* ================================
-   FILTROS
-================================ */
+.badge.cliente{
 
-.filtros{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-bottom:15px;
+background:#e8e6ff;
+
+color:#473bad;
+
 }
 
-.filtros select,
-.filtros input{
-  height:37px;
-  border:1px solid #d3dce3;
-  border-radius:7px;
-  padding:0 10px;
-  background:white;
-  color:#344554;
-  font-size:12px;
+.badge.presentado{
+
+background:#e9f6fc;
+
+color:#17698c;
+
 }
 
-/* ================================
-   MODULOS FUTUROS
-================================ */
 
-.modulo-pendiente{
-  background:white;
-  border-radius:15px;
-  border:1px solid #e1e8ed;
-  padding:50px 30px;
-  text-align:center;
+/* MODAL */
+
+.modalFondo{
+
+position:fixed;
+
+inset:0;
+
+background:
+rgba(10,30,50,.55);
+
+z-index:500;
+
+display:none;
+
+align-items:center;
+
+justify-content:center;
+
+padding:25px;
+
 }
 
-.modulo-pendiente .icono{
-  font-size:42px;
-  margin-bottom:15px;
+.modalFondo.visible{
+
+display:flex;
+
 }
 
-.modulo-pendiente h3{
-  color:var(--azul);
-  font-size:21px;
+.modal{
+
+background:white;
+
+border-radius:17px;
+
+width:
+min(1000px,95vw);
+
+max-height:88vh;
+
+overflow:hidden;
+
+box-shadow:
+0 20px 60px rgba(0,0,0,.25);
+
 }
 
-.modulo-pendiente p{
-  color:var(--gris);
-  max-width:600px;
-  line-height:1.6;
-  margin:auto;
+.modalHeader{
+
+display:flex;
+
+align-items:center;
+
+justify-content:
+space-between;
+
+padding:
+22px 25px;
+
+border-bottom:
+1px solid #e0e7ec;
+
 }
 
-/* ================================
-   FOOTER
-================================ */
+.modalHeader h2{
 
-footer{
-  text-align:center;
-  padding:25px;
-  color:var(--gris);
-  font-size:10px;
+margin:0;
+
+color:var(--azul);
+
 }
 
-/* ================================
-   RESPONSIVE
-================================ */
+.cerrar{
+
+border:0;
+
+background:#edf1f4;
+
+width:35px;
+
+height:35px;
+
+border-radius:50%;
+
+cursor:pointer;
+
+font-size:18px;
+
+}
+
+.modalBody{
+
+padding:24px;
+
+overflow:auto;
+
+max-height:
+calc(88vh - 80px);
+
+}
+
+.opcionesUniverso{
+
+display:grid;
+
+grid-template-columns:
+1fr 1fr;
+
+gap:18px;
+
+margin-bottom:20px;
+
+}
+
+.opcionUniverso{
+
+border:
+1px solid #dde5ea;
+
+border-radius:14px;
+
+padding:23px;
+
+cursor:pointer;
+
+background:#fafcfd;
+
+}
+
+.opcionUniverso:hover{
+
+border-color:
+var(--celeste);
+
+background:#f3fbfe;
+
+}
+
+.opcionUniverso strong{
+
+font-size:35px;
+
+display:block;
+
+color:var(--azul);
+
+}
+
+.opcionUniverso span{
+
+display:block;
+
+color:var(--gris);
+
+margin-top:6px;
+
+}
+
+.detalleDoc{
+
+padding:
+13px 4px;
+
+border-bottom:
+1px solid #e6ebef;
+
+}
+
+.detalleDoc strong{
+
+display:block;
+
+font-size:12px;
+
+color:var(--azul);
+
+margin-bottom:4px;
+
+}
+
+.detalleDoc span{
+
+font-size:12px;
+
+}
+
+.detalleDoc small{
+
+display:block;
+
+margin-top:6px;
+
+color:var(--gris);
+
+}
+
+
+/* FUTUROS MODULOS */
+
+.proximamente{
+
+background:white;
+
+padding:55px;
+
+text-align:center;
+
+border-radius:16px;
+
+border:
+1px solid #e1e8ed;
+
+}
+
+.proximamente h2{
+
+color:var(--azul);
+
+}
+
+.proximamente p{
+
+color:var(--gris);
+
+}
+
+
+/* CARGA */
+
+.cargando{
+
+background:white;
+
+padding:35px;
+
+border-radius:15px;
+
+text-align:center;
+
+color:var(--gris);
+
+}
+
+
+/* RESPONSIVE */
 
 @media(max-width:1200px){
 
-  .kpis{
-    grid-template-columns:repeat(3,1fr);
-  }
+.kpis{
+
+grid-template-columns:
+repeat(3,1fr);
+
+}
 
 }
 
 @media(max-width:900px){
 
-  .grid2,
-  .grid2-igual{
-    grid-template-columns:1fr;
-  }
+.grid2,
+.gridIgual{
+
+grid-template-columns:1fr;
 
 }
 
-@media(max-width:700px){
+}
 
-  main{
-    padding:15px;
-  }
+@media(max-width:650px){
 
-  .topbar{
-    padding:12px 15px;
-  }
+main{
 
-  .actualizacion{
-    display:none;
-  }
-
-  .kpis{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-  .metricas-plan{
-    grid-template-columns:1fr;
-  }
-
-  .titulo h2{
-    font-size:23px;
-  }
+padding:15px;
 
 }
 
-@media(max-width:450px){
+.kpis{
 
-  .kpis{
-    grid-template-columns:1fr;
-  }
+grid-template-columns:
+1fr 1fr;
+
+}
+
+.opcionesUniverso{
+
+grid-template-columns:1fr;
+
+}
 
 }
 
 </style>
+
 </head>
 
 
 <body>
 
+
 <header>
 
 <div class="topbar">
 
-  <div class="marca">
+<div class="marca">
 
-    <div class="marca-barra"></div>
+<div class="marcaBarra"></div>
 
-    <div>
-      <h1>DUPLICAR NORTE UAM</h1>
-      <p>Dashboard de Indicadores de Calidad</p>
-    </div>
+<div>
 
-  </div>
+<h1>
+DUPLICAR NORTE UAM
+</h1>
 
-  <div class="actualizacion">
+<p>
+Dashboard de Indicadores de Calidad
+</p>
 
-    <small>Última actualización de estados</small>
+</div>
 
-    <strong id="fechaActualizacion">
-      Consultando...
-    </strong>
+</div>
 
-  </div>
+
+<div class="actualizacion">
+
+<small>
+Última actualización
+</small>
+
+<strong id="fechaActualizacion">
+Consultando...
+</strong>
+
+</div>
 
 </div>
 
@@ -677,42 +1041,36 @@ footer{
 
 <div class="menu">
 
-  <button
-    class="activo"
-    onclick="mostrarSeccion('resumen',this)"
-  >
-    RESUMEN
-  </button>
+<button
+class="activo"
+onclick="mostrarSeccion('resumen',this)">
+RESUMEN
+</button>
 
-  <button
-    onclick="mostrarSeccion('documentacion',this)"
-  >
-    DOCUMENTACIÓN
-  </button>
+<button
+onclick="mostrarSeccion('documentacion',this)">
+DOCUMENTACIÓN
+</button>
 
-  <button
-    onclick="mostrarSeccion('blister',this)"
-  >
-    OBSERVACIONES BLISTER
-  </button>
+<button
+onclick="mostrarSeccion('blister',this)">
+OBSERVACIONES BLISTER
+</button>
 
-  <button
-    onclick="mostrarSeccion('hallazgos',this)"
-  >
-    HALLAZGOS
-  </button>
+<button
+onclick="mostrarSeccion('hallazgos',this)">
+HALLAZGOS
+</button>
 
-  <button
-    onclick="mostrarSeccion('capacitaciones',this)"
-  >
-    CAPACITACIONES
-  </button>
+<button
+onclick="mostrarSeccion('capacitaciones',this)">
+CAPACITACIONES
+</button>
 
-  <button
-    onclick="mostrarSeccion('produccion',this)"
-  >
-    PRODUCCIÓN
-  </button>
+<button
+onclick="mostrarSeccion('produccion',this)">
+PRODUCCIÓN
+</button>
 
 </div>
 
@@ -723,681 +1081,450 @@ footer{
 
 <main>
 
-<!-- =====================================================
-     CARGANDO
-===================================================== -->
 
-<div id="cargando" class="estado-carga">
-  Cargando información desde la base de Calidad...
+<div
+id="cargando"
+class="cargando">
+
+Cargando información...
+
 </div>
 
 
-<div id="contenido" style="display:none;">
+<div
+id="contenido"
+style="display:none;">
 
 
-<!-- =====================================================
-     RESUMEN
-===================================================== -->
+<!-- RESUMEN -->
 
 <section
-  id="resumen"
-  class="seccion activa"
->
-
-<div class="titulo">
-
-  <h2>Resumen Ejecutivo</h2>
-
-  <p>
-    Estado documental actualizado automáticamente desde el registro de archivos.
-  </p>
-
-</div>
+id="resumen"
+class="seccion activa">
 
 
 <div class="kpis">
 
-  <div class="kpi azul">
 
-    <small>Universo documental</small>
+<div
+class="kpi azul click"
+onclick="abrirUniverso()">
 
-    <strong id="kTotal">
-      0
-    </strong>
+<small>
+Universo documental
+</small>
 
-    <div class="sub">
-      Documentos activos
-    </div>
+<strong id="kUniverso">
+0
+</strong>
 
-  </div>
+<div class="sub">
+Tocar para ver Presentados / Pendientes
+</div>
 
-
-  <div class="kpi violeta">
-
-    <small>Presentados</small>
-
-    <strong id="kPresentados">
-      0
-    </strong>
-
-    <div
-      id="subPresentados"
-      class="sub"
-    >
-      0 %
-    </div>
-
-  </div>
+</div>
 
 
-  <div class="kpi verde">
+<div
+class="kpi verde click"
+onclick="abrirDetalle('liberados')">
 
-    <small>Liberados</small>
+<small>
+Liberados
+</small>
 
-    <strong id="kLiberados">
-      0
-    </strong>
+<strong id="kLiberados">
+0
+</strong>
 
-    <div
-      id="subLiberados"
-      class="sub"
-    >
-      0 %
-    </div>
+<div class="sub">
+Tocar para ver detalle
+</div>
 
-  </div>
-
-
-  <div class="kpi naranja">
-
-    <small>Observados</small>
-
-    <strong id="kObservados">
-      0
-    </strong>
-
-    <div class="sub">
-      Estado actual OBS
-    </div>
-
-  </div>
+</div>
 
 
-  <div class="kpi rojo">
+<div
+class="kpi rojo click"
+onclick="abrirDetalle('vencidos')">
 
-    <small>Vencidos sin presentar</small>
+<small>
+Vencidos sin presentar
+</small>
 
-    <strong id="kVencidos">
-      0
-    </strong>
+<strong id="kVencidos">
+0
+</strong>
 
-    <div class="sub">
-      Fecha prevista superada
-    </div>
+<div class="sub">
+Fecha prevista superada
+</div>
 
-  </div>
+</div>
 
 
-  <div class="kpi">
+<div
+class="kpi click"
+onclick="abrirDetalle('futuros')">
 
-    <small>Pendientes futuros</small>
+<small>
+Pendientes futuros
+</small>
 
-    <strong id="kPendientes">
-      0
-    </strong>
+<strong id="kFuturos">
+0
+</strong>
 
-    <div class="sub">
-      Aún dentro de plazo
-    </div>
+<div class="sub">
+Aún dentro del plazo
+</div>
 
-  </div>
+</div>
+
+
+<div
+class="kpi violeta click"
+onclick="abrirDetalle('cliente')">
+
+<small>
+En poder del cliente
+</small>
+
+<strong id="kCliente">
+0
+</strong>
+
+<div class="sub">
+Pendientes de devolución
+</div>
+
+</div>
+
 
 </div>
 
 
 <div class="grid2">
 
-  <div class="card">
 
-    <div class="card-header">
+<div class="card">
 
-      <h3>
-        Estado documental por especialidad
-      </h3>
+<div class="cardHeader">
 
-      <span class="tag">
-        Datos en vivo
-      </span>
+<h2>
+Curva S Documentación
+</h2>
 
-    </div>
-
-    <div class="chart">
-
-      <canvas
-        id="chartEspecialidades"
-      ></canvas>
-
-    </div>
-
-  </div>
-
-
-  <div class="card">
-
-    <div class="card-header">
-
-      <h3>
-        Cumplimiento del plan a la fecha
-      </h3>
-
-      <span class="tag">
-        Presentación
-      </span>
-
-    </div>
-
-
-    <div class="progreso-grande">
-
-      <div class="progreso-texto">
-
-        <strong id="porcentajeCumplimiento">
-          0 %
-        </strong>
-
-        <span>
-          Documentos previstos a la fecha
-        </span>
-
-      </div>
-
-      <div class="barra">
-
-        <div
-          id="barraCumplimiento"
-          style="width:0%"
-        ></div>
-
-      </div>
-
-    </div>
-
-
-    <div class="metricas-plan">
-
-      <div class="metrica">
-
-        <small>
-          Planificados a fecha
-        </small>
-
-        <strong id="mPlanificados">
-          0
-        </strong>
-
-      </div>
-
-
-      <div class="metrica">
-
-        <small>
-          Presentados del plan
-        </small>
-
-        <strong id="mPresentadosPlan">
-          0
-        </strong>
-
-      </div>
-
-
-      <div class="metrica">
-
-        <small>
-          Atrasados
-        </small>
-
-        <strong id="mAtrasados">
-          0
-        </strong>
-
-      </div>
-
-    </div>
-
-
-    <div
-      style="
-      margin-top:20px;
-      padding:13px;
-      background:#f7f9fb;
-      border-radius:10px;
-      font-size:11px;
-      color:#687787;
-      line-height:1.5;
-      "
-    >
-
-      El cumplimiento compara los documentos cuya
-      fecha prevista de presentación ya ocurrió
-      contra aquellos que efectivamente fueron
-      presentados.
-
-    </div>
-
-  </div>
+<span class="tag">
+Planificado vs Real
+</span>
 
 </div>
 
+<div class="chart">
 
-<div class="grid2-igual">
-
-  <div class="card">
-
-    <div class="card-header">
-
-      <h3>
-        ⚠ Documentos vencidos
-      </h3>
-
-      <span
-        id="tagVencidos"
-        class="tag"
-      >
-        0 pendientes
-      </span>
-
-    </div>
-
-    <div
-      id="listaVencidos"
-      class="lista-documentos"
-    ></div>
-
-  </div>
-
-
-  <div class="card">
-
-    <div class="card-header">
-
-      <h3>
-        📅 Próximas presentaciones
-      </h3>
-
-      <span class="tag">
-        Próximos 45 días
-      </span>
-
-    </div>
-
-    <div
-      id="listaProximos"
-      class="lista-documentos"
-    ></div>
-
-  </div>
+<canvas id="chartCurvaS"></canvas>
 
 </div>
-
-
-</section>
-
-
-<!-- =====================================================
-     DOCUMENTACION
-===================================================== -->
-
-<section
-  id="documentacion"
-  class="seccion"
->
-
-<div class="titulo">
-
-  <h2>
-    Seguimiento de Documentación
-  </h2>
-
-  <p>
-    Universo documental, situación actual, fechas previstas y especialidades.
-  </p>
-
-</div>
-
-
-<div class="kpis">
-
-  <div class="kpi azul">
-
-    <small>
-      Universo
-    </small>
-
-    <strong id="dTotal">
-      0
-    </strong>
-
-  </div>
-
-  <div class="kpi violeta">
-
-    <small>
-      Presentados
-    </small>
-
-    <strong id="dPresentados">
-      0
-    </strong>
-
-  </div>
-
-  <div class="kpi verde">
-
-    <small>
-      Liberados
-    </small>
-
-    <strong id="dLiberados">
-      0
-    </strong>
-
-  </div>
-
-  <div class="kpi naranja">
-
-    <small>
-      Observados
-    </small>
-
-    <strong id="dObservados">
-      0
-    </strong>
-
-  </div>
-
-  <div class="kpi rojo">
-
-    <small>
-      Vencidos
-    </small>
-
-    <strong id="dVencidos">
-      0
-    </strong>
-
-  </div>
-
-  <div class="kpi">
-
-    <small>
-      Pendientes futuros
-    </small>
-
-    <strong id="dPendientes">
-      0
-    </strong>
-
-  </div>
 
 </div>
 
 
 <div class="card">
 
-  <div class="card-header">
+<div class="cardHeader">
 
-    <h3>
-      Detalle del universo documental
-    </h3>
+<h3>
+Cumplimiento a la fecha
+</h3>
 
-    <span
-      id="cantidadFiltrada"
-      class="tag"
-    >
-      0 documentos
-    </span>
+<span class="tag">
+Presentaciones
+</span>
 
-  </div>
+</div>
 
 
-  <div class="filtros">
+<div
+id="porcentajeCumplimiento"
+class="cumplimientoNumero">
 
-    <input
-      id="buscarDocumento"
-      type="text"
-      placeholder="Buscar código o descripción..."
-      oninput="aplicarFiltros()"
-      style="min-width:260px;"
-    >
+0 %
+
+</div>
 
 
-    <select
-      id="filtroEspecialidad"
-      onchange="aplicarFiltros()"
-    >
+<div class="barra">
 
-      <option value="">
-        Todas las especialidades
-      </option>
+<div
+id="barraCumplimiento"
+style="width:0%">
+</div>
 
-    </select>
+</div>
 
 
-    <select
-      id="filtroEstado"
-      onchange="aplicarFiltros()"
-    >
+<div class="miniGrid">
 
-      <option value="">
-        Todos los estados
-      </option>
+<div class="mini">
 
-      <option value="LIBERADO">
-        Liberado
-      </option>
+<small>
+Planificados
+</small>
 
-      <option value="OBSERVADO">
-        Observado
-      </option>
+<strong id="mPlan">
+0
+</strong>
 
-      <option value="PRESENTADO">
-        Presentado
-      </option>
-
-      <option value="VENCIDO">
-        Vencido
-      </option>
-
-      <option value="PENDIENTE">
-        Pendiente
-      </option>
-
-    </select>
-
-  </div>
+</div>
 
 
-  <div class="tabla-cont">
+<div class="mini">
 
-    <table>
+<small>
+Presentados
+</small>
 
-      <thead>
+<strong id="mReal">
+0
+</strong>
 
-        <tr>
-          <th>Ítem</th>
-          <th>Especialidad</th>
-          <th>Código PECOM</th>
-          <th>Código Oldelval</th>
-          <th>Descripción</th>
-          <th>Fecha prevista</th>
-          <th>Inicio actividad</th>
-          <th>Revisión</th>
-          <th>Estado registro</th>
-          <th>Situación</th>
-        </tr>
+</div>
 
-      </thead>
 
-      <tbody
-        id="tablaDocumentos"
-      ></tbody>
+<div class="mini">
 
-    </table>
+<small>
+Atrasados
+</small>
 
-  </div>
+<strong id="mAtraso">
+0
+</strong>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="cardHeader">
+
+<h2>
+Estado por especialidad
+</h2>
+
+<span class="tag">
+Documentación
+</span>
+
+</div>
+
+<div class="chartEspecialidad">
+
+<canvas id="chartEspecialidad"></canvas>
+
+</div>
+
+</div>
+
+
+</section>
+
+
+<!-- DOCUMENTACIÓN -->
+
+<section
+id="documentacion"
+class="seccion">
+
+
+<div class="card">
+
+<div class="cardHeader">
+
+<h2>
+Detalle documental
+</h2>
+
+<span
+id="cantidadTabla"
+class="tag">
+
+0 documentos
+
+</span>
+
+</div>
+
+
+<div class="filtros">
+
+<input
+id="buscar"
+placeholder="Buscar código o documento..."
+oninput="filtrarTabla()"
+style="min-width:280px;">
+
+
+<select
+id="fEspecialidad"
+onchange="filtrarTabla()">
+
+<option value="">
+Todas las especialidades
+</option>
+
+</select>
+
+
+<select
+id="fSituacion"
+onchange="filtrarTabla()">
+
+<option value="">
+Todos los estados
+</option>
+
+<option value="LIBERADO">
+Liberado
+</option>
+
+<option value="PRESENTADO">
+Presentado
+</option>
+
+<option value="VENCIDO">
+Vencido
+</option>
+
+<option value="PENDIENTE">
+Pendiente
+</option>
+
+<option value="CLIENTE">
+En poder del cliente
+</option>
+
+</select>
+
+</div>
+
+
+<div class="tabla">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Ítem</th>
+
+<th>Especialidad</th>
+
+<th>Código cliente</th>
+
+<th>Nombre documento</th>
+
+<th>Fecha prevista</th>
+
+<th>Fecha real</th>
+
+<th>Estado</th>
+
+</tr>
+
+</thead>
+
+
+<tbody id="tablaDocs">
+</tbody>
+
+</table>
+
+</div>
 
 </div>
 
 </section>
 
 
-<!-- =====================================================
-     BLISTER
-===================================================== -->
-
 <section
-  id="blister"
-  class="seccion"
->
+id="blister"
+class="seccion">
 
-<div class="titulo">
+<div class="proximamente">
 
-  <h2>
-    Observaciones Blister
-  </h2>
+<h2>
+Observaciones Blister
+</h2>
 
-</div>
-
-<div class="modulo-pendiente">
-
-  <div class="icono">
-    👁️
-  </div>
-
-  <h3>
-    Módulo preparado para integración
-  </h3>
-
-  <p>
-    Esta sección se alimentará automáticamente
-    cuando incorporemos el Excel de Observaciones
-    Blister.
-  </p>
+<p>
+Se conectará al Excel de Blister.
+</p>
 
 </div>
 
 </section>
 
 
-<!-- =====================================================
-     HALLAZGOS
-===================================================== -->
-
 <section
-  id="hallazgos"
-  class="seccion"
->
+id="hallazgos"
+class="seccion">
 
-<div class="titulo">
+<div class="proximamente">
 
-  <h2>
-    Hallazgos, PNC y NC
-  </h2>
+<h2>
+Hallazgos
+</h2>
 
-</div>
-
-<div class="modulo-pendiente">
-
-  <div class="icono">
-    ⚠️
-  </div>
-
-  <h3>
-    Módulo preparado para integración
-  </h3>
-
-  <p>
-    Se incorporarán vencidos, en tiempo,
-    cerrados, PNC y No Conformidades desde
-    su archivo de seguimiento.
-  </p>
+<p>
+Se conectará al Excel de Hallazgos.
+</p>
 
 </div>
 
 </section>
 
 
-<!-- =====================================================
-     CAPACITACIONES
-===================================================== -->
-
 <section
-  id="capacitaciones"
-  class="seccion"
->
+id="capacitaciones"
+class="seccion">
 
-<div class="titulo">
+<div class="proximamente">
 
-  <h2>
-    Capacitaciones
-  </h2>
+<h2>
+Capacitaciones
+</h2>
 
-</div>
-
-<div class="modulo-pendiente">
-
-  <div class="icono">
-    🎓
-  </div>
-
-  <h3>
-    Módulo preparado para integración
-  </h3>
-
-  <p>
-    Aquí se incorporará automáticamente el
-    programa de capacitaciones planificadas
-    y realizadas.
-  </p>
+<p>
+Se conectará al Excel de Capacitaciones.
+</p>
 
 </div>
 
 </section>
 
 
-<!-- =====================================================
-     PRODUCCION
-===================================================== -->
-
 <section
-  id="produccion"
-  class="seccion"
->
+id="produccion"
+class="seccion">
 
-<div class="titulo">
+<div class="proximamente">
 
-  <h2>
-    Índices de Gestión y Producto
-  </h2>
+<h2>
+Producción
+</h2>
 
-</div>
-
-<div class="modulo-pendiente">
-
-  <div class="icono">
-    🏗️
-  </div>
-
-  <h3>
-    Módulo preparado para integración
-  </h3>
-
-  <p>
-    Esta sección se conectará al Excel de
-    producción para mostrar probetas, END,
-    rechazos y demás indicadores de Calidad.
-  </p>
+<p>
+Se conectará al Excel de Producción.
+</p>
 
 </div>
 
@@ -1409,1733 +1536,1857 @@ footer{
 </main>
 
 
-<footer>
-  DUPLICAR NORTE UAM · Dashboard de Calidad
-</footer>
+<!-- MODAL -->
+
+<div
+id="modalFondo"
+class="modalFondo"
+onclick="cerrarModalFondo(event)">
+
+
+<div class="modal">
+
+
+<div class="modalHeader">
+
+<h2 id="modalTitulo">
+Detalle
+</h2>
+
+<button
+class="cerrar"
+onclick="cerrarModal()">
+
+×
+
+</button>
+
+</div>
+
+
+<div
+id="modalBody"
+class="modalBody">
+</div>
+
+
+</div>
+
+</div>
 
 
 <script>
 
-/* ======================================================
-   CONFIG SUPABASE
-====================================================== */
+
+/* SUPABASE */
 
 const SUPABASE_URL =
-  "https://mzgbtejfgsrskiuymtwh.supabase.co";
+"https://mzgbtejfgsrskiuymtwh.supabase.co";
+
 
 const SUPABASE_KEY =
-  "sb_publishable_Wen9hxBnae8wRrEEaP5lOQ_aNl9OCGd";
+"sb_publishable_Wen9hxBnae8wRrEEaP5lOQ_aNl9OCGd";
+
 
 const supabaseClient =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+window.supabase.createClient(
 
+SUPABASE_URL,
 
-/* ======================================================
-   VARIABLES
-====================================================== */
+SUPABASE_KEY
 
-let documentos = [];
-
-let chartEspecialidades = null;
-
-
-/* ======================================================
-   INICIO
-====================================================== */
-
-document.addEventListener(
-  "DOMContentLoaded",
-  cargarDatos
 );
 
 
-/* ======================================================
-   CARGAR SUPABASE
-====================================================== */
+let documentos = [];
+
+let chartS = null;
+
+let chartEsp = null;
+
+
+/* INICIO */
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+cargarDatos
+
+);
+
+
+/* CARGAR */
 
 async function cargarDatos(){
 
-  const cargando =
-    document.getElementById("cargando");
+try{
 
-  try{
+const {
 
-    const {
-      data,
-      error
-    } =
-    await supabaseClient
+data,
+error
 
-      .from("v_documentacion_dashboard")
+} =
 
-      .select("*")
+await supabaseClient
 
-      .order(
-        "item",
-        {
-          ascending:true
-        }
-      );
+.from(
+"v_documentacion_dashboard"
+)
 
+.select("*")
 
-    if(error){
-
-      throw error;
-
-    }
+.order(
+"item",
+{
+ascending:true
+}
+);
 
 
-    documentos =
-      data || [];
+if(error){
 
-
-    if(!documentos.length){
-
-      throw new Error(
-        "No se encontraron documentos en el Maestro Oficial."
-      );
-
-    }
-
-
-    prepararDatos();
-
-
-    cargando.style.display =
-      "none";
-
-
-    document
-      .getElementById("contenido")
-      .style.display =
-      "block";
-
-  }
-  catch(error){
-
-    console.error(error);
-
-    cargando.classList.add("error");
-
-    cargando.innerHTML =
-
-      "<strong>No se pudo cargar el Dashboard.</strong><br><br>" +
-
-      escapar(error.message);
-
-  }
+throw error;
 
 }
 
 
-/* ======================================================
-   PREPARAR DATOS
-====================================================== */
-
-function prepararDatos(){
-
-  const hoy =
-    fechaHoyISO();
+documentos =
+(data || [])
+.map(prepararDocumento);
 
 
-  documentos =
-    documentos.map(doc => {
+actualizarKPIs();
 
-      const presentado =
-        doc.presentado === true;
+pintarCurvaS();
 
+pintarEspecialidades();
 
-      const liberado =
-        doc.liberado === true;
+cargarEspecialidades();
 
+filtrarTabla();
 
-      const observado =
-        doc.observado === true;
+ultimaActualizacion();
 
 
-      const vencido =
-        !presentado &&
-        doc.fecha_prevista_presentacion &&
-        doc.fecha_prevista_presentacion < hoy;
+document
+.getElementById("cargando")
+.style.display =
+"none";
 
 
-      const pendiente =
-        !presentado &&
-        !vencido;
+document
+.getElementById("contenido")
+.style.display =
+"block";
 
 
-      let situacion =
-        "PENDIENTE";
+}
+catch(error){
 
+document
+.getElementById("cargando")
+.innerHTML =
 
-      if(liberado){
+"Error al cargar información: " +
 
-        situacion =
-          "LIBERADO";
+escapar(
+error.message
+);
 
-      }
-      else if(observado){
-
-        situacion =
-          "OBSERVADO";
-
-      }
-      else if(presentado){
-
-        situacion =
-          "PRESENTADO";
-
-      }
-      else if(vencido){
-
-        situacion =
-          "VENCIDO";
-
-      }
-
-
-      return {
-
-        ...doc,
-
-        presentadoCalculado:
-          presentado,
-
-        liberadoCalculado:
-          liberado,
-
-        observadoCalculado:
-          observado,
-
-        vencidoCalculado:
-          vencido,
-
-        pendienteCalculado:
-          pendiente,
-
-        situacionCalculada:
-          situacion
-
-      };
-
-    });
-
-
-  actualizarKPIs();
-
-  pintarEspecialidades();
-
-  pintarVencidos();
-
-  pintarProximos();
-
-  cargarFiltroEspecialidades();
-
-  aplicarFiltros();
-
-  calcularUltimaActualizacion();
+}
 
 }
 
 
-/* ======================================================
-   KPIs
-====================================================== */
+/* PREPARAR */
+
+function prepararDocumento(doc){
+
+const hoy =
+hoyISO();
+
+
+const presentado =
+doc.presentado === true;
+
+
+const liberado =
+doc.liberado === true;
+
+
+const vencido =
+
+!presentado &&
+
+doc.fecha_prevista_presentacion &&
+
+doc.fecha_prevista_presentacion < hoy;
+
+
+const futuro =
+
+!presentado &&
+
+!vencido;
+
+
+return {
+
+...doc,
+
+_presentado:
+presentado,
+
+_liberado:
+liberado,
+
+_vencido:
+vencido,
+
+_futuro:
+futuro,
+
+_cliente:
+doc.en_poder_cliente === true
+
+};
+
+}
+
+
+/* KPIS */
 
 function actualizarKPIs(){
 
-  const total =
-    documentos.length;
+const universo =
+documentos.length;
 
 
-  const presentados =
-    documentos.filter(
-      d =>
-      d.presentadoCalculado
-    ).length;
+const presentados =
+documentos.filter(
+d => d._presentado
+);
 
 
-  const liberados =
-    documentos.filter(
-      d =>
-      d.liberadoCalculado
-    ).length;
+const pendientes =
+documentos.filter(
+d => !d._presentado
+);
 
 
-  const observados =
-    documentos.filter(
-      d =>
-      d.observadoCalculado
-    ).length;
+const liberados =
+documentos.filter(
+d => d._liberado
+);
 
 
-  const vencidos =
-    documentos.filter(
-      d =>
-      d.vencidoCalculado
-    ).length;
+const vencidos =
+documentos.filter(
+d => d._vencido
+);
 
 
-  const pendientes =
-    documentos.filter(
-      d =>
-      d.pendienteCalculado
-    ).length;
+const futuros =
+documentos.filter(
+d => d._futuro
+);
 
 
-  const porcentajePresentados =
-    total
-    ?
-    (
-      presentados /
-      total *
-      100
-    )
-    :
-    0;
+const cliente =
+documentos.filter(
+d => d._cliente
+);
 
 
-  const porcentajeLiberados =
-    total
-    ?
-    (
-      liberados /
-      total *
-      100
-    )
-    :
-    0;
+setTexto(
+"kUniverso",
+universo
+);
 
 
-  setTexto(
-    "kTotal",
-    total
-  );
-
-  setTexto(
-    "kPresentados",
-    presentados
-  );
-
-  setTexto(
-    "kLiberados",
-    liberados
-  );
-
-  setTexto(
-    "kObservados",
-    observados
-  );
-
-  setTexto(
-    "kVencidos",
-    vencidos
-  );
-
-  setTexto(
-    "kPendientes",
-    pendientes
-  );
+setTexto(
+"kLiberados",
+liberados.length
+);
 
 
-  setTexto(
-    "subPresentados",
-    porcentajePresentados
-      .toFixed(1)
-      .replace(".",",")
-      +
-      " % del universo"
-  );
+setTexto(
+"kVencidos",
+vencidos.length
+);
 
 
-  setTexto(
-    "subLiberados",
-    porcentajeLiberados
-      .toFixed(1)
-      .replace(".",",")
-      +
-      " % del universo"
-  );
+setTexto(
+"kFuturos",
+futuros.length
+);
 
 
-  setTexto(
-    "dTotal",
-    total
-  );
-
-  setTexto(
-    "dPresentados",
-    presentados
-  );
-
-  setTexto(
-    "dLiberados",
-    liberados
-  );
-
-  setTexto(
-    "dObservados",
-    observados
-  );
-
-  setTexto(
-    "dVencidos",
-    vencidos
-  );
-
-  setTexto(
-    "dPendientes",
-    pendientes
-  );
+setTexto(
+"kCliente",
+cliente.length
+);
 
 
-  calcularCumplimiento();
+/* Cumplimiento */
 
-}
-
-
-/* ======================================================
-   CUMPLIMIENTO PLAN
-====================================================== */
-
-function calcularCumplimiento(){
-
-  const hoy =
-    fechaHoyISO();
+const hoy =
+hoyISO();
 
 
-  const planificados =
-    documentos.filter(
-      d =>
-      d.fecha_prevista_presentacion &&
-      d.fecha_prevista_presentacion <= hoy
-    );
+const plan =
+documentos.filter(
+
+d =>
+
+d.fecha_prevista_presentacion &&
+
+d.fecha_prevista_presentacion <= hoy
+
+);
 
 
-  const presentadosPlan =
-    planificados.filter(
-      d =>
-      d.presentadoCalculado
-    ).length;
+const real =
+plan.filter(
+d => d._presentado
+);
 
 
-  const atrasados =
-    planificados.length -
-    presentadosPlan;
+const atraso =
+plan.length -
+real.length;
 
 
-  const porcentaje =
-    planificados.length
-    ?
-    (
-      presentadosPlan /
-      planificados.length *
-      100
-    )
-    :
-    100;
+const porcentaje =
+
+plan.length
+
+?
+
+real.length /
+plan.length *
+100
+
+:
+
+100;
 
 
-  setTexto(
-    "mPlanificados",
-    planificados.length
-  );
-
-  setTexto(
-    "mPresentadosPlan",
-    presentadosPlan
-  );
-
-  setTexto(
-    "mAtrasados",
-    atrasados
-  );
+setTexto(
+"mPlan",
+plan.length
+);
 
 
-  setTexto(
-    "porcentajeCumplimiento",
-
-    porcentaje
-      .toFixed(1)
-      .replace(".",",")
-      +
-      " %"
-  );
+setTexto(
+"mReal",
+real.length
+);
 
 
-  document
-    .getElementById(
-      "barraCumplimiento"
-    )
-    .style
-    .width =
-      Math.min(
-        porcentaje,
-        100
-      )
-      +
-      "%";
+setTexto(
+"mAtraso",
+atraso
+);
+
+
+setTexto(
+
+"porcentajeCumplimiento",
+
+porcentaje
+.toFixed(1)
+.replace(".",",")
++
+" %"
+
+);
+
+
+document
+.getElementById(
+"barraCumplimiento"
+)
+.style.width =
+
+Math.min(
+100,
+porcentaje
+)
++
+"%";
 
 }
 
 
-/* ======================================================
-   CHART ESPECIALIDADES
-====================================================== */
+/* UNIVERSO */
+
+function abrirUniverso(){
+
+const presentados =
+documentos.filter(
+d => d._presentado
+);
+
+
+const pendientes =
+documentos.filter(
+d => !d._presentado
+);
+
+
+document
+.getElementById(
+"modalTitulo"
+)
+.textContent =
+"Universo documental";
+
+
+document
+.getElementById(
+"modalBody"
+)
+.innerHTML = `
+
+<div class="opcionesUniverso">
+
+<div
+class="opcionUniverso"
+onclick="abrirDetalle('presentados')">
+
+<strong>
+${presentados.length}
+</strong>
+
+<span>
+Presentados
+</span>
+
+</div>
+
+
+<div
+class="opcionUniverso"
+onclick="abrirDetalle('pendientes')">
+
+<strong>
+${pendientes.length}
+</strong>
+
+<span>
+Pendientes de presentar
+</span>
+
+</div>
+
+</div>
+
+<div style="
+color:#687787;
+font-size:13px;
+">
+
+Tocá Presentados o Pendientes para ver
+el código del cliente y el nombre de cada documento.
+
+</div>
+
+`;
+
+
+mostrarModal();
+
+}
+
+
+/* DETALLE */
+
+function abrirDetalle(tipo){
+
+let lista = [];
+
+let titulo = "";
+
+
+if(tipo === "presentados"){
+
+lista =
+documentos.filter(
+d => d._presentado
+);
+
+titulo =
+"Documentos presentados";
+
+}
+
+
+if(tipo === "pendientes"){
+
+lista =
+documentos.filter(
+d => !d._presentado
+);
+
+titulo =
+"Documentos pendientes de presentar";
+
+}
+
+
+if(tipo === "liberados"){
+
+lista =
+documentos.filter(
+d => d._liberado
+);
+
+titulo =
+"Documentos liberados";
+
+}
+
+
+if(tipo === "vencidos"){
+
+lista =
+documentos.filter(
+d => d._vencido
+);
+
+titulo =
+"Documentos vencidos sin presentar";
+
+}
+
+
+if(tipo === "futuros"){
+
+lista =
+documentos.filter(
+d => d._futuro
+);
+
+titulo =
+"Documentos pendientes futuros";
+
+}
+
+
+if(tipo === "cliente"){
+
+lista =
+documentos.filter(
+d => d._cliente
+);
+
+titulo =
+"Documentos en poder del cliente";
+
+}
+
+
+lista.sort(
+(a,b) =>
+(a.item || 9999) -
+(b.item || 9999)
+);
+
+
+document
+.getElementById(
+"modalTitulo"
+)
+.textContent =
+
+titulo +
+" (" +
+lista.length +
+")";
+
+
+document
+.getElementById(
+"modalBody"
+)
+.innerHTML =
+
+lista.length
+
+?
+
+lista
+.map(
+doc => `
+
+<div class="detalleDoc">
+
+<strong>
+${escapar(
+doc.codigo_oldelval ||
+doc.codigo_pecom ||
+"-"
+)}
+</strong>
+
+<span>
+${escapar(
+doc.descripcion ||
+""
+)}
+</span>
+
+<small>
+
+${escapar(
+doc.especialidad ||
+"Sin especialidad"
+)}
+
+${doc.fecha_prevista_presentacion
+?
+" · Previsto: " +
+formatearFecha(
+doc.fecha_prevista_presentacion
+)
+:
+""
+}
+
+</small>
+
+</div>
+
+`
+)
+.join("")
+
+:
+
+`
+<div style="
+padding:25px;
+text-align:center;
+color:#687787;
+">
+No hay documentos en esta categoría.
+</div>
+`;
+
+
+mostrarModal();
+
+}
+
+
+/* CURVA S */
+
+function pintarCurvaS(){
+
+const fechas = new Set();
+
+
+documentos.forEach(doc => {
+
+if(
+doc.fecha_prevista_presentacion
+){
+
+fechas.add(
+doc.fecha_prevista_presentacion
+);
+
+}
+
+
+if(
+doc.fecha_primera_presentacion
+){
+
+fechas.add(
+doc.fecha_primera_presentacion
+);
+
+}
+
+});
+
+
+const fechasOrdenadas =
+
+[...fechas]
+
+.sort();
+
+
+const plan = [];
+
+const real = [];
+
+
+fechasOrdenadas
+.forEach(fecha => {
+
+
+const planAcum =
+
+documentos.filter(
+
+d =>
+
+d.fecha_prevista_presentacion &&
+
+d.fecha_prevista_presentacion <= fecha
+
+).length;
+
+
+const realAcum =
+
+documentos.filter(
+
+d =>
+
+d.fecha_primera_presentacion &&
+
+d.fecha_primera_presentacion <= fecha
+
+).length;
+
+
+plan.push(
+planAcum
+);
+
+
+real.push(
+realAcum
+);
+
+});
+
+
+const labels =
+
+fechasOrdenadas.map(
+formatearFechaCorta
+);
+
+
+const ctx =
+document.getElementById(
+"chartCurvaS"
+);
+
+
+if(chartS){
+
+chartS.destroy();
+
+}
+
+
+chartS = new Chart(
+
+ctx,
+
+{
+
+type:"line",
+
+data:{
+
+labels,
+
+datasets:[
+
+{
+
+label:
+"Planificado",
+
+data:plan,
+
+borderColor:
+"#60c5e8",
+
+backgroundColor:
+"#60c5e8",
+
+borderWidth:3,
+
+pointRadius:2,
+
+tension:.25
+
+},
+
+{
+
+label:
+"Presentado real",
+
+data:real,
+
+borderColor:
+"#174f8a",
+
+backgroundColor:
+"#174f8a",
+
+borderWidth:3,
+
+pointRadius:2,
+
+tension:.25
+
+}
+
+]
+
+},
+
+options:{
+
+responsive:true,
+
+maintainAspectRatio:false,
+
+interaction:{
+
+mode:"index",
+
+intersect:false
+
+},
+
+plugins:{
+
+legend:{
+
+position:"bottom"
+
+},
+
+tooltip:{
+
+callbacks:{
+
+label:function(ctx){
+
+return (
+
+ctx.dataset.label +
+
+": " +
+
+ctx.raw +
+
+" documentos"
+
+);
+
+}
+
+}
+
+}
+
+},
+
+scales:{
+
+y:{
+
+beginAtZero:true,
+
+suggestedMax:
+documentos.length,
+
+ticks:{
+
+precision:0
+
+},
+
+title:{
+
+display:true,
+
+text:
+"Documentos acumulados"
+
+}
+
+},
+
+x:{
+
+title:{
+
+display:true,
+
+text:"Fecha"
+
+},
+
+ticks:{
+
+maxRotation:60,
+
+minRotation:45,
+
+autoSkip:true,
+
+maxTicksLimit:18
+
+}
+
+}
+
+}
+
+}
+
+}
+
+);
+
+}
+
+
+/* ESPECIALIDADES */
 
 function pintarEspecialidades(){
 
-  const grupos = {};
+const grupos = {};
 
 
-  documentos.forEach(doc => {
+documentos.forEach(doc => {
 
-    const esp =
-      doc.especialidad
-      ?
-      doc.especialidad
-      :
-      "Sin especialidad";
+const esp =
+doc.especialidad ||
+"Sin especialidad";
 
 
-    if(!grupos[esp]){
+if(!grupos[esp]){
 
-      grupos[esp] = {
+grupos[esp] = {
 
-        liberado:0,
-        observado:0,
-        presentado:0,
-        vencido:0,
-        pendiente:0
+lib:0,
 
-      };
+cliente:0,
 
-    }
+gestion:0,
 
+vencido:0,
 
-    if(
-      doc.situacionCalculada ===
-      "LIBERADO"
-    ){
+futuro:0
 
-      grupos[esp].liberado++;
-
-    }
-    else if(
-      doc.situacionCalculada ===
-      "OBSERVADO"
-    ){
-
-      grupos[esp].observado++;
-
-    }
-    else if(
-      doc.situacionCalculada ===
-      "PRESENTADO"
-    ){
-
-      grupos[esp].presentado++;
-
-    }
-    else if(
-      doc.situacionCalculada ===
-      "VENCIDO"
-    ){
-
-      grupos[esp].vencido++;
-
-    }
-    else{
-
-      grupos[esp].pendiente++;
-
-    }
-
-  });
-
-
-  const labels =
-    Object.keys(grupos);
-
-
-  const datosLiberados =
-    labels.map(
-      x =>
-      grupos[x].liberado
-    );
-
-
-  const datosObservados =
-    labels.map(
-      x =>
-      grupos[x].observado
-    );
-
-
-  const datosPresentados =
-    labels.map(
-      x =>
-      grupos[x].presentado
-    );
-
-
-  const datosVencidos =
-    labels.map(
-      x =>
-      grupos[x].vencido
-    );
-
-
-  const datosPendientes =
-    labels.map(
-      x =>
-      grupos[x].pendiente
-    );
-
-
-  const ctx =
-    document.getElementById(
-      "chartEspecialidades"
-    );
-
-
-  if(chartEspecialidades){
-
-    chartEspecialidades.destroy();
-
-  }
-
-
-  chartEspecialidades =
-    new Chart(
-      ctx,
-      {
-
-        type:"bar",
-
-        data:{
-
-          labels,
-
-          datasets:[
-
-            {
-              label:"Liberados",
-              data:datosLiberados,
-              backgroundColor:"#179447"
-            },
-
-            {
-              label:"Observados",
-              data:datosObservados,
-              backgroundColor:"#f28c28"
-            },
-
-            {
-              label:"Presentados",
-              data:datosPresentados,
-              backgroundColor:"#5145e5"
-            },
-
-            {
-              label:"Vencidos",
-              data:datosVencidos,
-              backgroundColor:"#d83c3c"
-            },
-
-            {
-              label:"Pendientes",
-              data:datosPendientes,
-              backgroundColor:"#aebac4"
-            }
-
-          ]
-
-        },
-
-        options:{
-
-          responsive:true,
-
-          maintainAspectRatio:false,
-
-          indexAxis:"y",
-
-          plugins:{
-
-            legend:{
-              position:"bottom"
-            }
-
-          },
-
-          scales:{
-
-            x:{
-
-              beginAtZero:true,
-
-              stacked:true,
-
-              ticks:{
-                precision:0
-              }
-
-            },
-
-            y:{
-              stacked:true
-            }
-
-          }
-
-        }
-
-      }
-    );
+};
 
 }
 
 
-/* ======================================================
-   VENCIDOS
-====================================================== */
+if(doc._liberado){
 
-function pintarVencidos(){
+grupos[esp].lib++;
 
-  const vencidos =
-    documentos
+}
+else if(doc._cliente){
 
-      .filter(
-        d =>
-        d.vencidoCalculado
-      )
+grupos[esp].cliente++;
 
-      .sort(
-        (a,b) =>
-        compararFechas(
-          a.fecha_prevista_presentacion,
-          b.fecha_prevista_presentacion
-        )
-      );
+}
+else if(doc._vencido){
 
+grupos[esp].vencido++;
 
-  setTexto(
-    "tagVencidos",
-    vencidos.length +
-    (
-      vencidos.length === 1
-      ?
-      " pendiente"
-      :
-      " pendientes"
-    )
-  );
+}
+else if(doc._futuro){
+
+grupos[esp].futuro++;
+
+}
+else if(doc._presentado){
+
+grupos[esp].gestion++;
+
+}
+
+});
 
 
-  const contenedor =
-    document.getElementById(
-      "listaVencidos"
-    );
+const labels =
+Object.keys(grupos);
 
 
-  if(!vencidos.length){
-
-    contenedor.innerHTML =
-
-      `
-      <div class="vacio">
-        ✓ No hay documentos vencidos sin presentar.
-      </div>
-      `;
-
-    return;
-
-  }
+const ctx =
+document.getElementById(
+"chartEspecialidad"
+);
 
 
-  contenedor.innerHTML =
-    vencidos
-    .slice(0,8)
-    .map(
-      d => {
+if(chartEsp){
 
-        const atraso =
-          diasEntre(
-            d.fecha_prevista_presentacion,
-            fechaHoyISO()
-          );
-
-
-        return `
-
-        <div class="documento-item">
-
-          <div class="doc-top">
-
-            <div class="doc-codigo">
-              ${escapar(
-                d.codigo_oldelval ||
-                d.codigo_pecom
-              )}
-            </div>
-
-            <div class="doc-fecha">
-              ${formatearFecha(
-                d.fecha_prevista_presentacion
-              )}
-            </div>
-
-          </div>
-
-          <div class="doc-desc">
-            ${escapar(
-              d.descripcion
-            )}
-          </div>
-
-          <div class="doc-extra">
-            ${escapar(
-              d.especialidad ||
-              "Sin especialidad"
-            )}
-            ·
-            ${atraso}
-            días de atraso
-          </div>
-
-        </div>
-
-        `;
-
-      }
-    )
-    .join("");
+chartEsp.destroy();
 
 }
 
 
-/* ======================================================
-   PROXIMOS
-====================================================== */
+chartEsp = new Chart(
 
-function pintarProximos(){
+ctx,
 
-  const hoy =
-    fechaHoyISO();
+{
 
+type:"bar",
 
-  const limite =
-    sumarDiasISO(
-      hoy,
-      45
-    );
+data:{
 
+labels,
 
-  const proximos =
-    documentos
+datasets:[
 
-      .filter(
-        d =>
+{
 
-        !d.presentadoCalculado &&
+label:"Liberados",
 
-        d.fecha_prevista_presentacion &&
+data:
+labels.map(
+x => grupos[x].lib
+),
 
-        d.fecha_prevista_presentacion >= hoy &&
+backgroundColor:
+"#179447"
 
-        d.fecha_prevista_presentacion <= limite
+},
 
-      )
+{
 
-      .sort(
-        (a,b) =>
-        compararFechas(
-          a.fecha_prevista_presentacion,
-          b.fecha_prevista_presentacion
-        )
-      );
+label:"En poder cliente",
 
+data:
+labels.map(
+x => grupos[x].cliente
+),
 
-  const contenedor =
-    document.getElementById(
-      "listaProximos"
-    );
+backgroundColor:
+"#5145e5"
 
+},
 
-  if(!proximos.length){
+{
 
-    contenedor.innerHTML =
+label:"Presentados en gestión",
 
-      `
-      <div class="vacio">
-        No hay presentaciones pendientes dentro de los próximos 45 días.
-      </div>
-      `;
+data:
+labels.map(
+x => grupos[x].gestion
+),
 
-    return;
+backgroundColor:
+"#60c5e8"
 
-  }
+},
 
+{
 
-  contenedor.innerHTML =
-    proximos
-    .slice(0,8)
-    .map(
-      d => {
+label:"Vencidos",
 
-        const faltan =
-          diasEntre(
-            hoy,
-            d.fecha_prevista_presentacion
-          );
+data:
+labels.map(
+x => grupos[x].vencido
+),
 
+backgroundColor:
+"#dc3b3b"
 
-        return `
+},
 
-        <div class="documento-item">
+{
 
-          <div class="doc-top">
+label:"Pendientes futuros",
 
-            <div class="doc-codigo">
-              ${escapar(
-                d.codigo_oldelval ||
-                d.codigo_pecom
-              )}
-            </div>
+data:
+labels.map(
+x => grupos[x].futuro
+),
 
-            <div class="doc-fecha">
-              ${formatearFecha(
-                d.fecha_prevista_presentacion
-              )}
-            </div>
+backgroundColor:
+"#aeb9c2"
 
-          </div>
+}
 
-          <div class="doc-desc">
-            ${escapar(
-              d.descripcion
-            )}
-          </div>
+]
 
-          <div class="doc-extra">
+},
 
-            ${escapar(
-              d.especialidad ||
-              "Sin especialidad"
-            )}
+options:{
 
-            ·
+responsive:true,
 
-            vence en
+maintainAspectRatio:false,
 
-            ${faltan}
+indexAxis:"y",
 
-            días
+plugins:{
 
-          </div>
+legend:{
 
-        </div>
+position:"bottom"
 
-        `;
+}
 
-      }
-    )
-    .join("");
+},
+
+scales:{
+
+x:{
+
+stacked:true,
+
+beginAtZero:true,
+
+ticks:{
+
+precision:0
+
+}
+
+},
+
+y:{
+
+stacked:true
+
+}
+
+}
+
+}
+
+}
+
+);
 
 }
 
 
-/* ======================================================
-   FILTRO ESPECIALIDAD
-====================================================== */
+/* FILTROS */
 
-function cargarFiltroEspecialidades(){
+function cargarEspecialidades(){
 
-  const select =
-    document.getElementById(
-      "filtroEspecialidad"
-    );
+const select =
+document.getElementById(
+"fEspecialidad"
+);
 
 
-  const especialidades =
-    [
-      ...new Set(
-        documentos
-        .map(
-          d =>
-          d.especialidad ||
-          "Sin especialidad"
-        )
-      )
-    ]
-    .sort();
+const especialidades =
+
+[
+...new Set(
+
+documentos.map(
+
+d =>
+d.especialidad ||
+"Sin especialidad"
+
+)
+
+)
+
+]
+.sort();
 
 
-  especialidades.forEach(esp => {
+especialidades
+.forEach(esp => {
 
-    const opcion =
-      document.createElement(
-        "option"
-      );
-
-
-    opcion.value =
-      esp;
+const option =
+document.createElement(
+"option"
+);
 
 
-    opcion.textContent =
-      esp;
+option.value =
+esp;
 
 
-    select.appendChild(
-      opcion
-    );
-
-  });
-
-}
+option.textContent =
+esp;
 
 
-/* ======================================================
-   FILTROS
-====================================================== */
+select.appendChild(
+option
+);
 
-function aplicarFiltros(){
-
-  const busqueda =
-    normalizarTexto(
-      document
-      .getElementById(
-        "buscarDocumento"
-      )
-      .value
-    );
-
-
-  const especialidad =
-    document
-      .getElementById(
-        "filtroEspecialidad"
-      )
-      .value;
-
-
-  const estado =
-    document
-      .getElementById(
-        "filtroEstado"
-      )
-      .value;
-
-
-  const filtrados =
-    documentos.filter(doc => {
-
-      const texto =
-        normalizarTexto(
-
-          (
-            doc.codigo_pecom ||
-            ""
-          )
-          +
-          " "
-          +
-          (
-            doc.codigo_oldelval ||
-            ""
-          )
-          +
-          " "
-          +
-          (
-            doc.descripcion ||
-            ""
-          )
-
-        );
-
-
-      const cumpleBusqueda =
-        !busqueda ||
-        texto.includes(
-          busqueda
-        );
-
-
-      const espDoc =
-        doc.especialidad ||
-        "Sin especialidad";
-
-
-      const cumpleEspecialidad =
-        !especialidad ||
-        espDoc ===
-        especialidad;
-
-
-      const cumpleEstado =
-        !estado ||
-        doc.situacionCalculada ===
-        estado;
-
-
-      return (
-        cumpleBusqueda &&
-        cumpleEspecialidad &&
-        cumpleEstado
-      );
-
-    });
-
-
-  pintarTabla(
-    filtrados
-  );
+});
 
 }
 
 
-/* ======================================================
-   TABLA
-====================================================== */
+function filtrarTabla(){
+
+const buscar =
+
+normalizar(
+document
+.getElementById(
+"buscar"
+)
+.value
+);
+
+
+const esp =
+
+document
+.getElementById(
+"fEspecialidad"
+)
+.value;
+
+
+const situacion =
+
+document
+.getElementById(
+"fSituacion"
+)
+.value;
+
+
+const lista =
+
+documentos.filter(doc => {
+
+
+const texto =
+
+normalizar(
+
+(doc.codigo_oldelval || "")
+
++
+
+" "
+
++
+
+(doc.codigo_pecom || "")
+
++
+
+" "
+
++
+
+(doc.descripcion || "")
+
+);
+
+
+if(
+buscar &&
+!texto.includes(buscar)
+){
+
+return false;
+
+}
+
+
+const espDoc =
+doc.especialidad ||
+"Sin especialidad";
+
+
+if(
+esp &&
+espDoc !== esp
+){
+
+return false;
+
+}
+
+
+if(
+situacion === "LIBERADO" &&
+!doc._liberado
+){
+
+return false;
+
+}
+
+
+if(
+situacion === "PRESENTADO" &&
+!doc._presentado
+){
+
+return false;
+
+}
+
+
+if(
+situacion === "VENCIDO" &&
+!doc._vencido
+){
+
+return false;
+
+}
+
+
+if(
+situacion === "PENDIENTE" &&
+doc._presentado
+){
+
+return false;
+
+}
+
+
+if(
+situacion === "CLIENTE" &&
+!doc._cliente
+){
+
+return false;
+
+}
+
+
+return true;
+
+});
+
+
+pintarTabla(lista);
+
+}
+
+
+/* TABLA */
 
 function pintarTabla(lista){
 
-  setTexto(
-    "cantidadFiltrada",
+setTexto(
 
-    lista.length +
+"cantidadTabla",
 
-    (
-      lista.length === 1
-      ?
-      " documento"
-      :
-      " documentos"
-    )
+lista.length +
+" documentos"
 
-  );
+);
 
 
-  const tbody =
-    document.getElementById(
-      "tablaDocumentos"
-    );
+const tbody =
+document.getElementById(
+"tablaDocs"
+);
 
 
-  if(!lista.length){
+tbody.innerHTML =
 
-    tbody.innerHTML =
+lista
+.map(doc => `
 
-      `
-      <tr>
-        <td colspan="10">
-          No hay documentos que coincidan con los filtros.
-        </td>
-      </tr>
-      `;
+<tr>
 
-    return;
+<td>
+${escapar(
+doc.item || ""
+)}
+</td>
 
-  }
+<td>
+${escapar(
+doc.especialidad ||
+"-"
+)}
+</td>
 
+<td>
+<strong>
+${escapar(
+doc.codigo_oldelval ||
+"-"
+)}
+</strong>
+</td>
 
-  tbody.innerHTML =
-    lista
-    .map(
-      doc => {
+<td>
+${escapar(
+doc.descripcion ||
+""
+)}
+</td>
 
-        return `
+<td>
+${formatearFecha(
+doc.fecha_prevista_presentacion
+)}
+</td>
 
-        <tr>
+<td>
+${formatearFecha(
+doc.fecha_primera_presentacion
+)}
+</td>
 
-          <td>
-            ${escapar(
-              doc.item ?? ""
-            )}
-          </td>
+<td>
+${badgeDoc(doc)}
+</td>
 
-          <td>
-            ${escapar(
-              doc.especialidad ||
-              "-"
-            )}
-          </td>
+</tr>
 
-          <td>
-            <strong>
-            ${escapar(
-              doc.codigo_pecom ||
-              "-"
-            )}
-            </strong>
-          </td>
-
-          <td>
-            ${escapar(
-              doc.codigo_oldelval ||
-              "-"
-            )}
-          </td>
-
-          <td>
-            ${escapar(
-              doc.descripcion ||
-              ""
-            )}
-          </td>
-
-          <td>
-            ${formatearFecha(
-              doc.fecha_prevista_presentacion
-            )}
-          </td>
-
-          <td>
-            ${formatearFecha(
-              doc.inicio_actividad
-            )}
-          </td>
-
-          <td>
-            ${escapar(
-              doc.revision_actual ||
-              "-"
-            )}
-          </td>
-
-          <td>
-            ${escapar(
-              doc.estado_actual ||
-              "-"
-            )}
-          </td>
-
-          <td>
-            ${badgeSituacion(
-              doc.situacionCalculada
-            )}
-          </td>
-
-        </tr>
-
-        `;
-
-      }
-    )
-    .join("");
+`)
+.join("");
 
 }
 
 
-/* ======================================================
-   ULTIMA ACTUALIZACION
-====================================================== */
+/* BADGE */
 
-function calcularUltimaActualizacion(){
+function badgeDoc(doc){
 
-  const fechas =
-    documentos
+if(doc._liberado){
 
-      .map(
-        d =>
-        d.fecha_actualizacion
-      )
-
-      .filter(Boolean)
-
-      .map(
-        f =>
-        new Date(f)
-      )
-
-      .filter(
-        f =>
-        !isNaN(
-          f.getTime()
-        )
-      );
-
-
-  if(!fechas.length){
-
-    setTexto(
-      "fechaActualizacion",
-      "Sin actualizaciones registradas"
-    );
-
-    return;
-
-  }
-
-
-  const ultima =
-    new Date(
-      Math.max(
-        ...fechas.map(
-          f =>
-          f.getTime()
-        )
-      )
-    );
-
-
-  setTexto(
-    "fechaActualizacion",
-
-    ultima.toLocaleString(
-      "es-AR",
-      {
-        dateStyle:"short",
-        timeStyle:"short"
-      }
-    )
-
-  );
+return `
+<span class="badge lib">
+LIBERADO
+</span>
+`;
 
 }
 
 
-/* ======================================================
-   NAVEGACION
-====================================================== */
+if(doc._cliente){
+
+return `
+<span class="badge cliente">
+EN PODER CLIENTE
+</span>
+`;
+
+}
+
+
+if(doc._vencido){
+
+return `
+<span class="badge vencido">
+VENCIDO
+</span>
+`;
+
+}
+
+
+if(doc._presentado){
+
+return `
+<span class="badge presentado">
+PRESENTADO
+</span>
+`;
+
+}
+
+
+return `
+<span class="badge pendiente">
+PENDIENTE
+</span>
+`;
+
+}
+
+
+/* ÚLTIMA ACTUALIZACIÓN */
+
+function ultimaActualizacion(){
+
+const fechas =
+
+documentos
+
+.map(
+d =>
+d.fecha_actualizacion
+)
+
+.filter(Boolean)
+
+.map(
+d =>
+new Date(d)
+)
+
+.filter(
+d =>
+!isNaN(
+d.getTime()
+)
+);
+
+
+if(!fechas.length){
+
+setTexto(
+
+"fechaActualizacion",
+
+"Sin actualizaciones registradas"
+
+);
+
+return;
+
+}
+
+
+const max =
+
+new Date(
+
+Math.max(
+
+...fechas.map(
+d => d.getTime()
+)
+
+)
+
+);
+
+
+setTexto(
+
+"fechaActualizacion",
+
+max.toLocaleString(
+"es-AR"
+)
+
+);
+
+}
+
+
+/* MODAL */
+
+function mostrarModal(){
+
+document
+.getElementById(
+"modalFondo"
+)
+.classList
+.add(
+"visible"
+);
+
+}
+
+
+function cerrarModal(){
+
+document
+.getElementById(
+"modalFondo"
+)
+.classList
+.remove(
+"visible"
+);
+
+}
+
+
+function cerrarModalFondo(e){
+
+if(
+e.target.id ===
+"modalFondo"
+){
+
+cerrarModal();
+
+}
+
+}
+
+
+/* NAVEGACIÓN */
 
 function mostrarSeccion(
-  id,
-  boton
+id,
+btn
 ){
 
-  document
-    .querySelectorAll(
-      ".seccion"
-    )
-    .forEach(
-      s =>
-      s.classList.remove(
-        "activa"
-      )
-    );
+document
+
+.querySelectorAll(
+".seccion"
+)
+
+.forEach(
+x =>
+x.classList.remove(
+"activa"
+)
+);
 
 
-  document
-    .getElementById(id)
-    .classList
-    .add("activa");
+document
+.getElementById(id)
+.classList.add(
+"activa"
+);
 
 
-  document
-    .querySelectorAll(
-      ".menu button"
-    )
-    .forEach(
-      b =>
-      b.classList.remove(
-        "activo"
-      )
-    );
+document
+
+.querySelectorAll(
+".menu button"
+)
+
+.forEach(
+x =>
+x.classList.remove(
+"activo"
+)
+);
 
 
-  boton.classList.add(
-    "activo"
-  );
+btn.classList.add(
+"activo"
+);
 
 
-  window.scrollTo(
-    {
-      top:0,
-      behavior:"smooth"
-    }
-  );
+window.scrollTo(
+{
+top:0,
+behavior:"smooth"
+}
+);
 
 }
 
 
-/* ======================================================
-   BADGES
-====================================================== */
+/* FECHAS */
 
-function badgeSituacion(
-  estado
-){
+function hoyISO(){
 
-  if(
-    estado ===
-    "LIBERADO"
-  ){
-
-    return `
-      <span class="badge lib">
-        LIBERADO
-      </span>
-    `;
-
-  }
+const d =
+new Date();
 
 
-  if(
-    estado ===
-    "OBSERVADO"
-  ){
+return (
 
-    return `
-      <span class="badge obs">
-        OBSERVADO
-      </span>
-    `;
+d.getFullYear()
 
-  }
++
 
+"-"
 
-  if(
-    estado ===
-    "VENCIDO"
-  ){
++
 
-    return `
-      <span class="badge vencido">
-        VENCIDO
-      </span>
-    `;
+String(
+d.getMonth()+1
+).padStart(
+2,
+"0"
+)
 
-  }
++
 
+"-"
 
-  if(
-    estado ===
-    "PRESENTADO"
-  ){
++
 
-    return `
-      <span class="badge presentado">
-        PRESENTADO
-      </span>
-    `;
+String(
+d.getDate()
+).padStart(
+2,
+"0"
+)
 
-  }
-
-
-  return `
-    <span class="badge pendiente">
-      PENDIENTE
-    </span>
-  `;
+);
 
 }
 
 
-/* ======================================================
-   FECHAS
-====================================================== */
+function parseFecha(fecha){
 
-function fechaHoyISO(){
+if(!fecha){
 
-  const ahora =
-    new Date();
-
-
-  const anio =
-    ahora.getFullYear();
-
-
-  const mes =
-    String(
-      ahora.getMonth() + 1
-    )
-    .padStart(
-      2,
-      "0"
-    );
-
-
-  const dia =
-    String(
-      ahora.getDate()
-    )
-    .padStart(
-      2,
-      "0"
-    );
-
-
-  return (
-    anio +
-    "-" +
-    mes +
-    "-" +
-    dia
-  );
+return null;
 
 }
 
 
-function parseFechaISO(fecha){
-
-  if(!fecha){
-
-    return null;
-
-  }
+const p =
+String(fecha)
+.split("-");
 
 
-  const partes =
-    String(fecha)
-    .split("-");
+if(p.length !== 3){
+
+return null;
+
+}
 
 
-  if(
-    partes.length !== 3
-  ){
+return new Date(
 
-    return null;
+Number(p[0]),
 
-  }
+Number(p[1])-1,
 
+Number(p[2])
 
-  return new Date(
-
-    Number(partes[0]),
-
-    Number(partes[1]) - 1,
-
-    Number(partes[2])
-
-  );
+);
 
 }
 
 
 function formatearFecha(fecha){
 
-  const d =
-    parseFechaISO(
-      fecha
-    );
+const d =
+parseFecha(fecha);
 
 
-  if(!d){
+if(!d){
 
-    return "-";
-
-  }
-
-
-  return d.toLocaleDateString(
-    "es-AR"
-  );
+return "-";
 
 }
 
 
-function compararFechas(a,b){
-
-  const fa =
-    parseFechaISO(a);
-
-
-  const fb =
-    parseFechaISO(b);
-
-
-  if(!fa || !fb){
-
-    return 0;
-
-  }
-
-
-  return (
-    fa.getTime() -
-    fb.getTime()
-  );
+return d.toLocaleDateString(
+"es-AR"
+);
 
 }
 
 
-function diasEntre(
-  fecha1,
-  fecha2
-){
+function formatearFechaCorta(fecha){
 
-  const f1 =
-    parseFechaISO(
-      fecha1
-    );
+const d =
+parseFecha(fecha);
 
 
-  const f2 =
-    parseFechaISO(
-      fecha2
-    );
+if(!d){
 
-
-  if(!f1 || !f2){
-
-    return 0;
-
-  }
-
-
-  const diferencia =
-    f2.getTime() -
-    f1.getTime();
-
-
-  return Math.max(
-    0,
-    Math.round(
-      diferencia /
-      86400000
-    )
-  );
+return "";
 
 }
 
 
-function sumarDiasISO(
-  fecha,
-  dias
-){
+return d.toLocaleDateString(
 
-  const f =
-    parseFechaISO(
-      fecha
-    );
+"es-AR",
 
+{
+day:"2-digit",
+month:"2-digit",
+year:"2-digit"
+}
 
-  if(!f){
-
-    return fecha;
-
-  }
-
-
-  f.setDate(
-    f.getDate() +
-    dias
-  );
-
-
-  const anio =
-    f.getFullYear();
-
-
-  const mes =
-    String(
-      f.getMonth() + 1
-    )
-    .padStart(
-      2,
-      "0"
-    );
-
-
-  const dia =
-    String(
-      f.getDate()
-    )
-    .padStart(
-      2,
-      "0"
-    );
-
-
-  return (
-    anio +
-    "-" +
-    mes +
-    "-" +
-    dia
-  );
+);
 
 }
 
 
-/* ======================================================
-   UTILIDADES
-====================================================== */
+/* UTILIDADES */
+
+function normalizar(valor){
+
+return String(
+valor || ""
+)
+
+.toLowerCase()
+
+.normalize("NFD")
+
+.replace(
+/[\u0300-\u036f]/g,
+""
+)
+
+.trim();
+
+}
+
 
 function setTexto(
-  id,
-  valor
+id,
+valor
 ){
 
-  const elemento =
-    document.getElementById(
-      id
-    );
+const x =
+document.getElementById(id);
 
 
-  if(elemento){
+if(x){
 
-    elemento.textContent =
-      valor;
-
-  }
+x.textContent =
+valor;
 
 }
-
-
-function normalizarTexto(
-  valor
-){
-
-  return String(
-    valor || ""
-  )
-
-  .toLowerCase()
-
-  .normalize("NFD")
-
-  .replace(
-    /[\u0300-\u036f]/g,
-    ""
-  )
-
-  .trim();
 
 }
 
 
 function escapar(valor){
 
-  return String(
-    valor ?? ""
-  )
+return String(
+valor ?? ""
+)
 
-  .replace(
-    /&/g,
-    "&amp;"
-  )
+.replace(
+/&/g,
+"&amp;"
+)
 
-  .replace(
-    /</g,
-    "&lt;"
-  )
+.replace(
+/</g,
+"&lt;"
+)
 
-  .replace(
-    />/g,
-    "&gt;"
-  )
+.replace(
+/>/g,
+"&gt;"
+)
 
-  .replace(
-    /"/g,
-    "&quot;"
-  )
+.replace(
+/"/g,
+"&quot;"
+)
 
-  .replace(
-    /'/g,
-    "&#039;"
-  );
+.replace(
+/'/g,
+"&#039;"
+);
 
 }
 
 </script>
 
 </body>
+
 </html>
