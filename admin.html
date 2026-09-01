@@ -1,0 +1,3193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Administración | Calidad UAM</title>
+
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- LECTOR EXCEL -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<style>
+
+*{
+  box-sizing:border-box;
+}
+
+:root{
+  --azul:#0c356a;
+  --azul2:#174f8a;
+  --celeste:#60c5e8;
+  --verde:#179447;
+  --rojo:#d83c3c;
+  --naranja:#f28c28;
+  --violeta:#5145e5;
+  --gris:#687787;
+  --gris2:#eef2f5;
+  --fondo:#f4f7f9;
+  --blanco:#ffffff;
+}
+
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:var(--fondo);
+  color:#1d2a36;
+}
+
+header{
+  background:white;
+  border-bottom:1px solid #dde5ea;
+}
+
+.topbar{
+  max-width:1450px;
+  margin:auto;
+  min-height:78px;
+  padding:14px 26px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+}
+
+.marca{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.linea{
+  width:7px;
+  height:46px;
+  background:var(--celeste);
+  border-radius:10px;
+}
+
+.marca h1{
+  margin:0 0 4px;
+  color:var(--azul);
+  font-size:22px;
+}
+
+.marca p{
+  margin:0;
+  color:var(--gris);
+  font-size:13px;
+}
+
+.usuario{
+  font-size:13px;
+  color:var(--gris);
+  text-align:right;
+}
+
+.usuario strong{
+  color:var(--azul);
+}
+
+main{
+  max-width:1450px;
+  margin:auto;
+  padding:28px;
+}
+
+.card{
+  background:white;
+  border:1px solid #e2e8ed;
+  border-radius:15px;
+  padding:24px;
+  box-shadow:0 3px 12px rgba(15,50,80,.05);
+  margin-bottom:20px;
+}
+
+.login{
+  max-width:480px;
+  margin:60px auto;
+}
+
+.login h2{
+  color:var(--azul);
+  margin-top:0;
+}
+
+label{
+  display:block;
+  font-size:12px;
+  font-weight:bold;
+  color:var(--gris);
+  margin:17px 0 7px;
+}
+
+input[type="email"],
+input[type="password"]{
+  width:100%;
+  height:45px;
+  border:1px solid #ced7de;
+  border-radius:8px;
+  padding:0 12px;
+  font-size:14px;
+}
+
+button{
+  border:0;
+  border-radius:8px;
+  padding:12px 18px;
+  font-weight:bold;
+  cursor:pointer;
+  font-size:13px;
+}
+
+.btn-primary{
+  background:var(--azul);
+  color:white;
+}
+
+.btn-primary:hover{
+  background:var(--azul2);
+}
+
+.btn-verde{
+  background:var(--verde);
+  color:white;
+}
+
+.btn-rojo{
+  background:var(--rojo);
+  color:white;
+}
+
+.btn-gris{
+  background:#e9eef2;
+  color:#3b4b59;
+}
+
+.btn-login{
+  width:100%;
+  margin-top:22px;
+}
+
+.toolbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  margin-bottom:24px;
+}
+
+.toolbar h2{
+  margin:0;
+  color:var(--azul);
+}
+
+.modulos{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:14px;
+  margin-bottom:25px;
+}
+
+.modulo{
+  background:white;
+  border:1px solid #e0e7ec;
+  border-radius:12px;
+  padding:18px;
+  text-align:center;
+}
+
+.modulo.activo{
+  border:2px solid var(--celeste);
+}
+
+.modulo-icono{
+  font-size:27px;
+  margin-bottom:7px;
+}
+
+.modulo strong{
+  color:var(--azul);
+  font-size:13px;
+}
+
+.modulo small{
+  display:block;
+  margin-top:5px;
+  color:var(--gris);
+}
+
+.carga{
+  border:2px dashed #c9d6df;
+  background:#fafcfd;
+  border-radius:13px;
+  padding:30px;
+  text-align:center;
+}
+
+.carga h3{
+  color:var(--azul);
+  margin-top:0;
+}
+
+.file-input{
+  margin:15px 0;
+}
+
+.archivo-nombre{
+  color:var(--gris);
+  font-size:13px;
+  margin:10px;
+}
+
+.estado{
+  margin-top:15px;
+  border-radius:8px;
+  padding:12px;
+  display:none;
+}
+
+.estado.ok{
+  display:block;
+  background:#eaf8ef;
+  color:#15773a;
+}
+
+.estado.error{
+  display:block;
+  background:#fdecec;
+  color:#b72c2c;
+}
+
+.estado.info{
+  display:block;
+  background:#eaf6fd;
+  color:#155a88;
+}
+
+.kpis{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:14px;
+  margin:22px 0;
+}
+
+.kpi{
+  background:white;
+  border:1px solid #e1e8ed;
+  border-radius:12px;
+  padding:17px;
+  border-left:5px solid var(--celeste);
+}
+
+.kpi.verde{
+  border-left-color:var(--verde);
+}
+
+.kpi.rojo{
+  border-left-color:var(--rojo);
+}
+
+.kpi.naranja{
+  border-left-color:var(--naranja);
+}
+
+.kpi.violeta{
+  border-left-color:var(--violeta);
+}
+
+.kpi span{
+  font-size:11px;
+  text-transform:uppercase;
+  color:var(--gris);
+  font-weight:bold;
+}
+
+.kpi strong{
+  display:block;
+  margin-top:8px;
+  font-size:27px;
+  color:var(--azul);
+}
+
+.tabla-wrap{
+  overflow:auto;
+  max-height:520px;
+  border:1px solid #e2e7eb;
+  border-radius:10px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+
+thead{
+  position:sticky;
+  top:0;
+  z-index:5;
+}
+
+th{
+  background:var(--azul);
+  color:white;
+  padding:10px;
+  text-align:left;
+  white-space:nowrap;
+}
+
+td{
+  padding:9px 10px;
+  border-bottom:1px solid #e7ecef;
+  vertical-align:top;
+}
+
+tr:hover td{
+  background:#f7fbfd;
+}
+
+.badge{
+  display:inline-block;
+  padding:5px 8px;
+  border-radius:20px;
+  font-size:10px;
+  font-weight:bold;
+}
+
+.badge.exacto{
+  background:#eaf8ef;
+  color:#15773a;
+}
+
+.badge.normalizado{
+  background:#fff3e5;
+  color:#a75b00;
+}
+
+.badge.manual{
+  background:#eeeafd;
+  color:#4b38a6;
+}
+
+.badge.error{
+  background:#fdecec;
+  color:#b62d2d;
+}
+
+.select-doc{
+  width:280px;
+  max-width:100%;
+  padding:7px;
+}
+
+.acciones{
+  margin-top:20px;
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+
+.advertencia{
+  background:#fff7e8;
+  color:#865400;
+  border-left:4px solid var(--naranja);
+  padding:13px 15px;
+  border-radius:7px;
+  margin-bottom:18px;
+  font-size:13px;
+}
+
+.oculto{
+  display:none !important;
+}
+
+.loader{
+  display:inline-block;
+  width:17px;
+  height:17px;
+  border:3px solid rgba(255,255,255,.35);
+  border-top-color:white;
+  border-radius:50%;
+  animation:girar .8s linear infinite;
+  vertical-align:middle;
+  margin-right:7px;
+}
+
+@keyframes girar{
+  to{transform:rotate(360deg);}
+}
+
+@media(max-width:1050px){
+
+  .modulos{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .kpis{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:600px){
+
+  main{
+    padding:14px;
+  }
+
+  .modulos,
+  .kpis{
+    grid-template-columns:1fr;
+  }
+
+  .toolbar{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+<div class="topbar">
+
+  <div class="marca">
+
+    <div class="linea"></div>
+
+    <div>
+      <h1>DUPLICAR NORTE UAM</h1>
+      <p>Administración de Indicadores de Calidad</p>
+    </div>
+
+  </div>
+
+  <div id="usuarioHeader" class="usuario oculto">
+
+    Sesión iniciada como<br>
+
+    <strong id="emailHeader"></strong>
+
+  </div>
+
+</div>
+
+</header>
+
+
+<main>
+
+<!-- =========================================================
+LOGIN
+========================================================= -->
+
+<section id="loginBox" class="card login">
+
+  <h2>🔐 Administración</h2>
+
+  <p style="color:#687787;font-size:13px;line-height:1.5;">
+    Acceso exclusivo para usuarios autorizados a actualizar
+    información del Dashboard de Calidad.
+  </p>
+
+  <label>Email</label>
+
+  <input
+    id="email"
+    type="email"
+    autocomplete="username"
+    placeholder="usuario@empresa.com"
+  >
+
+  <label>Contraseña</label>
+
+  <input
+    id="password"
+    type="password"
+    autocomplete="current-password"
+    placeholder="Contraseña"
+  >
+
+  <button
+    id="btnLogin"
+    class="btn-primary btn-login"
+    onclick="iniciarSesion()"
+  >
+    INGRESAR
+  </button>
+
+  <div id="loginEstado" class="estado"></div>
+
+</section>
+
+
+<!-- =========================================================
+ADMIN
+========================================================= -->
+
+<section id="adminBox" class="oculto">
+
+  <div class="toolbar">
+
+    <div>
+
+      <h2>Actualización de información</h2>
+
+      <p style="color:#687787;font-size:13px;margin-bottom:0;">
+        Seleccioná el módulo que querés actualizar.
+      </p>
+
+    </div>
+
+    <button
+      class="btn-gris"
+      onclick="cerrarSesion()"
+    >
+      Cerrar sesión
+    </button>
+
+  </div>
+
+
+  <!-- MODULOS -->
+
+  <div class="modulos">
+
+    <div class="modulo activo">
+
+      <div class="modulo-icono">📄</div>
+
+      <strong>Documentación</strong>
+
+      <small>Disponible</small>
+
+    </div>
+
+    <div class="modulo">
+
+      <div class="modulo-icono">👁️</div>
+
+      <strong>Blister</strong>
+
+      <small>Próximamente</small>
+
+    </div>
+
+    <div class="modulo">
+
+      <div class="modulo-icono">⚠️</div>
+
+      <strong>Hallazgos</strong>
+
+      <small>Próximamente</small>
+
+    </div>
+
+    <div class="modulo">
+
+      <div class="modulo-icono">🎓</div>
+
+      <strong>Capacitaciones</strong>
+
+      <small>Próximamente</small>
+
+    </div>
+
+    <div class="modulo">
+
+      <div class="modulo-icono">🏗️</div>
+
+      <strong>Producción</strong>
+
+      <small>Próximamente</small>
+
+    </div>
+
+  </div>
+
+
+  <!-- CARGA -->
+
+  <div class="card">
+
+    <div class="carga">
+
+      <h3>📄 Actualizar Registro de Archivos</h3>
+
+      <p style="font-size:13px;color:#687787;">
+        Seleccioná el Excel exportado del registro documental.
+      </p>
+
+      <input
+        id="archivoExcel"
+        class="file-input"
+        type="file"
+        accept=".xlsx,.xls"
+        onchange="archivoSeleccionado()"
+      >
+
+      <div
+        id="nombreArchivo"
+        class="archivo-nombre"
+      >
+        Ningún archivo seleccionado
+      </div>
+
+      <button
+        id="btnAnalizar"
+        class="btn-primary"
+        onclick="analizarExcel()"
+      >
+        ANALIZAR EXCEL
+      </button>
+
+      <div
+        id="estadoCarga"
+        class="estado"
+      ></div>
+
+    </div>
+
+  </div>
+
+
+  <!-- RESULTADO -->
+
+  <div
+    id="resultadoAnalisis"
+    class="oculto"
+  >
+
+    <div class="kpis">
+
+      <div class="kpi">
+
+        <span>Filas Excel</span>
+
+        <strong id="kpiFilas">0</strong>
+
+      </div>
+
+      <div class="kpi verde">
+
+        <span>Vinculadas</span>
+
+        <strong id="kpiVinculados">0</strong>
+
+      </div>
+
+      <div class="kpi naranja">
+
+        <span>DQ / DO normalizados</span>
+
+        <strong id="kpiNormalizados">0</strong>
+
+      </div>
+
+      <div class="kpi rojo">
+
+        <span>Sin vincular</span>
+
+        <strong id="kpiSinVincular">0</strong>
+
+      </div>
+
+      <div class="kpi violeta">
+
+        <span>Documentos afectados</span>
+
+        <strong id="kpiDocumentos">0</strong>
+
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h3 style="color:#0c356a;margin-top:0;">
+        Vista previa del cruce
+      </h3>
+
+      <div class="advertencia">
+
+        El sistema todavía <strong>no modificó Supabase</strong>.
+
+        Revisá especialmente las filas amarillas o rojas.
+
+        Las diferencias tipo <strong>DQ-QA / DO-QA</strong>
+        se muestran como coincidencia normalizada.
+
+      </div>
+
+      <div class="tabla-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>Archivo / Código detectado</th>
+              <th>Descripción Excel</th>
+              <th>Tipo emisión</th>
+              <th>Fecha</th>
+              <th>Documento oficial</th>
+              <th>Coincidencia</th>
+            </tr>
+
+          </thead>
+
+          <tbody id="tablaPreview"></tbody>
+
+        </table>
+
+      </div>
+
+
+      <div class="acciones">
+
+        <button
+          class="btn-gris"
+          onclick="cancelarAnalisis()"
+        >
+          CANCELAR
+        </button>
+
+        <button
+          id="btnConfirmar"
+          class="btn-verde"
+          onclick="confirmarActualizacion()"
+        >
+          CONFIRMAR ACTUALIZACIÓN
+        </button>
+
+      </div>
+
+      <div
+        id="estadoConfirmacion"
+        class="estado"
+      ></div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ÚLTIMA CARGA -->
+
+  <div class="card">
+
+    <h3 style="color:#0c356a;margin-top:0;">
+      Última actualización documental
+    </h3>
+
+    <div id="ultimaCarga">
+
+      Consultando...
+
+    </div>
+
+  </div>
+
+</section>
+
+</main>
+
+
+<script>
+
+/* ============================================================
+SUPABASE
+============================================================ */
+
+const SUPABASE_URL =
+  "https://mzgbtejfgsrskiuymtwh.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_Wen9hxBnae8wRrEEaP5lOQ_aNl9OCGd";
+
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+/* ============================================================
+VARIABLES
+============================================================ */
+
+let usuarioActual = null;
+
+let maestro = [];
+
+let equivalencias = [];
+
+let filasExcel = [];
+
+let filasProcesadas = [];
+
+let archivoActual = null;
+
+
+/* ============================================================
+INICIO
+============================================================ */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  async () => {
+
+    const {
+      data: { session }
+    } =
+    await supabaseClient.auth.getSession();
+
+    if(session){
+
+      await validarUsuario(session.user);
+
+    }
+
+  }
+);
+
+
+/* ============================================================
+LOGIN
+============================================================ */
+
+async function iniciarSesion(){
+
+  const email =
+    document
+      .getElementById("email")
+      .value
+      .trim();
+
+  const password =
+    document
+      .getElementById("password")
+      .value;
+
+  if(!email || !password){
+
+    mostrarEstado(
+      "loginEstado",
+      "Completá email y contraseña.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  const boton =
+    document.getElementById("btnLogin");
+
+  boton.disabled = true;
+
+  boton.innerHTML =
+    '<span class="loader"></span>Ingresando...';
+
+
+  const {
+    data,
+    error
+  } =
+  await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+
+  boton.disabled = false;
+
+  boton.innerHTML = "INGRESAR";
+
+
+  if(error){
+
+    mostrarEstado(
+      "loginEstado",
+      "No se pudo iniciar sesión: " +
+      error.message,
+      "error"
+    );
+
+    return;
+  }
+
+
+  await validarUsuario(data.user);
+
+}
+
+
+/* ============================================================
+VALIDAR ADMIN
+============================================================ */
+
+async function validarUsuario(user){
+
+  const {
+    data,
+    error
+  } =
+  await supabaseClient
+
+    .from("usuarios_admin")
+
+    .select(
+      "email,puede_cargar,activo"
+    )
+
+    .eq(
+      "user_id",
+      user.id
+    )
+
+    .maybeSingle();
+
+
+  if(
+    error ||
+    !data ||
+    !data.activo ||
+    !data.puede_cargar
+  ){
+
+    await supabaseClient.auth.signOut();
+
+    mostrarEstado(
+      "loginEstado",
+      "Este usuario no tiene permiso para cargar información.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  usuarioActual = user;
+
+  document
+    .getElementById("loginBox")
+    .classList
+    .add("oculto");
+
+  document
+    .getElementById("adminBox")
+    .classList
+    .remove("oculto");
+
+  document
+    .getElementById("usuarioHeader")
+    .classList
+    .remove("oculto");
+
+  document
+    .getElementById("emailHeader")
+    .textContent =
+      user.email;
+
+
+  await cargarMaestro();
+
+  await cargarUltimaCarga();
+
+}
+
+
+/* ============================================================
+LOGOUT
+============================================================ */
+
+async function cerrarSesion(){
+
+  await supabaseClient.auth.signOut();
+
+  location.reload();
+
+}
+
+
+/* ============================================================
+CARGAR MAESTRO
+============================================================ */
+
+async function cargarMaestro(){
+
+  const {
+    data,
+    error
+  } =
+  await supabaseClient
+
+    .from("documentos_maestro")
+
+    .select(
+      "id,item,especialidad,codigo_pecom,codigo_oldelval,descripcion,fecha_prevista_presentacion,inicio_actividad"
+    )
+
+    .eq("activo",true)
+
+    .order("item");
+
+
+  if(error){
+
+    mostrarEstado(
+      "estadoCarga",
+      "No se pudo leer el Maestro Oficial: " +
+      error.message,
+      "error"
+    );
+
+    return;
+  }
+
+
+  maestro = data || [];
+
+
+  const {
+    data: eqData
+  } =
+  await supabaseClient
+
+    .from("documentos_equivalencias")
+
+    .select(
+      "documento_id,codigo_alternativo"
+    )
+
+    .eq("confirmado",true);
+
+
+  equivalencias =
+    eqData || [];
+
+}
+
+
+/* ============================================================
+ARCHIVO
+============================================================ */
+
+function archivoSeleccionado(){
+
+  const input =
+    document.getElementById(
+      "archivoExcel"
+    );
+
+  archivoActual =
+    input.files[0] || null;
+
+
+  document
+    .getElementById("nombreArchivo")
+    .textContent =
+      archivoActual
+        ? archivoActual.name
+        : "Ningún archivo seleccionado";
+
+
+  document
+    .getElementById("resultadoAnalisis")
+    .classList
+    .add("oculto");
+
+}
+
+
+/* ============================================================
+ANALIZAR EXCEL
+============================================================ */
+
+async function analizarExcel(){
+
+  if(!archivoActual){
+
+    mostrarEstado(
+      "estadoCarga",
+      "Seleccioná primero un archivo Excel.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  if(!maestro.length){
+
+    await cargarMaestro();
+  }
+
+
+  mostrarEstado(
+    "estadoCarga",
+    "Leyendo y analizando el archivo...",
+    "info"
+  );
+
+
+  try{
+
+    const buffer =
+      await archivoActual.arrayBuffer();
+
+    const workbook =
+      XLSX.read(
+        buffer,
+        {
+          type:"array",
+          cellDates:true
+        }
+      );
+
+
+    let nombreHoja =
+      workbook.SheetNames.find(
+        n =>
+        normalizarTexto(n) ===
+        "archivos"
+      );
+
+
+    if(!nombreHoja){
+
+      nombreHoja =
+        workbook.SheetNames[0];
+    }
+
+
+    const hoja =
+      workbook.Sheets[nombreHoja];
+
+
+    filasExcel =
+      XLSX.utils.sheet_to_json(
+        hoja,
+        {
+          defval:"",
+          raw:false
+        }
+      );
+
+
+    if(!filasExcel.length){
+
+      throw new Error(
+        "La hoja seleccionada no contiene registros."
+      );
+
+    }
+
+
+    filasProcesadas =
+      filasExcel
+        .map(
+          (fila,index) =>
+            procesarFila(
+              fila,
+              index
+            )
+        )
+        .filter(
+          x =>
+            x.nombre ||
+            x.descripcion ||
+            x.codigoDetectado
+        );
+
+
+    pintarResultado();
+
+
+    mostrarEstado(
+      "estadoCarga",
+      "Excel analizado correctamente. Revisá la vista previa antes de confirmar.",
+      "ok"
+    );
+
+  }
+  catch(error){
+
+    console.error(error);
+
+    mostrarEstado(
+      "estadoCarga",
+      "No se pudo leer el Excel: " +
+      error.message,
+      "error"
+    );
+
+  }
+
+}
+
+
+/* ============================================================
+PROCESAR FILA
+============================================================ */
+
+function procesarFila(fila,index){
+
+  const nombre =
+    obtenerCampo(
+      fila,
+      [
+        "Nombre",
+        "nombre"
+      ]
+    );
+
+
+  const descripcion =
+    obtenerCampo(
+      fila,
+      [
+        "Descripción",
+        "Descripcion",
+        "descripcion"
+      ]
+    );
+
+
+  const tipoEmision =
+    String(
+      obtenerCampo(
+        fila,
+        [
+          "Tipos de Emision",
+          "Tipos de Emisión",
+          "Tipo de Emision",
+          "Tipo de Emisión"
+        ]
+      ) || ""
+    )
+    .trim()
+    .toUpperCase();
+
+
+  const tipo =
+    obtenerCampo(
+      fila,
+      ["Tipo"]
+    );
+
+
+  const revision =
+    obtenerCampo(
+      fila,
+      [
+        "Revision",
+        "Revisión"
+      ]
+    );
+
+
+  const transmision =
+    obtenerCampo(
+      fila,
+      [
+        "Número de transmision",
+        "Número de transmisión",
+        "Numero de transmision"
+      ]
+    );
+
+
+  const fechaRaw =
+    obtenerCampo(
+      fila,
+      [
+        "Fecha de emisión",
+        "Fecha de emision"
+      ]
+    );
+
+
+  const ultimaActualizacion =
+    obtenerCampo(
+      fila,
+      [
+        "Última actualización",
+        "Ultima actualización",
+        "Ultima actualizacion"
+      ]
+    );
+
+
+  const actualizadoPor =
+    obtenerCampo(
+      fila,
+      [
+        "Actualizado por"
+      ]
+    );
+
+
+  const codigoDetectado =
+    extraerCodigo(
+      nombre
+    );
+
+
+  const match =
+    buscarDocumento(
+      codigoDetectado,
+      descripcion
+    );
+
+
+  return {
+
+    indice:index,
+
+    filaOriginal:fila,
+
+    nombre,
+
+    descripcion,
+
+    codigoDetectado,
+
+    tipoEmision,
+
+    tipo,
+
+    revision,
+
+    transmision,
+
+    fechaRaw,
+
+    fechaISO:
+      convertirFechaISO(
+        fechaRaw
+      ),
+
+    ultimaActualizacion,
+
+    actualizadoPor,
+
+    documentoId:
+      match
+        ? match.documento.id
+        : null,
+
+    documento:
+      match
+        ? match.documento
+        : null,
+
+    metodo:
+      match
+        ? match.metodo
+        : "SIN_VINCULAR"
+
+  };
+
+}
+
+
+/* ============================================================
+BUSCAR DOCUMENTO
+============================================================ */
+
+function buscarDocumento(
+  codigo,
+  descripcion
+){
+
+  if(codigo){
+
+    const exacto =
+      maestro.find(
+        d =>
+        normalizarCodigo(
+          d.codigo_oldelval
+        ) ===
+        normalizarCodigo(codigo)
+      );
+
+
+    if(exacto){
+
+      return {
+        documento:exacto,
+        metodo:"EXACTO"
+      };
+
+    }
+
+
+    const equivalente =
+      equivalencias.find(
+        e =>
+        normalizarCodigo(
+          e.codigo_alternativo
+        ) ===
+        normalizarCodigo(codigo)
+      );
+
+
+    if(equivalente){
+
+      const doc =
+        maestro.find(
+          d =>
+          d.id ===
+          equivalente.documento_id
+        );
+
+
+      if(doc){
+
+        return {
+          documento:doc,
+          metodo:"EQUIVALENCIA"
+        };
+
+      }
+
+    }
+
+
+    /*
+    ---------------------------------------
+    CASO DQ-QA / DO-QA
+    ---------------------------------------
+    */
+
+    const codigoFlexible =
+      normalizarDQDO(codigo);
+
+
+    const candidatos =
+      maestro.filter(
+        d =>
+        normalizarDQDO(
+          d.codigo_oldelval
+        ) ===
+        codigoFlexible
+      );
+
+
+    if(candidatos.length === 1){
+
+      return {
+        documento:candidatos[0],
+        metodo:"NORMALIZADO_DQ_DO"
+      };
+
+    }
+
+  }
+
+
+  /*
+  La descripción solamente se utiliza
+  como sugerencia si es muy parecida.
+  NO vincula automáticamente una
+  coincidencia dudosa.
+  */
+
+  const sugerido =
+    mejorCoincidenciaDescripcion(
+      descripcion
+    );
+
+
+  if(
+    sugerido &&
+    sugerido.score >= 0.92
+  ){
+
+    return {
+      documento:sugerido.documento,
+      metodo:"DESCRIPCION"
+    };
+
+  }
+
+
+  return null;
+
+}
+
+
+/* ============================================================
+NORMALIZAR CÓDIGOS
+============================================================ */
+
+function normalizarCodigo(valor){
+
+  return String(valor || "")
+
+    .toUpperCase()
+
+    .replace(/\s+/g,"")
+
+    .replace(/_/g,"-")
+
+    .trim();
+
+}
+
+
+function normalizarDQDO(valor){
+
+  return normalizarCodigo(valor)
+
+    .replace(
+      /-(DQ|DO)-QA-/,
+      "-XX-QA-"
+    );
+
+}
+
+
+/* ============================================================
+EXTRAER CÓDIGO DESDE NOMBRE
+============================================================ */
+
+function extraerCodigo(nombre){
+
+  const texto =
+    String(nombre || "")
+      .toUpperCase();
+
+
+  const patron =
+    /ODV-ALVS-25033-[A-Z]{2}-[A-Z]{2}-\d{3}/;
+
+
+  const encontrado =
+    texto.match(patron);
+
+
+  return encontrado
+    ? encontrado[0]
+    : "";
+
+}
+
+
+/* ============================================================
+DESCRIPCIÓN SIMILAR
+============================================================ */
+
+function mejorCoincidenciaDescripcion(
+  descripcion
+){
+
+  const objetivo =
+    limpiarDescripcion(
+      descripcion
+    );
+
+
+  if(!objetivo){
+
+    return null;
+  }
+
+
+  let mejor = null;
+
+
+  maestro.forEach(doc => {
+
+    const candidato =
+      limpiarDescripcion(
+        doc.descripcion
+      );
+
+
+    const score =
+      similitud(
+        objetivo,
+        candidato
+      );
+
+
+    if(
+      !mejor ||
+      score > mejor.score
+    ){
+
+      mejor = {
+        documento:doc,
+        score
+      };
+
+    }
+
+  });
+
+
+  return mejor;
+
+}
+
+
+function limpiarDescripcion(texto){
+
+  return normalizarTexto(texto)
+
+    .replace(
+      /[^a-z0-9 ]/g,
+      " "
+    )
+
+    .replace(
+      /\s+/g,
+      " "
+    )
+
+    .trim();
+
+}
+
+
+function similitud(a,b){
+
+  if(!a || !b){
+    return 0;
+  }
+
+
+  const palabrasA =
+    new Set(
+      a.split(" ")
+      .filter(x => x.length > 2)
+    );
+
+
+  const palabrasB =
+    new Set(
+      b.split(" ")
+      .filter(x => x.length > 2)
+    );
+
+
+  if(
+    !palabrasA.size ||
+    !palabrasB.size
+  ){
+    return 0;
+  }
+
+
+  let iguales = 0;
+
+
+  palabrasA.forEach(p => {
+
+    if(
+      palabrasB.has(p)
+    ){
+      iguales++;
+    }
+
+  });
+
+
+  return (
+    2 * iguales
+  ) /
+  (
+    palabrasA.size +
+    palabrasB.size
+  );
+
+}
+
+
+/* ============================================================
+PINTAR PREVIEW
+============================================================ */
+
+function pintarResultado(){
+
+  const tbody =
+    document.getElementById(
+      "tablaPreview"
+    );
+
+
+  tbody.innerHTML = "";
+
+
+  let vinculados = 0;
+
+  let normalizados = 0;
+
+  let sinVincular = 0;
+
+  const docs =
+    new Set();
+
+
+  filasProcesadas.forEach(
+    (fila,index) => {
+
+      if(fila.documentoId){
+
+        vinculados++;
+
+        docs.add(
+          fila.documentoId
+        );
+
+      }
+      else{
+
+        sinVincular++;
+
+      }
+
+
+      if(
+        fila.metodo ===
+        "NORMALIZADO_DQ_DO"
+      ){
+
+        normalizados++;
+
+      }
+
+
+      const tr =
+        document.createElement("tr");
+
+
+      const documentoTexto =
+        fila.documento
+        ?
+        `
+          <strong>
+          ${escapar(
+            fila.documento.codigo_oldelval
+          )}
+          </strong>
+          <br>
+          ${escapar(
+            fila.documento.descripcion
+          )}
+        `
+        :
+        crearSelectorManual(
+          index
+        );
+
+
+      tr.innerHTML = `
+
+        <td>
+
+          <strong>
+          ${escapar(
+            fila.codigoDetectado ||
+            fila.nombre
+          )}
+          </strong>
+
+          <br>
+
+          <span style="color:#687787">
+          ${escapar(fila.nombre)}
+          </span>
+
+        </td>
+
+        <td>
+          ${escapar(
+            fila.descripcion
+          )}
+        </td>
+
+        <td>
+          ${escapar(
+            fila.tipoEmision
+          )}
+        </td>
+
+        <td>
+          ${escapar(
+            fila.fechaRaw
+          )}
+        </td>
+
+        <td>
+          ${documentoTexto}
+        </td>
+
+        <td>
+          ${badgeMetodo(
+            fila.metodo
+          )}
+        </td>
+
+      `;
+
+
+      tbody.appendChild(tr);
+
+    });
+
+
+  document
+    .getElementById("kpiFilas")
+    .textContent =
+      filasProcesadas.length;
+
+
+  document
+    .getElementById("kpiVinculados")
+    .textContent =
+      vinculados;
+
+
+  document
+    .getElementById("kpiNormalizados")
+    .textContent =
+      normalizados;
+
+
+  document
+    .getElementById("kpiSinVincular")
+    .textContent =
+      sinVincular;
+
+
+  document
+    .getElementById("kpiDocumentos")
+    .textContent =
+      docs.size;
+
+
+  document
+    .getElementById(
+      "resultadoAnalisis"
+    )
+    .classList
+    .remove("oculto");
+
+}
+
+
+/* ============================================================
+SELECT MANUAL
+============================================================ */
+
+function crearSelectorManual(index){
+
+  let html = `
+
+  <select
+    class="select-doc"
+    onchange="
+      vincularManual(
+        ${index},
+        this.value
+      )
+    "
+  >
+
+    <option value="">
+      -- Seleccionar documento --
+    </option>
+
+  `;
+
+
+  maestro.forEach(doc => {
+
+    html += `
+
+      <option value="${doc.id}">
+
+        ${escapar(
+          doc.codigo_oldelval
+        )}
+
+        -
+
+        ${escapar(
+          doc.descripcion
+        )}
+
+      </option>
+
+    `;
+
+  });
+
+
+  html += "</select>";
+
+
+  return html;
+
+}
+
+
+function vincularManual(
+  indiceFila,
+  documentoId
+){
+
+  const fila =
+    filasProcesadas[
+      indiceFila
+    ];
+
+
+  if(!fila){
+    return;
+  }
+
+
+  if(!documentoId){
+
+    fila.documentoId = null;
+
+    fila.documento = null;
+
+    fila.metodo =
+      "SIN_VINCULAR";
+
+  }
+  else{
+
+    const doc =
+      maestro.find(
+        d =>
+        String(d.id) ===
+        String(documentoId)
+      );
+
+
+    fila.documentoId =
+      doc.id;
+
+    fila.documento =
+      doc;
+
+    fila.metodo =
+      "MANUAL";
+
+  }
+
+
+  pintarResultado();
+
+}
+
+
+/* ============================================================
+BADGE
+============================================================ */
+
+function badgeMetodo(metodo){
+
+  if(metodo === "EXACTO"){
+
+    return `
+      <span class="badge exacto">
+      EXACTO
+      </span>
+    `;
+
+  }
+
+
+  if(metodo === "EQUIVALENCIA"){
+
+    return `
+      <span class="badge exacto">
+      EQUIVALENCIA
+      </span>
+    `;
+
+  }
+
+
+  if(
+    metodo ===
+    "NORMALIZADO_DQ_DO"
+  ){
+
+    return `
+      <span class="badge normalizado">
+      DQ / DO
+      </span>
+    `;
+
+  }
+
+
+  if(
+    metodo ===
+    "DESCRIPCION"
+  ){
+
+    return `
+      <span class="badge normalizado">
+      DESCRIPCIÓN
+      </span>
+    `;
+
+  }
+
+
+  if(metodo === "MANUAL"){
+
+    return `
+      <span class="badge manual">
+      MANUAL
+      </span>
+    `;
+
+  }
+
+
+  return `
+    <span class="badge error">
+    SIN VINCULAR
+    </span>
+  `;
+
+}
+
+
+/* ============================================================
+CONFIRMAR ACTUALIZACIÓN
+============================================================ */
+
+async function confirmarActualizacion(){
+
+  if(!usuarioActual){
+
+    return;
+  }
+
+
+  const sinVincular =
+    filasProcesadas.filter(
+      f =>
+      !f.documentoId
+    );
+
+
+  if(sinVincular.length){
+
+    const seguir =
+      confirm(
+
+        "Hay " +
+
+        sinVincular.length +
+
+        " filas sin vincular.\n\n" +
+
+        "Esas filas se guardarán para revisión pero NO modificarán el estado de ningún documento.\n\n" +
+
+        "¿Querés continuar?"
+
+      );
+
+
+    if(!seguir){
+
+      return;
+
+    }
+
+  }
+
+
+  const boton =
+    document.getElementById(
+      "btnConfirmar"
+    );
+
+
+  boton.disabled = true;
+
+  boton.innerHTML =
+    '<span class="loader"></span>Actualizando...';
+
+
+  mostrarEstado(
+    "estadoConfirmacion",
+    "Procesando actualización...",
+    "info"
+  );
+
+
+  try{
+
+    /*
+    ========================================
+    CREAR REGISTRO DE CARGA
+    ========================================
+    */
+
+    const {
+      data:carga,
+      error:errorCarga
+    } =
+    await supabaseClient
+
+      .from("cargas_excel")
+
+      .insert({
+
+        tipo_archivo:
+          "DOCUMENTACION_REGISTRO",
+
+        nombre_archivo:
+          archivoActual.name,
+
+        usuario:
+          usuarioActual.email,
+
+        cantidad_registros:
+          filasProcesadas.length,
+
+        registros_sin_vincular:
+          sinVincular.length,
+
+        estado:
+          "PROCESANDO"
+
+      })
+
+      .select()
+
+      .single();
+
+
+    if(errorCarga){
+
+      throw errorCarga;
+
+    }
+
+
+    /*
+    ========================================
+    GUARDAR REGISTROS DEL EXCEL
+    ========================================
+    */
+
+    const registros =
+      filasProcesadas.map(
+        fila => ({
+
+          carga_id:
+            carga.id,
+
+          documento_id:
+            fila.documentoId,
+
+          codigo_detectado:
+            fila.codigoDetectado,
+
+          nombre_archivo:
+            fila.nombre,
+
+          descripcion_detectada:
+            fila.descripcion,
+
+          revision:
+            String(
+              fila.revision || ""
+            ),
+
+          tipo_emision:
+            fila.tipoEmision,
+
+          numero_transmision:
+            fila.transmision,
+
+          fecha_emision:
+            fila.fechaISO,
+
+          actualizado_por:
+            fila.actualizadoPor,
+
+          vinculado:
+            !!fila.documentoId,
+
+          metodo_vinculacion:
+            fila.metodo
+
+        })
+      );
+
+
+    /*
+    Insertar por bloques.
+    */
+
+    const TAMANO_BLOQUE = 100;
+
+
+    for(
+      let i=0;
+      i<registros.length;
+      i+=TAMANO_BLOQUE
+    ){
+
+      const bloque =
+        registros.slice(
+          i,
+          i+TAMANO_BLOQUE
+        );
+
+
+      const {
+        error
+      } =
+      await supabaseClient
+
+        .from(
+          "documentos_registro"
+        )
+
+        .insert(bloque);
+
+
+      if(error){
+
+        throw error;
+
+      }
+
+    }
+
+
+    /*
+    ========================================
+    ACTUALIZAR ESTADO ACTUAL
+    ========================================
+    */
+
+    const agrupados =
+      agruparPorDocumento(
+        filasProcesadas
+      );
+
+
+    const estados = [];
+
+
+    Object.values(
+      agrupados
+    )
+    .forEach(grupo => {
+
+      const estado =
+        calcularEstadoDocumento(
+          grupo
+        );
+
+
+      if(estado){
+
+        estados.push(estado);
+
+      }
+
+    });
+
+
+    if(estados.length){
+
+      const {
+        error:errorEstados
+      } =
+      await supabaseClient
+
+        .from(
+          "documentos_estado_actual"
+        )
+
+        .upsert(
+          estados,
+          {
+            onConflict:
+              "documento_id"
+          }
+        );
+
+
+      if(errorEstados){
+
+        throw errorEstados;
+
+      }
+
+    }
+
+
+    /*
+    ========================================
+    GUARDAR EQUIVALENCIAS CONFIRMADAS
+    ========================================
+    */
+
+    const equivalenciasNuevas =
+      filasProcesadas
+
+        .filter(
+          f =>
+          f.documentoId &&
+          f.codigoDetectado &&
+          (
+            f.metodo ===
+            "MANUAL" ||
+            f.metodo ===
+            "NORMALIZADO_DQ_DO"
+          )
+        )
+
+        .map(
+          f => ({
+
+            documento_id:
+              f.documentoId,
+
+            codigo_alternativo:
+              f.codigoDetectado,
+
+            descripcion_alternativa:
+              f.descripcion,
+
+            confirmado:true,
+
+            usuario:
+              usuarioActual.email
+
+          })
+        );
+
+
+    const unicas =
+      [];
+
+    const usados =
+      new Set();
+
+
+    equivalenciasNuevas
+      .forEach(e => {
+
+        const key =
+          normalizarCodigo(
+            e.codigo_alternativo
+          );
+
+
+        if(
+          key &&
+          !usados.has(key)
+        ){
+
+          usados.add(key);
+
+          unicas.push(e);
+
+        }
+
+      });
+
+
+    if(unicas.length){
+
+      const {
+        error:errorEq
+      } =
+      await supabaseClient
+
+        .from(
+          "documentos_equivalencias"
+        )
+
+        .upsert(
+          unicas,
+          {
+            onConflict:
+              "codigo_alternativo"
+          }
+        );
+
+
+      if(errorEq){
+
+        throw errorEq;
+
+      }
+
+    }
+
+
+    /*
+    ========================================
+    FINALIZAR CARGA
+    ========================================
+    */
+
+    const docsAfectados =
+      Object.keys(
+        agrupados
+      ).length;
+
+
+    const {
+      error:errorFinal
+    } =
+    await supabaseClient
+
+      .from("cargas_excel")
+
+      .update({
+
+        estado:
+          "PROCESADO",
+
+        registros_actualizados:
+          docsAfectados,
+
+        registros_sin_vincular:
+          sinVincular.length,
+
+        observaciones:
+          "Actualización realizada desde admin.html"
+
+      })
+
+      .eq(
+        "id",
+        carga.id
+      );
+
+
+    if(errorFinal){
+
+      throw errorFinal;
+
+    }
+
+
+    mostrarEstado(
+      "estadoConfirmacion",
+
+      "✓ Actualización completada. " +
+
+      docsAfectados +
+
+      " documentos actualizaron su estado.",
+
+      "ok"
+    );
+
+
+    boton.innerHTML =
+      "ACTUALIZACIÓN COMPLETADA";
+
+
+    await cargarUltimaCarga();
+
+    await cargarMaestro();
+
+  }
+  catch(error){
+
+    console.error(error);
+
+    mostrarEstado(
+      "estadoConfirmacion",
+      "Error durante la actualización: " +
+      error.message,
+      "error"
+    );
+
+
+    boton.disabled = false;
+
+    boton.innerHTML =
+      "CONFIRMAR ACTUALIZACIÓN";
+
+  }
+
+}
+
+
+/* ============================================================
+AGRUPAR POR DOCUMENTO
+============================================================ */
+
+function agruparPorDocumento(
+  filas
+){
+
+  const resultado = {};
+
+
+  filas.forEach(fila => {
+
+    if(!fila.documentoId){
+
+      return;
+
+    }
+
+
+    if(
+      !resultado[
+        fila.documentoId
+      ]
+    ){
+
+      resultado[
+        fila.documentoId
+      ] = [];
+
+    }
+
+
+    resultado[
+      fila.documentoId
+    ].push(fila);
+
+  });
+
+
+  return resultado;
+
+}
+
+
+/* ============================================================
+CALCULAR ESTADO ACTUAL
+============================================================ */
+
+function calcularEstadoDocumento(
+  filas
+){
+
+  if(!filas.length){
+
+    return null;
+
+  }
+
+
+  const filasOrdenadas =
+    [...filas]
+    .sort(
+      (a,b) => {
+
+        const fechaA =
+          a.fechaISO
+          ?
+          new Date(a.fechaISO)
+          :
+          new Date(0);
+
+
+        const fechaB =
+          b.fechaISO
+          ?
+          new Date(b.fechaISO)
+          :
+          new Date(0);
+
+
+        return fechaA - fechaB;
+
+      }
+    );
+
+
+  const estadosRespuesta =
+    [
+      "LIB",
+      "APR",
+      "APC",
+      "OBS",
+      "REC"
+    ];
+
+
+  const respuestas =
+    filasOrdenadas.filter(
+      f =>
+      estadosRespuesta.includes(
+        f.tipoEmision
+      )
+    );
+
+
+  /*
+  Si existe devolución del cliente,
+  usamos la última devolución.
+
+  Si todavía no existe devolución,
+  usamos la última emisión.
+  */
+
+  const ultima =
+    respuestas.length
+    ?
+    respuestas[
+      respuestas.length - 1
+    ]
+    :
+    filasOrdenadas[
+      filasOrdenadas.length - 1
+    ];
+
+
+  /*
+  Si encontramos el documento en el
+  registro, consideramos que fue
+  presentado al menos una vez.
+  */
+
+  const presentado =
+    filasOrdenadas.length > 0;
+
+
+  const estadoActual =
+    ultima.tipoEmision ||
+    (
+      presentado
+      ?
+      "PRESENTADO"
+      :
+      ""
+    );
+
+
+  return {
+
+    documento_id:
+      ultima.documentoId,
+
+    revision_actual:
+      String(
+        ultima.revision || ""
+      ),
+
+    estado_actual:
+      estadoActual,
+
+    fecha_ultima_emision:
+      ultima.fechaISO,
+
+    numero_transmision:
+      ultima.transmision,
+
+    presentado:
+      presentado,
+
+    liberado:
+      estadoActual === "LIB",
+
+    observado:
+      estadoActual === "OBS",
+
+    fecha_actualizacion:
+      new Date()
+        .toISOString()
+
+  };
+
+}
+
+
+/* ============================================================
+ÚLTIMA CARGA
+============================================================ */
+
+async function cargarUltimaCarga(){
+
+  const contenedor =
+    document.getElementById(
+      "ultimaCarga"
+    );
+
+
+  const {
+    data,
+    error
+  } =
+  await supabaseClient
+
+    .from("cargas_excel")
+
+    .select("*")
+
+    .eq(
+      "tipo_archivo",
+      "DOCUMENTACION_REGISTRO"
+    )
+
+    .order(
+      "fecha_carga",
+      {
+        ascending:false
+      }
+    )
+
+    .limit(1);
+
+
+  if(
+    error ||
+    !data ||
+    !data.length
+  ){
+
+    contenedor.innerHTML =
+      `
+        <span style="color:#687787">
+        Todavía no hay cargas registradas.
+        </span>
+      `;
+
+    return;
+
+  }
+
+
+  const carga =
+    data[0];
+
+
+  contenedor.innerHTML = `
+
+    <div
+      style="
+        display:grid;
+        grid-template-columns:
+        repeat(auto-fit,minmax(180px,1fr));
+        gap:15px;
+      "
+    >
+
+      <div>
+
+        <small style="color:#687787">
+        Fecha
+        </small>
+
+        <br>
+
+        <strong>
+        ${formatearFechaHora(
+          carga.fecha_carga
+        )}
+        </strong>
+
+      </div>
+
+      <div>
+
+        <small style="color:#687787">
+        Archivo
+        </small>
+
+        <br>
+
+        <strong>
+        ${escapar(
+          carga.nombre_archivo
+        )}
+        </strong>
+
+      </div>
+
+      <div>
+
+        <small style="color:#687787">
+        Usuario
+        </small>
+
+        <br>
+
+        <strong>
+        ${escapar(
+          carga.usuario || "-"
+        )}
+        </strong>
+
+      </div>
+
+      <div>
+
+        <small style="color:#687787">
+        Registros
+        </small>
+
+        <br>
+
+        <strong>
+        ${carga.cantidad_registros || 0}
+        </strong>
+
+      </div>
+
+      <div>
+
+        <small style="color:#687787">
+        Sin vincular
+        </small>
+
+        <br>
+
+        <strong>
+        ${carga.registros_sin_vincular || 0}
+        </strong>
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+/* ============================================================
+FECHAS
+============================================================ */
+
+function convertirFechaISO(valor){
+
+  if(!valor){
+
+    return null;
+
+  }
+
+
+  if(valor instanceof Date){
+
+    if(
+      !isNaN(
+        valor.getTime()
+      )
+    ){
+
+      return valor
+        .toISOString()
+        .slice(0,10);
+
+    }
+
+  }
+
+
+  const texto =
+    String(valor)
+      .trim()
+      .toLowerCase();
+
+
+  /*
+  Formato:
+  16 de jun. de 2026
+  */
+
+  const meses = {
+
+    ene:1,
+    enero:1,
+
+    feb:2,
+    febrero:2,
+
+    mar:3,
+    marzo:3,
+
+    abr:4,
+    abril:4,
+
+    may:5,
+    mayo:5,
+
+    jun:6,
+    junio:6,
+
+    jul:7,
+    julio:7,
+
+    ago:8,
+    agosto:8,
+
+    sep:9,
+    sept:9,
+    septiembre:9,
+
+    oct:10,
+    octubre:10,
+
+    nov:11,
+    noviembre:11,
+
+    dic:12,
+    diciembre:12
+
+  };
+
+
+  const limpio =
+    texto
+      .replace(/\./g,"")
+      .replace(
+        /\s+\d{1,2}:\d{2}.*$/,
+        ""
+      )
+      .trim();
+
+
+  const match =
+    limpio.match(
+      /(\d{1,2})\s+de\s+([a-záéíóú]+)\s+de\s+(\d{4})/
+    );
+
+
+  if(match){
+
+    const dia =
+      Number(match[1]);
+
+    const mesTexto =
+      quitarAcentos(
+        match[2]
+      );
+
+    const mes =
+      meses[mesTexto];
+
+
+    const anio =
+      Number(match[3]);
+
+
+    if(mes){
+
+      return (
+        anio +
+        "-" +
+        String(mes)
+          .padStart(2,"0") +
+        "-" +
+        String(dia)
+          .padStart(2,"0")
+      );
+
+    }
+
+  }
+
+
+  /*
+  dd/mm/yyyy
+  */
+
+  const match2 =
+    limpio.match(
+      /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/
+    );
+
+
+  if(match2){
+
+    return (
+      match2[3] +
+      "-" +
+      match2[2]
+        .padStart(2,"0") +
+      "-" +
+      match2[1]
+        .padStart(2,"0")
+    );
+
+  }
+
+
+  return null;
+
+}
+
+
+/* ============================================================
+UTILIDADES
+============================================================ */
+
+function obtenerCampo(
+  objeto,
+  nombres
+){
+
+  const keys =
+    Object.keys(objeto);
+
+
+  for(
+    const nombre of nombres
+  ){
+
+    const buscado =
+      normalizarTexto(nombre);
+
+
+    const encontrado =
+      keys.find(
+        key =>
+        normalizarTexto(key) ===
+        buscado
+      );
+
+
+    if(encontrado){
+
+      return objeto[
+        encontrado
+      ];
+
+    }
+
+  }
+
+
+  return "";
+
+}
+
+
+function normalizarTexto(valor){
+
+  return quitarAcentos(
+    String(valor || "")
+      .toLowerCase()
+      .trim()
+  );
+
+}
+
+
+function quitarAcentos(texto){
+
+  return String(texto || "")
+
+    .normalize("NFD")
+
+    .replace(
+      /[\u0300-\u036f]/g,
+      ""
+    );
+
+}
+
+
+function escapar(valor){
+
+  return String(valor ?? "")
+
+    .replace(/&/g,"&amp;")
+
+    .replace(/</g,"&lt;")
+
+    .replace(/>/g,"&gt;")
+
+    .replace(/"/g,"&quot;")
+
+    .replace(/'/g,"&#039;");
+
+}
+
+
+function formatearFechaHora(valor){
+
+  if(!valor){
+
+    return "-";
+
+  }
+
+
+  return new Date(valor)
+
+    .toLocaleString(
+      "es-AR"
+    );
+
+}
+
+
+function mostrarEstado(
+  id,
+  texto,
+  tipo
+){
+
+  const el =
+    document.getElementById(id);
+
+
+  el.className =
+    "estado " + tipo;
+
+
+  el.textContent =
+    texto;
+
+}
+
+
+function cancelarAnalisis(){
+
+  filasExcel = [];
+
+  filasProcesadas = [];
+
+
+  document
+    .getElementById(
+      "resultadoAnalisis"
+    )
+    .classList
+    .add("oculto");
+
+
+  mostrarEstado(
+    "estadoCarga",
+    "Análisis cancelado. Podés seleccionar otro archivo.",
+    "info"
+  );
+
+}
+
+</script>
+
+</body>
+</html>
