@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blister | Administración Calidad UAM</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<style>
+*{box-sizing:border-box}
+:root{
+  --azul:#0c356a;
+  --celeste:#60c5e8;
+  --verde:#179447;
+  --verdeClaro:#eaf8ef;
+  --rojo:#d83c3c;
+  --rojoClaro:#fdecec;
+  --naranja:#f28c28;
+  --naranjaClaro:#fff3e5;
+  --violeta:#5145e5;
+  --gris:#687787;
+  --fondo:#f4f7f9;
+}
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:var(--fondo);
+  color:#1d2a36;
+}
+main{
+  max-width:1500px;
+  margin:auto;
+  padding:24px;
+}
+.card{
+  background:white;
+  border:1px solid #e1e8ed;
+  border-radius:15px;
+  padding:24px;
+  box-shadow:0 3px 12px rgba(20,50,80,.05);
+  margin-bottom:20px;
+}
+.carga{
+  border:2px dashed #c9d6df;
+  background:#fafcfd;
+  border-radius:13px;
+  padding:30px;
+  text-align:center;
+}
+.carga h2{
+  margin-top:0;
+  color:var(--azul);
+}
+.carga p{
+  font-size:12px;
+  color:var(--gris);
+  line-height:1.5;
+}
+button{
+  border:0;
+  border-radius:8px;
+  padding:12px 18px;
+  font-weight:bold;
+  cursor:pointer;
+}
+.btnPrimario{background:var(--azul);color:white}
+.btnVerde{background:var(--verde);color:white}
+.btnGris{background:#e8edf1;color:#40505d}
+.estado{
+  display:none;
+  margin-top:15px;
+  padding:12px;
+  border-radius:8px;
+  font-size:12px;
+}
+.estado.ok{display:block;background:var(--verdeClaro);color:var(--verde)}
+.estado.error{display:block;background:var(--rojoClaro);color:var(--rojo)}
+.estado.info{display:block;background:#eaf6fd;color:#155a88}
+.oculto{display:none!important}
+.kpis{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:14px;
+  margin:22px 0;
+}
+.kpi{
+  background:white;
+  border:1px solid #e1e8ed;
+  border-left:5px solid var(--celeste);
+  border-radius:12px;
+  padding:17px;
+}
+.kpi.verde{border-left-color:var(--verde)}
+.kpi.rojo{border-left-color:var(--rojo)}
+.kpi.naranja{border-left-color:var(--naranja)}
+.kpi.violeta{border-left-color:var(--violeta)}
+.kpi span{
+  font-size:10px;
+  text-transform:uppercase;
+  font-weight:bold;
+  color:var(--gris);
+}
+.kpi strong{
+  display:block;
+  font-size:28px;
+  color:var(--azul);
+  margin-top:8px;
+}
+.tablaWrap{
+  overflow:auto;
+  max-height:650px;
+  border:1px solid #e1e8ed;
+  border-radius:10px;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:11px;
+}
+thead{position:sticky;top:0;z-index:4}
+th{
+  background:var(--azul);
+  color:white;
+  padding:10px;
+  text-align:left;
+  white-space:nowrap;
+}
+td{
+  padding:9px 10px;
+  border-bottom:1px solid #e5eaee;
+  vertical-align:top;
+}
+tr:hover td{background:#f8fbfd}
+.badge{
+  font-size:9px;
+  font-weight:bold;
+  padding:5px 8px;
+  border-radius:15px;
+  display:inline-block;
+}
+.badge.ok{background:var(--verdeClaro);color:var(--verde)}
+.badge.error{background:var(--rojoClaro);color:var(--rojo)}
+.badge.alerta{background:var(--naranjaClaro);color:#a25a00}
+.badge.info{background:#eaf6fd;color:#155a88}
+.acciones{
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+  margin-top:18px;
+  flex-wrap:wrap;
+}
+.infoArchivo{
+  margin:12px;
+  font-size:12px;
+  color:var(--gris);
+}
+.advertencia{
+  background:var(--naranjaClaro);
+  border-left:4px solid var(--naranja);
+  color:#795000;
+  padding:12px;
+  border-radius:7px;
+  margin-bottom:15px;
+  font-size:12px;
+}
+.toolbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  margin-bottom:20px;
+}
+.toolbar h2{
+  margin:0;
+  color:var(--azul);
+}
+.toolbar p{
+  margin:5px 0 0;
+  font-size:12px;
+  color:var(--gris);
+}
+@media(max-width:1100px){
+  .kpis{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:650px){
+  main{padding:12px}
+  .kpis{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+
+<body>
+<main>
+
+  <div class="toolbar">
+    <div>
+      <h2>⚠️ Observaciones Blister</h2>
+      <p>Actualización del listado de inspecciones de calidad mediante Excel.</p>
+    </div>
+  </div>
+
+  <div id="sinAcceso" class="card oculto">
+    <div class="estado error" style="display:block">
+      No hay una sesión administrativa válida. Ingresá primero desde Administración.
+    </div>
+  </div>
+
+  <div id="contenido" class="oculto">
+
+    <div class="card">
+      <div class="carga">
+        <h2>⚠️ Actualizar Observaciones Blister</h2>
+        <p>
+          Seleccioná el Excel exportado del listado de inspecciones.
+          El sistema detectará automáticamente la fila real de encabezados y omitirá
+          filas vacías o encabezados repetidos.
+        </p>
+
+        <input
+          id="archivoBlister"
+          type="file"
+          accept=".xlsx,.xls"
+          onchange="archivoSeleccionado()">
+
+        <div id="nombreArchivo" class="infoArchivo">
+          Ningún archivo seleccionado
+        </div>
+
+        <button class="btnPrimario" onclick="analizarBlister()">
+          ANALIZAR EXCEL
+        </button>
+
+        <div id="estadoCarga" class="estado"></div>
+      </div>
+    </div>
+
+    <section id="resultado" class="oculto">
+
+      <div class="kpis">
+        <div class="kpi">
+          <span>Registros</span>
+          <strong id="kTotal">0</strong>
+        </div>
+
+        <div class="kpi rojo">
+          <span>Abiertas</span>
+          <strong id="kAbiertas">0</strong>
+        </div>
+
+        <div class="kpi naranja">
+          <span>Respondidas</span>
+          <strong id="kRespondidas">0</strong>
+        </div>
+
+        <div class="kpi verde">
+          <span>Cerradas</span>
+          <strong id="kCerradas">0</strong>
+        </div>
+
+        <div class="kpi rojo">
+          <span>Vencidas</span>
+          <strong id="kVencidas">0</strong>
+        </div>
+
+        <div class="kpi violeta">
+          <span>No conformidades</span>
+          <strong id="kNC">0</strong>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="advertencia">
+          Esta es una vista previa. Supabase todavía no fue modificado.
+          Revisá la cantidad de registros y los datos antes de confirmar.
+        </div>
+
+        <div class="tablaWrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Fecha detección</th>
+                <th>Especialidad</th>
+                <th>Inspector</th>
+                <th>Tipo</th>
+                <th>Estado</th>
+                <th>Vencido</th>
+                <th>NC</th>
+              </tr>
+            </thead>
+            <tbody id="tablaPreview"></tbody>
+          </table>
+        </div>
+
+        <div class="acciones">
+          <button class="btnGris" onclick="cancelarAnalisis()">
+            CANCELAR
+          </button>
+
+          <button
+            id="btnConfirmar"
+            class="btnVerde"
+            onclick="confirmarBlister()">
+            CONFIRMAR ACTUALIZACIÓN
+          </button>
+        </div>
+
+        <div id="estadoConfirmacion" class="estado"></div>
+      </div>
+
+    </section>
+
+  </div>
+
+</main>
+
+<script>
+const SUPABASE_URL =
+"https://mzgbtejfgsrskiuymtwh.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_Wen9hxBnae8wRrEEaP5lOQ_aNl9OCGd";
+
+const supabaseClient =
+window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+
+let usuarioActual = null;
+let archivoActual = null;
+let registrosProcesados = [];
+
+
+/* ============================================================
+INICIO
+============================================================ */
+
+document.addEventListener(
+"DOMContentLoaded",
+iniciarModulo
+);
+
+async function iniciarModulo(){
+
+  const {
+    data:{session}
+  } =
+  await supabaseClient
+  .auth
+  .getSession();
+
+  if(
+    !session ||
+    !session.user
+  ){
+
+    document
+    .getElementById("sinAcceso")
+    .classList
+    .remove("oculto");
+
+    return;
+  }
+
+  const {
+    data,
+    error
+  } =
+  await supabaseClient
+  .from("usuarios_admin")
+  .select("email,activo,puede_cargar")
+  .eq(
+    "email",
+    session.user.email
+  )
+  .maybeSingle();
+
+  if(
+    error ||
+    !data ||
+    !data.activo ||
+    !data.puede_cargar
+  ){
+
+    document
+    .getElementById("sinAcceso")
+    .classList
+    .remove("oculto");
+
+    return;
+  }
+
+  usuarioActual =
+  session.user;
+
+  document
+  .getElementById("contenido")
+  .classList
+  .remove("oculto");
+
+}
+
+
+/* ============================================================
+ARCHIVO
+============================================================ */
+
+function archivoSeleccionado(){
+
+  archivoActual =
+  document
+  .getElementById(
+    "archivoBlister"
+  )
+  .files[0] || null;
+
+  document
+  .getElementById(
+    "nombreArchivo"
+  )
+  .textContent =
+  archivoActual
+  ?
+  archivoActual.name
+  :
+  "Ningún archivo seleccionado";
+
+  cancelarAnalisis(false);
+
+}
+
+
+/* ============================================================
+ANALIZAR EXCEL
+============================================================ */
+
+async function analizarBlister(){
+
+  if(!archivoActual){
+
+    mostrarEstado(
+      "estadoCarga",
+      "Seleccioná primero un archivo Excel.",
+      "error"
+    );
+
+    return;
+  }
+
+  mostrarEstado(
+    "estadoCarga",
+    "Analizando Excel...",
+    "info"
+  );
+
+  try{
+
+    const buffer =
+    await archivoActual
+    .arrayBuffer();
+
+    const libro =
+    XLSX.read(
+      buffer,
+      {
+        type:"array",
+        cellDates:true
+      }
+    );
+
+    if(
+      !libro.SheetNames.length
+    ){
+      throw new Error(
+        "El archivo no contiene hojas."
+      );
+    }
+
+    const hoja =
+    libro.Sheets[
+      libro.SheetNames[0]
+    ];
+
+    const filas =
+    XLSX.utils.sheet_to_json(
+      hoja,
+      {
+        header:1,
+        defval:"",
+        raw:true
+      }
+    );
+
+    const filaCabecera =
+    detectarCabecera(
+      filas
+    );
+
+    if(
+      filaCabecera < 0
+    ){
+      throw new Error(
+        "No encontré la fila de encabezados esperada."
+      );
+    }
+
+    const registros = [];
+
+    for(
+      let i =
+      filaCabecera + 1;
+      i < filas.length;
+      i++
+    ){
+
+      const fila =
+      filas[i];
+
+      if(
+        !fila ||
+        !fila.some(
+          x =>
+          String(
+            x ?? ""
+          ).trim() !== ""
+        )
+      ){
+        continue;
+      }
+
+      /*
+      Si aparece otra fila de encabezados,
+      se ignora.
+      */
+      if(
+        normalizar(
+          fila[0]
+        ) === "id" &&
+        normalizar(
+          fila[1]
+        ) === "proyecto"
+      ){
+        continue;
+      }
+
+      const id =
+      numeroId(
+        fila[0]
+      );
+
+      if(!id){
+        continue;
+      }
+
+      registros.push({
+        id:id,
+        proyecto:texto(
+          fila[1]
+        ),
+        fase:texto(
+          fila[2]
+        ),
+        especialidad:texto(
+          fila[3]
+        ),
+        contratista:texto(
+          fila[4]
+        ),
+        fecha_deteccion:
+        convertirFechaISO(
+          fila[5]
+        ),
+        fecha_carga:
+        convertirFechaISO(
+          fila[6]
+        ),
+        inspector:texto(
+          fila[7]
+        ),
+        tipo_observacion:
+        texto(
+          fila[8]
+        ).toUpperCase(),
+        estado:
+        texto(
+          fila[9]
+        ).toUpperCase(),
+        vencido:
+        convertirBooleano(
+          fila[10]
+        ),
+        no_conformidad:
+        convertirBooleano(
+          fila[11]
+        ),
+        archivo_origen:
+        archivoActual.name,
+        fecha_actualizacion:
+        new Date()
+        .toISOString(),
+        usuario_actualizacion:
+        usuarioActual.email
+      });
+
+    }
+
+    if(
+      !registros.length
+    ){
+      throw new Error(
+        "No encontré observaciones válidas para importar."
+      );
+    }
+
+    registrosProcesados =
+    registros;
+
+    pintarAnalisis();
+
+    mostrarEstado(
+      "estadoCarga",
+      "Excel analizado correctamente. Revisá la vista previa antes de confirmar.",
+      "ok"
+    );
+
+  }
+  catch(error){
+
+    console.error(
+      error
+    );
+
+    mostrarEstado(
+      "estadoCarga",
+      "No se pudo analizar el Excel: " +
+      error.message,
+      "error"
+    );
+
+  }
+
+}
+
+
+/* ============================================================
+DETECTAR CABECERA
+============================================================ */
+
+function detectarCabecera(
+filas
+){
+
+  const candidatos = [];
+
+  filas.forEach(
+    (
+      fila,
+      indice
+    ) => {
+
+      if(!fila){
+        return;
+      }
+
+      const a =
+      normalizar(
+        fila[0]
+      );
+
+      const b =
+      normalizar(
+        fila[1]
+      );
+
+      const j =
+      normalizar(
+        fila[9]
+      );
+
+      if(
+        a === "id" &&
+        b === "proyecto" &&
+        j === "estado"
+      ){
+        candidatos.push(
+          indice
+        );
+      }
+
+    }
+  );
+
+  if(
+    !candidatos.length
+  ){
+    return -1;
+  }
+
+  /*
+  Elegimos la última cabecera porque
+  el export puede traer una cabecera
+  inicial y otra antes del listado real.
+  */
+  return candidatos[
+    candidatos.length - 1
+  ];
+
+}
+
+
+/* ============================================================
+PREVIEW
+============================================================ */
+
+function pintarAnalisis(){
+
+  const total =
+  registrosProcesados.length;
+
+  const abiertas =
+  registrosProcesados
+  .filter(
+    x =>
+    x.estado === "ABIERTO"
+  )
+  .length;
+
+  const respondidas =
+  registrosProcesados
+  .filter(
+    x =>
+    x.estado === "RESPONDIDO"
+  )
+  .length;
+
+  const cerradas =
+  registrosProcesados
+  .filter(
+    x =>
+    x.estado === "CERRADO"
+  )
+  .length;
+
+  const vencidas =
+  registrosProcesados
+  .filter(
+    x =>
+    x.vencido === true
+  )
+  .length;
+
+  const nc =
+  registrosProcesados
+  .filter(
+    x =>
+    x.no_conformidad === true
+  )
+  .length;
+
+  setTexto(
+    "kTotal",
+    total
+  );
+
+  setTexto(
+    "kAbiertas",
+    abiertas
+  );
+
+  setTexto(
+    "kRespondidas",
+    respondidas
+  );
+
+  setTexto(
+    "kCerradas",
+    cerradas
+  );
+
+  setTexto(
+    "kVencidas",
+    vencidas
+  );
+
+  setTexto(
+    "kNC",
+    nc
+  );
+
+  document
+  .getElementById(
+    "tablaPreview"
+  )
+  .innerHTML =
+  registrosProcesados
+  .map(
+    x => `
+      <tr>
+        <td>
+          <strong>
+            ${escapar(x.id)}
+          </strong>
+        </td>
+
+        <td>
+          ${fechaAR(
+            x.fecha_deteccion
+          )}
+        </td>
+
+        <td>
+          ${escapar(
+            x.especialidad
+          )}
+        </td>
+
+        <td>
+          ${escapar(
+            x.inspector
+          )}
+        </td>
+
+        <td>
+          <span class="badge info">
+            ${escapar(
+              x.tipo_observacion
+            )}
+          </span>
+        </td>
+
+        <td>
+          ${badgeEstado(
+            x.estado
+          )}
+        </td>
+
+        <td>
+          ${
+            x.vencido
+            ?
+            '<span class="badge error">SÍ</span>'
+            :
+            '<span class="badge ok">NO</span>'
+          }
+        </td>
+
+        <td>
+          ${
+            x.no_conformidad
+            ?
+            '<span class="badge error">SÍ</span>'
+            :
+            '<span class="badge ok">NO</span>'
+          }
+        </td>
+      </tr>
+    `
+  )
+  .join("");
+
+  document
+  .getElementById(
+    "resultado"
+  )
+  .classList
+  .remove("oculto");
+
+}
+
+
+/* ============================================================
+CONFIRMAR
+============================================================ */
+
+async function confirmarBlister(){
+
+  if(
+    !registrosProcesados.length
+  ){
+    return;
+  }
+
+  if(
+    !confirm(
+      "¿Confirmás actualizar Observaciones Blister con " +
+      registrosProcesados.length +
+      " registros?"
+    )
+  ){
+    return;
+  }
+
+  const boton =
+  document.getElementById(
+    "btnConfirmar"
+  );
+
+  boton.disabled =
+  true;
+
+  mostrarEstado(
+    "estadoConfirmacion",
+    "Actualizando Supabase...",
+    "info"
+  );
+
+  try{
+
+    /*
+    Upsert por ID.
+    Si el ID ya existe, se actualiza.
+    Si es nuevo, se agrega.
+    */
+    const {
+      error
+    } =
+    await supabaseClient
+    .from(
+      "blister_observaciones"
+    )
+    .upsert(
+      registrosProcesados,
+      {
+        onConflict:"id"
+      }
+    );
+
+    if(error){
+      throw error;
+    }
+
+    const {
+      error:errorCarga
+    } =
+    await supabaseClient
+    .from(
+      "blister_cargas"
+    )
+    .insert({
+      archivo:
+      archivoActual.name,
+
+      usuario:
+      usuarioActual.email,
+
+      registros_excel:
+      registrosProcesados.length,
+
+      registros_actualizados:
+      registrosProcesados.length
+    });
+
+    if(errorCarga){
+      throw new Error(
+        "Las observaciones se actualizaron, pero falló el registro de la carga: " +
+        errorCarga.message
+      );
+    }
+
+    mostrarEstado(
+      "estadoConfirmacion",
+      "✓ Actualización completada. " +
+      registrosProcesados.length +
+      " observaciones procesadas.",
+      "ok"
+    );
+
+  }
+  catch(error){
+
+    console.error(
+      error
+    );
+
+    mostrarEstado(
+      "estadoConfirmacion",
+      "No se pudo completar la actualización: " +
+      error.message,
+      "error"
+    );
+
+  }
+  finally{
+
+    boton.disabled =
+    false;
+
+  }
+
+}
+
+
+/* ============================================================
+CANCELAR
+============================================================ */
+
+function cancelarAnalisis(
+limpiarEstado = true
+){
+
+  registrosProcesados = [];
+
+  document
+  .getElementById(
+    "resultado"
+  )
+  .classList
+  .add(
+    "oculto"
+  );
+
+  if(
+    limpiarEstado
+  ){
+
+    ocultarEstado(
+      "estadoCarga"
+    );
+
+    ocultarEstado(
+      "estadoConfirmacion"
+    );
+
+  }
+
+}
+
+
+/* ============================================================
+FECHAS
+============================================================ */
+
+function convertirFechaISO(
+valor
+){
+
+  if(
+    valor === null ||
+    valor === undefined ||
+    valor === ""
+  ){
+    return null;
+  }
+
+  if(
+    valor instanceof Date &&
+    !isNaN(
+      valor.getTime()
+    )
+  ){
+
+    const y =
+    valor.getFullYear();
+
+    const m =
+    String(
+      valor.getMonth() + 1
+    )
+    .padStart(
+      2,
+      "0"
+    );
+
+    const d =
+    String(
+      valor.getDate()
+    )
+    .padStart(
+      2,
+      "0"
+    );
+
+    return (
+      y +
+      "-" +
+      m +
+      "-" +
+      d
+    );
+
+  }
+
+  if(
+    typeof valor === "number"
+  ){
+
+    const fecha =
+    XLSX.SSF.parse_date_code(
+      valor
+    );
+
+    if(fecha){
+
+      return (
+        fecha.y +
+        "-" +
+        String(
+          fecha.m
+        ).padStart(
+          2,
+          "0"
+        )
+        +
+        "-" +
+        String(
+          fecha.d
+        ).padStart(
+          2,
+          "0"
+        )
+      );
+
+    }
+
+  }
+
+  const s =
+  String(
+    valor
+  )
+  .trim();
+
+  let m =
+  s.match(
+    /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/
+  );
+
+  if(m){
+
+    return (
+      m[3] +
+      "-" +
+      m[2].padStart(
+        2,
+        "0"
+      )
+      +
+      "-" +
+      m[1].padStart(
+        2,
+        "0"
+      )
+    );
+
+  }
+
+  m =
+  s.match(
+    /^(\d{4})-(\d{1,2})-(\d{1,2})$/
+  );
+
+  if(m){
+
+    return (
+      m[1] +
+      "-" +
+      m[2].padStart(
+        2,
+        "0"
+      )
+      +
+      "-" +
+      m[3].padStart(
+        2,
+        "0"
+      )
+    );
+
+  }
+
+  return null;
+}
+
+
+/* ============================================================
+UTILIDADES
+============================================================ */
+
+function numeroId(
+valor
+){
+
+  const n =
+  Number(
+    String(
+      valor ?? ""
+    )
+    .trim()
+  );
+
+  if(
+    !Number.isFinite(
+      n
+    ) ||
+    n <= 0
+  ){
+    return null;
+  }
+
+  return Math.trunc(
+    n
+  );
+
+}
+
+function texto(
+valor
+){
+
+  return String(
+    valor ?? ""
+  )
+  .trim();
+
+}
+
+function normalizar(
+valor
+){
+
+  return String(
+    valor ?? ""
+  )
+  .trim()
+  .toLowerCase()
+  .normalize("NFD")
+  .replace(
+    /[\u0300-\u036f]/g,
+    ""
+  );
+
+}
+
+function convertirBooleano(
+valor
+){
+
+  const x =
+  normalizar(
+    valor
+  );
+
+  return [
+    "si",
+    "s",
+    "yes",
+    "true",
+    "1",
+    "x"
+  ]
+  .includes(
+    x
+  );
+
+}
+
+function fechaAR(
+valor
+){
+
+  if(!valor){
+    return "-";
+  }
+
+  const p =
+  String(
+    valor
+  )
+  .slice(
+    0,
+    10
+  )
+  .split(
+    "-"
+  );
+
+  if(
+    p.length !== 3
+  ){
+    return escapar(
+      valor
+    );
+  }
+
+  return (
+    p[2] +
+    "/" +
+    p[1] +
+    "/" +
+    p[0]
+  );
+
+}
+
+function badgeEstado(
+estado
+){
+
+  const e =
+  String(
+    estado || ""
+  )
+  .toUpperCase();
+
+  if(
+    e === "CERRADO"
+  ){
+    return '<span class="badge ok">CERRADO</span>';
+  }
+
+  if(
+    e === "RESPONDIDO"
+  ){
+    return '<span class="badge alerta">RESPONDIDO</span>';
+  }
+
+  return (
+    '<span class="badge error">' +
+    escapar(
+      e || "ABIERTO"
+    ) +
+    '</span>'
+  );
+
+}
+
+function setTexto(
+id,
+valor
+){
+
+  document
+  .getElementById(
+    id
+  )
+  .textContent =
+  valor;
+
+}
+
+function mostrarEstado(
+id,
+texto,
+tipo
+){
+
+  const el =
+  document.getElementById(
+    id
+  );
+
+  el.textContent =
+  texto;
+
+  el.className =
+  "estado " +
+  tipo;
+
+}
+
+function ocultarEstado(
+id
+){
+
+  const el =
+  document.getElementById(
+    id
+  );
+
+  if(!el){
+    return;
+  }
+
+  el.className =
+  "estado";
+
+  el.textContent =
+  "";
+
+}
+
+function escapar(
+valor
+){
+
+  return String(
+    valor ?? ""
+  )
+  .replace(
+    /&/g,
+    "&amp;"
+  )
+  .replace(
+    /</g,
+    "&lt;"
+  )
+  .replace(
+    />/g,
+    "&gt;"
+  )
+  .replace(
+    /"/g,
+    "&quot;"
+  )
+  .replace(
+    /'/g,
+    "&#039;"
+  );
+
+}
+
+</script>
+</body>
+</html>
