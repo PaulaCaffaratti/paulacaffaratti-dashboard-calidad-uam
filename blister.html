@@ -180,6 +180,107 @@ main{
 .kpi.naranja{border-left-color:var(--naranja)}
 .kpi.verde{border-left-color:var(--verde)}
 .kpi.violeta{border-left-color:var(--violeta)}
+
+.kpiEstadoValor{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:8px;
+}
+.kpiEstadoValor strong{
+  margin:0;
+}
+.kpiEstadoPct{
+  font-size:24px;
+  font-weight:bold;
+  color:var(--azul);
+}
+
+.resumenIndicadores{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:0;
+  margin-top:2px;
+}
+
+.filaIndicador{
+  display:grid;
+  grid-template-columns:1fr 110px 110px;
+  align-items:center;
+  gap:14px;
+  padding:14px 2px;
+  border-bottom:1px solid #e2e8ed;
+}
+
+.filaIndicador:last-child{
+  border-bottom:0;
+}
+
+.filaIndicador .nombre{
+  font-size:13px;
+  color:#263746;
+}
+
+.filaIndicador .cantidad{
+  text-align:right;
+  font-size:16px;
+  font-weight:bold;
+  color:var(--azul);
+}
+
+.filaIndicador .porcentaje{
+  text-align:right;
+  font-size:16px;
+  font-weight:bold;
+  color:var(--azul);
+}
+
+.filaIndicador.destacado .nombre{
+  font-weight:bold;
+}
+
+.filaIndicador.rojo .porcentaje{
+  color:var(--rojo);
+}
+
+.filaIndicador.verde .porcentaje{
+  color:var(--verde);
+}
+
+.filaIndicador.naranja .porcentaje{
+  color:var(--naranja);
+}
+
+.filaIndicador.violeta .porcentaje{
+  color:var(--violeta);
+}
+
+.resumenCabecera{
+  display:grid;
+  grid-template-columns:1fr 110px 110px;
+  gap:14px;
+  padding:0 2px 9px;
+  border-bottom:2px solid #d8e1e7;
+  font-size:10px;
+  font-weight:bold;
+  color:var(--gris);
+  text-transform:uppercase;
+}
+
+.resumenCabecera div:nth-child(2),
+.resumenCabecera div:nth-child(3){
+  text-align:right;
+}
+
+@media(max-width:650px){
+  .filaIndicador,
+  .resumenCabecera{
+    grid-template-columns:1fr 75px 75px;
+    gap:8px;
+  }
+}
+
 .panel{
   background:white;
   border:1px solid #e1e8ed;
@@ -324,19 +425,28 @@ body.embed .titulo{margin-top:0!important;}
 
       <div class="kpi verde" data-filtro="CERRADO" onclick="filtrarKPI('CERRADO',this)">
         <span>Cerradas</span>
-        <strong id="kCerradas">0</strong>
+        <div class="kpiEstadoValor">
+          <strong id="kCerradas">0</strong>
+          <div id="kCerradasPct" class="kpiEstadoPct">0,0%</div>
+        </div>
         <div class="subKpi">Observaciones cerradas</div>
       </div>
 
       <div class="kpi naranja" data-filtro="RESPONDIDO" onclick="filtrarKPI('RESPONDIDO',this)">
         <span>Respondidas</span>
-        <strong id="kRespondidas">0</strong>
+        <div class="kpiEstadoValor">
+          <strong id="kRespondidas">0</strong>
+          <div id="kRespondidasPct" class="kpiEstadoPct">0,0%</div>
+        </div>
         <div class="subKpi">Respondidas, aún no cerradas</div>
       </div>
 
       <div class="kpi rojo" data-filtro="ABIERTO" onclick="filtrarKPI('ABIERTO',this)">
         <span>Abiertas</span>
-        <strong id="kAbiertas">0</strong>
+        <div class="kpiEstadoValor">
+          <strong id="kAbiertas">0</strong>
+          <div id="kAbiertasPct" class="kpiEstadoPct">0,0%</div>
+        </div>
         <div class="subKpi">Observaciones todavía abiertas</div>
       </div>
 
@@ -368,17 +478,41 @@ body.embed .titulo{margin-top:0!important;}
 
   <div class="graficos">
 
-    <section class="panel">
-      <h3>Estado de observaciones</h3>
-      <div class="chartBox">
-        <canvas id="chartEstado"></canvas>
-      </div>
-    </section>
+    <section class="panel" style="grid-column:1 / -1">
+      <h3>Resumen de indicadores</h3>
 
-    <section class="panel">
-      <h3>Tipo de observación</h3>
-      <div class="chartBox">
-        <canvas id="chartTipo"></canvas>
+      <div class="resumenCabecera">
+        <div>Indicador</div>
+        <div>Cantidad</div>
+        <div>% del total</div>
+      </div>
+
+      <div class="resumenIndicadores">
+
+        <div class="filaIndicador violeta destacado">
+          <div class="nombre">No conformidades</div>
+          <div id="rNC" class="cantidad">0</div>
+          <div id="rNCPct" class="porcentaje">0,0%</div>
+        </div>
+
+        <div class="filaIndicador rojo destacado">
+          <div class="nombre">Fuera de tiempo / vencidas</div>
+          <div id="rVencidas" class="cantidad">0</div>
+          <div id="rVencidasPct" class="porcentaje">0,0%</div>
+        </div>
+
+        <div class="filaIndicador naranja">
+          <div class="nombre">Tipo de observación · Mejora</div>
+          <div id="rMejora" class="cantidad">0</div>
+          <div id="rMejoraPct" class="porcentaje">0,0%</div>
+        </div>
+
+        <div class="filaIndicador verde">
+          <div class="nombre">Tipo de observación · Positiva</div>
+          <div id="rPositiva" class="cantidad">0</div>
+          <div id="rPositivaPct" class="porcentaje">0,0%</div>
+        </div>
+
       </div>
     </section>
 
@@ -564,48 +698,64 @@ function pintarKPIs(){
     x => x.no_conformidad===true
   ).length;
 
+  const mejora =
+  datos.filter(
+    x =>
+    texto(x.tipo_observacion)
+    .toUpperCase() === "MEJORA"
+  ).length;
+
+  const positiva =
+  datos.filter(
+    x =>
+    texto(x.tipo_observacion)
+    .toUpperCase() === "POSITIVA"
+  ).length;
+
+  const porcentaje = cantidad =>
+  total === 0
+  ?
+  0
+  :
+  (cantidad / total) * 100;
+
+  const formatoPct = valor =>
+  valor.toLocaleString(
+    "es-AR",
+    {
+      minimumFractionDigits:1,
+      maximumFractionDigits:1
+    }
+  ) + "%";
+
   setTexto("kTotal",total);
+
   setTexto("kCerradas",cerradas);
+  setTexto("kCerradasPct",formatoPct(porcentaje(cerradas)));
+
   setTexto("kRespondidas",respondidas);
+  setTexto("kRespondidasPct",formatoPct(porcentaje(respondidas)));
+
   setTexto("kAbiertas",abiertas);
+  setTexto("kAbiertasPct",formatoPct(porcentaje(abiertas)));
+
   setTexto("kVencidas",vencidas);
+  setTexto("kVencidasPct",formatoPct(porcentaje(vencidas)));
+
   setTexto("kNC",nc);
+  setTexto("kNCPct",formatoPct(porcentaje(nc)));
 
-  const pctNC =
-  total === 0
-  ?
-  0
-  :
-  (nc / total) * 100;
+  setTexto("rNC",nc);
+  setTexto("rNCPct",formatoPct(porcentaje(nc)));
 
-  const pctVencidas =
-  total === 0
-  ?
-  0
-  :
-  (vencidas / total) * 100;
+  setTexto("rVencidas",vencidas);
+  setTexto("rVencidasPct",formatoPct(porcentaje(vencidas)));
 
-  setTexto(
-    "kNCPct",
-    pctNC.toLocaleString(
-      "es-AR",
-      {
-        minimumFractionDigits:1,
-        maximumFractionDigits:1
-      }
-    ) + "%"
-  );
+  setTexto("rMejora",mejora);
+  setTexto("rMejoraPct",formatoPct(porcentaje(mejora)));
 
-  setTexto(
-    "kVencidasPct",
-    pctVencidas.toLocaleString(
-      "es-AR",
-      {
-        minimumFractionDigits:1,
-        maximumFractionDigits:1
-      }
-    ) + "%"
-  );
+  setTexto("rPositiva",positiva);
+  setTexto("rPositivaPct",formatoPct(porcentaje(positiva)));
 
 }
 
@@ -861,69 +1011,6 @@ function llenarSelect(id,valores){
 }
 
 function pintarGraficos(){
-
-  const estados = {
-    CERRADO:0,
-    RESPONDIDO:0,
-    ABIERTO:0
-  };
-
-  datos.forEach(
-    x => {
-      const e =
-      estado(x);
-
-      if(
-        Object.prototype.hasOwnProperty.call(
-          estados,
-          e
-        )
-      ){
-        estados[e]++;
-      }
-    }
-  );
-
-  graficoEstado =
-  crearBarra(
-    "chartEstado",
-    ["CERRADO","RESPONDIDO","ABIERTO"],
-    [
-      estados.CERRADO,
-      estados.RESPONDIDO,
-      estados.ABIERTO
-    ],
-    [
-      "#179447",
-      "#f28c28",
-      "#d83c3c"
-    ]
-  );
-
-  const mejora =
-  datos.filter(
-    x =>
-    texto(x.tipo_observacion)
-    .toUpperCase() === "MEJORA"
-  ).length;
-
-  const positiva =
-  datos.filter(
-    x =>
-    texto(x.tipo_observacion)
-    .toUpperCase() === "POSITIVA"
-  ).length;
-
-  graficoTipo =
-  crearBarra(
-    "chartTipo",
-    ["MEJORA","POSITIVA"],
-    [mejora,positiva],
-    [
-      "#f2c94c",
-      "#179447"
-    ]
-  );
 
   const especialidades =
   contarPor(
