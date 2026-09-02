@@ -1,0 +1,1108 @@
+Reporte Semanal 30 08 26.pdf
+PDF
+dale, en este segundo quiero hacer algo con esta informacion, q le presentamos al cliente
+
+Sí. Viendo el reporte, da para hacer algo bastante mejor que un PDF estático: un dashboard web de Calidad / Gestión para mostrarle al cliente, manteniendo la lógica y estética corporativa del reporte.
+
+El informe hoy está dividido en Observaciones Blister, Índice de Gestión, Hallazgos, Seguimiento de Documentación, Capacitaciones e Índices de Gestión/Producto. Además, ya tienen información muy útil para convertir en indicadores interactivos: por ejemplo, documentación planificada/presentada/liberada, evolución temporal, hallazgos y capacitaciones.
+
+Mi propuesta sería crear un segundo repositorio GitHub, independiente del de premoldeados, por ejemplo:
+
+dashboard-calidad-uam
+
+Y que la web tenga una portada ejecutiva tipo:
+
+DUPLICAR NORTE UAM — Dashboard de Calidad
+Actualizado al: 30/08/2026
+
+Observaciones | Hallazgos | Documentación | Capacitaciones | Producción
+
+🟢 Documentación liberada: 16
+🟠 Documentación pendiente: 17
+📄 Presentados: 33
+📋 Planificados: 50
+
+Avance documental → Curva Planificado / Presentado / Liberado
+Hallazgos → Abiertos / En tiempo / Vencidos / Cerrados
+Observaciones Blister → por especialidad y estado
+Capacitaciones → Planificadas vs. realizadas
+Producción / Calidad → PH, END, rechazo de soldadura, etc.
+
+De hecho, la página 10 del reporte es una excelente base para la web: ya muestra la evolución de documentos y abajo resume 50 planificados, 33 presentados, 17 pendientes y 16 liberados. Eso podemos convertirlo en una curva interactiva que se actualice automáticamente.
+
+Y haría una diferencia importante respecto al PDF: vos cargás/actualizás los datos y el cliente entra a un link y ve siempre el estado actualizado, sin tener que generar un PDF nuevo todas las semanas.
+
+Podemos mantener el mismo esquema que te funcionó con Premoldeados:
+
+GitHub Pages → página web
+Supabase → datos
+Usuarios internos → cargan/actualizan
+Cliente → solamente visualiza
+
+Así el cliente no puede modificar nada.
+
+El primer paso es crear el segundo repositorio sin tocar absolutamente nada de paulacaffaratti.github.io. Te puedo ir guiando clic por clic y después armamos el dashboard basándonos en este reporte.
+
+estoy en settings, q toco
+hoy 14:12
+Informe de registro de archivos-202609011710.xlsx
+Hoja de cálculo
+Se ha pegado el markdown.md
+Archivo
+
+POR OTRO LADO YO TE PASO EL LISTADO OFICIAL donde tiene el universo de documentos con su nombre y codigo correcto; porque puede que algunos documentos que en el código tienen DO-QA estén como DQ-QA en el informe de registro de archivos que te pase. A continuación te paso el listado original y con las fechas previstas de presentación de cada documento
+
+67	AR-5-0338-Pr-67	ODV-ALVS-25033-DO-QA-034	Procedimiento de Rescate de Fuente	26/08/2026	15/09/2026
+68	AR-5-0338-Pr-68	ODV-ALVS-25033-DO-QA-036	Procedimiento de Seguridad Radiològica	26/08/2026	15/09/2026
+Se ha pegado el markdown(1).md
+Archivo
+pude que con el correr del tiempo se agreguen documentos al listado orginal
+listo
+donde?
+Administración _ Calidad UAM.pdf
+PDF
+
+Sí, salió bien la actualización. Revisé el PDF que me mandaste.
+
+El resultado real fue:
+
+142 registros leídos del Excel.
+138 vinculados al maestro.
+15 fueron reconocidos mediante la corrección/normalización DQ-QA ↔ DO-QA.
+4 quedaron sin vincular.
+Esos registros corresponden a 42 documentos distintos, y los 42 actualizaron su estado.
+La pantalla confirma: “Actualización completada. 42 documentos actualizaron su estado.”
+Además quedó registrada la carga del Excel con 142 registros y 4 sin vincular.
+
+Y veo ejemplos coherentes: el procedimiento de montaje de cañerías tiene sucesivas emisiones y termina en LIB, y el de montaje eléctrico también llega a LIB.
+
+Antes de hacer el dashboard del cliente
+
+Yo corregiría los 4 que quedaron sin vincular. Es lo único pendiente de esta carga.
+
+Así dejamos:
+
+142 registros → 142 vinculados → 0 sin vincular
+
+y después hacemos que el index.html del cliente muestre automáticamente cosas como 61 documentos previstos / presentados / liberados / observados / pendientes de presentación / vencidos, avance documental y próximos vencimientos.
+
+Para encontrar esos 4, no hace falta volver a cargar nada. Te puedo pasar ahora un SQL muy cortito para que Supabase nos diga exactamente cuáles son los cuatro archivos que quedaron sin vincular.
+
+quiero q este el 61, si lo toco me salga 42 presentados, y si toco pueda dar el detalle de codigo del cliente y nombre del doc, con los pendientes tmb 19. a la par de 61, el 31 liberados y q si toco veo detalle de codigo cliente y nombre. Observados sacarlo, dejar el vencidos sin presentar, y dejar el futuros. ademas quiero que se refleje la cantidad de los documentos que el cliente tiene en su poder corrigiendo y que aun no devolvio. Y una curva S con las fechas 
+cuales son los presentados en gestion?
+no me aparece para editar
+en resumen y documentaciòn no se estan actualizando los cambios manuales
+quiero sacar el presentados en gestion
+dale 
+Pegado text(10).txt
+Documento
+quise desactivar un documento y me salto esto
+si toco en el lapiz para editar me aparece esto y no me deja modificar lo escrito
+Listado_inspecciones_calidad_2026-09-02.xlsx
+Hoja de cálculo
+lo dejamos para luego a eso, ahora en observaciones blister tengo esto de input
+listo
+no puede estar alli el dashboard de observaciones blister?
+hoy 10:58
+en la curva s quiero agregar una curva q sea de liberados
+eso quiero q más bien se vea como la segunda imagen
+en presentados q son 50, lo q esta debajo tiene q sumarme 50; por otro lado ahora al hacer clic en universo documental no debe abrirse nada pq ya se ve abajo, no me gusta mucho esteticamente como quedo
+ debajo de 11 quiero q primero esten los 7 y a la derecha los 4 (invertir el orden), por otro lado en el otro bloque la suma no me da 50; por otro lado no quiero q abajo se vea la suma en ningun bloque
+podemos seguir la misma visual total 28, debajo primero las cerradas,  respondidas y luego las abiertas; y debajo de todo esto las no conformidades y vencidas; podría ser como un kpi en % cuantas del total son NC y cuantas del total no las cerramos en tiempo y forma es decir vencidas, en % y cantidad 
+podemos seguir la misma visual total 28, debajo primero las cerradas,  respondidas y luego las abiertas; y debajo de todo esto las no conformidades y vencidas; podría ser como un kpi en % cuantas del total son NC y cuantas del total no las cerramos en tiempo y forma es decir vencidas, en % y cantidad; por otro lado el grafico de mejora y positiva quiero q tenga respectivamente el color amarillo en mejor y verde en positiva q son los colores del cliente. Por otro lado, en el grafico de cerradas abiertas y respondidas, quiero primero ver cerradas desp resp desp abiertas y en los colores q tienen más arriba en el resumen (rojo naranja y verde)
+quiero agregar el porcentaje en cerradas respondidas, abiertas. Los graficos de tipo de observacion y estado de observacion eliminarlos. Hacer mas o menos con el formato de la segunda imagen, un resumen donde poner no conformidades, fuera de tiempo vencidas, tipo de observaciones, todo cantidad y %.
+eliminar lo tachado. Y diferenciar abajo como q de las 28 15 son mejoras 13 positivas; por otro lado de las 28 6 vencidas 3 NC
+Editar
+quiero compartir el link al cliente para q visualice pero no quiero q sepan q utilizo github, como puedo hacer?
+Deploy details _ Deploys _ comfy-speculoos-c24d8c _ Netlify.pdf
+PDF
+
+Perfecto, ya se publicó correctamente en Netlify. El PDF muestra que el proceso terminó completo y que se subieron los 7 archivos del dashboard, incluido index.html.
+
+Ahora falta solamente ponerle un nombre lindo. Tu sitio actualmente se llama:
+
+comfy-speculoos-c24d8c
+
+Queremos cambiarlo, por ejemplo, a:
+
+calidad-uam.netlify.app
+
+En Netlify hacé clic arriba donde dice “comfy-speculoos-c24d8c” para volver al proyecto. Después buscá Project configuration (o Site configuration) → General → Project details y buscá Change project name / Edit project name.
+
+Poné:
+
+calidad-uam
+
+Si te dice que ya está ocupado, probamos duplicar-norte-uam o calidad-duplicar-norte-uam.
+
+Cuando llegues a donde te deja cambiar el nombre, mandame una captura y te indico qué poner exactamente.
+
+a los otros usuarios les aparece asi cuando quieren ingresar
+ahora lo q quiero es mi otro proyecto no se vea github
+pasame el paso a paso a partir de aqui
+ahora en producción quiero que haya un titulo que sea seguimiento premoldeados que pueda mostrarse y ocultarse su contenido; otro titulo que sea seguimiento de instrumentacion, otro q sea seguimiento de electricidad, seguimiento de piping, seguimiento de estructuras
+Pegado text(20260902-173639).txt
+Documento
+ahora en seguimiento de premoldeados quiero q se relacione con mi otro proyecto, que muestre esos datos 
+solo quiero esos datos, pq el resto son datos sensibles 
+Pegado text(20260902-174514).txt
+Documento
+porque tiene cero en todas?
+aca quiero agregar una pestaña que sea para subir el excel de capacitaciones; y luego en el dashboard de calidad q se muestren los datos al cliente
+PSIG-12 F-01 (v.2) Programa de capacitación REV_A_APC.xlsx
+Hoja de cálculo
+
+Listo. Pegá todo este SQL completo en el SQL Editor de Supabase y después tocá RUN.
+
+Este diseño respeta la lógica mensual del Excel: cada registro guarda año + mes + estado (P, R, RFF, RNP). En tu archivo, los meses 2026 están distribuidos en columnas mensuales y las referencias definen esos cuatro estados. Además, el propio Excel separa “Planificadas”, “Realizadas” y el porcentaje de cumplimiento.
+
+-- ============================================================
+-- CAPACITACIONES - DUPLICAR NORTE UAM
+-- Estructura para carga mensual desde Excel
+-- ============================================================
+
+
+-- ============================================================
+-- 1. HISTORIAL DE CARGAS DE EXCEL
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS public.capacitaciones_cargas (
+
+    id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+
+    archivo_nombre TEXT NOT NULL,
+
+    fecha_carga TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    usuario TEXT,
+
+    filas_detectadas INTEGER DEFAULT 0,
+
+    eventos_detectados INTEGER DEFAULT 0
+
+);
+
+
+-- ============================================================
+-- 2. REGISTRO DE CAPACITACIONES
+--
+-- Cada fila representa una capacitación en un mes determinado.
+--
+-- P   = Planificada
+-- R   = Planificada realizada
+-- RFF = Planificada realizada fuera de fecha
+-- RNP = Realizada no programada
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS public.capacitaciones_registro (
+
+    id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+
+    carga_id BIGINT NOT NULL
+        REFERENCES public.capacitaciones_cargas(id)
+        ON DELETE CASCADE,
+
+    item INTEGER,
+
+    tema TEXT NOT NULL,
+
+    especialidades TEXT[] DEFAULT '{}',
+
+    anio INTEGER NOT NULL,
+
+    mes INTEGER NOT NULL
+        CHECK (mes BETWEEN 1 AND 12),
+
+    estado TEXT NOT NULL
+        CHECK (estado IN ('P','R','RFF','RNP')),
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+
+);
+
+
+-- Evita duplicados dentro de una misma carga
+CREATE UNIQUE INDEX IF NOT EXISTS
+capacitaciones_registro_unico
+ON public.capacitaciones_registro
+(
+    carga_id,
+    item,
+    anio,
+    mes,
+    estado
+);
+
+
+-- Índices para consultas rápidas
+CREATE INDEX IF NOT EXISTS
+idx_capacitaciones_registro_carga
+ON public.capacitaciones_registro(carga_id);
+
+CREATE INDEX IF NOT EXISTS
+idx_capacitaciones_registro_fecha
+ON public.capacitaciones_registro(anio, mes);
+
+CREATE INDEX IF NOT EXISTS
+idx_capacitaciones_registro_estado
+ON public.capacitaciones_registro(estado);
+
+
+
+-- ============================================================
+-- 3. SEGURIDAD
+-- ============================================================
+
+ALTER TABLE public.capacitaciones_cargas
+ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE public.capacitaciones_registro
+ENABLE ROW LEVEL SECURITY;
+
+
+-- Sacamos políticas anteriores si existieran
+DROP POLICY IF EXISTS
+"admin capacitaciones cargas select"
+ON public.capacitaciones_cargas;
+
+DROP POLICY IF EXISTS
+"admin capacitaciones cargas insert"
+ON public.capacitaciones_cargas;
+
+DROP POLICY IF EXISTS
+"admin capacitaciones cargas update"
+ON public.capacitaciones_cargas;
+
+DROP POLICY IF EXISTS
+"admin capacitaciones cargas delete"
+ON public.capacitaciones_cargas;
+
+
+DROP POLICY IF EXISTS
+"admin capacitaciones registro select"
+ON public.capacitaciones_registro;
+
+DROP POLICY IF EXISTS
+"admin capacitaciones registro insert"
+ON public.capacitaciones_registro;
+
+DROP POLICY IF EXISTS
+"admin capacitaciones registro update"
+ON public.capacitaciones_registro;
+
+DROP POLICY IF EXISTS
+"admin capacitaciones registro delete"
+ON public.capacitaciones_registro;
+
+
+
+-- ============================================================
+-- 4. POLÍTICAS PARA ADMINISTRADORES
+--
+-- Usa la misma función es_admin_calidad() que ya tenemos
+-- para Documentación / Blister / Listado Base.
+-- ============================================================
+
+CREATE POLICY
+"admin capacitaciones cargas select"
+ON public.capacitaciones_cargas
+FOR SELECT
+TO authenticated
+USING (
+    public.es_admin_calidad()
+);
+
+
+CREATE POLICY
+"admin capacitaciones cargas insert"
+ON public.capacitaciones_cargas
+FOR INSERT
+TO authenticated
+WITH CHECK (
+    public.es_admin_calidad()
+);
+
+
+CREATE POLICY
+"admin capacitaciones cargas update"
+ON public.capacitaciones_cargas
+FOR UPDATE
+TO authenticated
+USING (
+    public.es_admin_calidad()
+)
+WITH CHECK (
+    public.es_admin_calidad()
+);
+
+
+CREATE POLICY
+"admin capacitaciones cargas delete"
+ON public.capacitaciones_cargas
+FOR DELETE
+TO authenticated
+USING (
+    public.es_admin_calidad()
+);
+
+
+
+CREATE POLICY
+"admin capacitaciones registro select"
+ON public.capacitaciones_registro
+FOR SELECT
+TO authenticated
+USING (
+    public.es_admin_calidad()
+);
+
+
+CREATE POLICY
+"admin capacitaciones registro insert"
+ON public.capacitaciones_registro
+FOR INSERT
+TO authenticated
+WITH CHECK (
+    public.es_admin_calidad()
+);
+
+
+CREATE POLICY
+"admin capacitaciones registro update"
+ON public.capacitaciones_registro
+FOR UPDATE
+TO authenticated
+USING (
+    public.es_admin_calidad()
+)
+WITH CHECK (
+    public.es_admin_calidad()
+);
+
+
+CREATE POLICY
+"admin capacitaciones registro delete"
+ON public.capacitaciones_registro
+FOR DELETE
+TO authenticated
+USING (
+    public.es_admin_calidad()
+);
+
+
+
+-- ============================================================
+-- 5. PERMISOS DE LAS TABLAS PRIVADAS
+-- ============================================================
+
+REVOKE ALL
+ON public.capacitaciones_cargas
+FROM anon;
+
+REVOKE ALL
+ON public.capacitaciones_registro
+FROM anon;
+
+
+GRANT SELECT, INSERT, UPDATE, DELETE
+ON public.capacitaciones_cargas
+TO authenticated;
+
+GRANT SELECT, INSERT, UPDATE, DELETE
+ON public.capacitaciones_registro
+TO authenticated;
+
+
+
+-- ============================================================
+-- 6. VISTA PÚBLICA PARA EL DASHBOARD DEL CLIENTE
+--
+-- IMPORTANTE:
+-- Solo muestra cantidades agregadas.
+-- NO muestra:
+-- - personal a capacitar
+-- - instructor
+-- - usuarios
+-- - datos internos de carga
+-- ============================================================
+
+DROP VIEW IF EXISTS
+public.v_capacitaciones_dashboard;
+
+
+CREATE VIEW public.v_capacitaciones_dashboard AS
+
+WITH ultima_carga AS (
+
+    SELECT id
+
+    FROM public.capacitaciones_cargas
+
+    ORDER BY
+        fecha_carga DESC,
+        id DESC
+
+    LIMIT 1
+
+),
+
+datos AS (
+
+    SELECT cr.*
+
+    FROM public.capacitaciones_registro cr
+
+    INNER JOIN ultima_carga uc
+        ON uc.id = cr.carga_id
+
+),
+
+meses AS (
+
+    SELECT
+        anio,
+        mes,
+
+        COUNT(*) FILTER (
+            WHERE estado IN ('P','R','RFF')
+        )::INTEGER
+        AS planificadas,
+
+        COUNT(*) FILTER (
+            WHERE estado IN ('R','RFF')
+        )::INTEGER
+        AS realizadas_planificadas,
+
+        COUNT(*) FILTER (
+            WHERE estado = 'RNP'
+        )::INTEGER
+        AS realizadas_no_programadas,
+
+        COUNT(*) FILTER (
+            WHERE estado IN ('R','RFF','RNP')
+        )::INTEGER
+        AS realizadas_totales,
+
+        COUNT(*) FILTER (
+            WHERE estado = 'RFF'
+        )::INTEGER
+        AS realizadas_fuera_fecha
+
+    FROM datos
+
+    GROUP BY
+        anio,
+        mes
+
+)
+
+SELECT
+
+    anio,
+
+    mes,
+
+    CASE mes
+        WHEN 1 THEN 'Enero'
+        WHEN 2 THEN 'Febrero'
+        WHEN 3 THEN 'Marzo'
+        WHEN 4 THEN 'Abril'
+        WHEN 5 THEN 'Mayo'
+        WHEN 6 THEN 'Junio'
+        WHEN 7 THEN 'Julio'
+        WHEN 8 THEN 'Agosto'
+        WHEN 9 THEN 'Septiembre'
+        WHEN 10 THEN 'Octubre'
+        WHEN 11 THEN 'Noviembre'
+        WHEN 12 THEN 'Diciembre'
+    END
+    AS nombre_mes,
+
+    planificadas,
+
+    realizadas_planificadas,
+
+    realizadas_no_programadas,
+
+    realizadas_totales,
+
+    realizadas_fuera_fecha,
+
+    CASE
+
+        WHEN planificadas = 0
+        THEN 0
+
+        ELSE ROUND(
+            (
+                realizadas_planificadas::NUMERIC
+                /
+                planificadas::NUMERIC
+            ) * 100,
+            1
+        )
+
+    END
+    AS cumplimiento_porcentaje
+
+FROM meses
+
+ORDER BY
+    anio,
+    mes;
+
+
+
+-- ============================================================
+-- 7. PERMISO PÚBLICO SOLO PARA LA VISTA
+-- ============================================================
+
+GRANT SELECT
+ON public.v_capacitaciones_dashboard
+TO anon, authenticated;
+
+
+
+-- ============================================================
+-- FIN
+-- ============================================================
+Qué va a calcular
+
+Para el cumplimiento mensual voy a usar:
+
+Planificadas = P + R + RFF
+
+Realizadas planificadas = R + RFF
+
+RNP se muestra aparte, porque fue una capacitación realizada pero no estaba programada. Esto es importante para que una RNP no infle artificialmente el cumplimiento del programa.
+
+Así, en el dashboard del cliente podremos mostrar por cada mes:
+
+Planificadas | Realizadas | No programadas | Cumplimiento %
+
+y arriba el acumulado a la fecha.
+
+Dale RUN. Si aparece “Success. No rows returned”, está perfecto. Decime “listo” y seguimos con capacitaciones-admin.html, para que puedas subir exactamente el Excel que me pasaste.
+
+listo
+
+Listo. Ya te preparé la parte privada para cargar Capacitaciones.
+
+Primero subí este archivo nuevo al repositorio:
+
+Descargar capacitaciones-admin.html
+
+Crealo acá con ese nombre exacto:
+
+Crear capacitaciones-admin.html en GitHub
+
+Después reemplazá tu gestion.html por esta versión, que agrega la pestaña 🎓 CAPACITACIONES:
+
+Descargar gestion.html actualizado
+
+Pegalo acá:
+
+Editar gestion.html en GitHub
+
+El cargador está preparado específicamente para tu Excel: lee los temas del programa, las marcas de especialidad y los meses de enero a diciembre, tomando únicamente los estados P, R, RFF y RNP. No carga al dashboard público ni el personal a capacitar ni el instructor.
+
+Después de subir ambos archivos, entrá en gestion.html → CAPACITACIONES, seleccioná el mismo Excel que me pasaste y tocá Analizar Excel. Primero quiero que veamos qué cantidad de temas/eventos detecta antes de tocar el dashboard del cliente. 
+
+capacitaciones-admin.html
+HTML
+gestion_con_capacitaciones.html
+HTML
+para, haceme de paso por paso pq que hago aca?
+
+Sí, ahí estás bien. Hacemos solo este paso ahora.
+
+En esa pantalla:
+
+Arriba, donde dice “Name your file…”, escribí exactamente:
+capacitaciones-admin.html
+En el cuadro grande que dice “Enter file contents here”, pegá el contenido completo de este archivo:
+
+Abrir/descargar capacitaciones-admin.html
+Después apretá el botón verde de arriba a la derecha:
+Commit changes...
+Confirmá nuevamente con Commit changes.
+
+No hagas nada más todavía.
+
+Cuando termines, mandame una captura de cómo quedó o decime “listo” y seguimos con gestion.html.
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capacitaciones | Gestión de Calidad</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<style>
+*{box-sizing:border-box}
+:root{
+  --azul:#0b3568;
+  --azul2:#174f8a;
+  --celeste:#60c5e8;
+  --verde:#179447;
+  --rojo:#dc3b3b;
+  --naranja:#f28c28;
+  --gris:#687787;
+  --fondo:#f4f7f9;
+  --borde:#dfe7ed;
+}
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:var(--fondo);
+  color:#1d2a36;
+}
+main{
+  max-width:1250px;
+  margin:auto;
+  padding:28px;
+}
+.card{
+  background:white;
+  border:1px solid var(--borde);
+  border-radius:16px;
+  padding:24px;
+  margin-bottom:20px;
+  box-shadow:0 4px 15px rgba(20,50,80,.04);
+}
+h1,h2{color:var(--azul);margin-top:0}
+h1{font-size:25px;margin-bottom:7px}
+h2{font-size:17px}
+.bajada{color:var(--gris);font-size:13px;margin:0}
+.estado{
+  padding:12px 14px;
+  border-radius:10px;
+  background:#eef7fb;
+  color:#31566e;
+  font-size:12px;
+  margin-bottom:18px;
+}
+.estado.ok{background:#eaf8ef;color:#176d3c}
+.estado.error{background:#fdecec;color:#a62f2f}
+.fila{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  align-items:center;
+}
+input[type=file]{
+  flex:1;
+  min-width:280px;
+  border:1px solid #ccd7df;
+  border-radius:9px;
+  padding:11px;
+  background:white;
+}
+button{
+  border:0;
+  border-radius:9px;
+  padding:12px 18px;
+  cursor:pointer;
+  font-weight:bold;
+}
+.btnAnalizar{background:var(--azul);color:white}
+.btnCargar{background:var(--verde);color:white}
+button:disabled{opacity:.45;cursor:not-allowed}
+.kpis{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-top:18px;
+}
+.kpi{
+  border:1px solid var(--borde);
+  border-radius:12px;
+  padding:16px;
+  background:#fafbfd;
+}
+.kpi span{
+  display:block;
+  text-transform:uppercase;
+  color:var(--gris);
+  font-size:10px;
+  font-weight:bold;
+}
+.kpi strong{
+  display:block;
+  color:var(--azul);
+  font-size:25px;
+  margin-top:6px;
+}
+.tablaWrap{
+  overflow:auto;
+  border:1px solid var(--borde);
+  border-radius:10px;
+  max-height:510px;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+th{
+  position:sticky;
+  top:0;
+  background:var(--azul);
+  color:white;
+  padding:10px;
+  text-align:left;
+  white-space:nowrap;
+}
+td{
+  padding:9px 10px;
+  border-bottom:1px solid #e8edf1;
+  vertical-align:top;
+}
+.badge{
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:15px;
+  font-size:10px;
+  font-weight:bold;
+}
+.P{background:#eef2f5;color:#536574}
+.R{background:#eaf8ef;color:#176d3c}
+.RFF{background:#fff3e5;color:#9a5d00}
+.RNP{background:#e9f6fc;color:#17698c}
+.nota{
+  margin-top:12px;
+  color:var(--gris);
+  font-size:11px;
+  line-height:1.5;
+}
+@media(max-width:800px){
+  main{padding:14px}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+
+<body>
+<main>
+
+  <div class="card">
+    <h1>🎓 Carga de Capacitaciones</h1>
+    <p class="bajada">Programa mensual de capacitación · carga privada para actualizar el dashboard del cliente.</p>
+  </div>
+
+  <div id="estado" class="estado">⏳ Verificando sesión...</div>
+
+  <div class="card">
+    <h2>1. Seleccionar Excel</h2>
+    <div class="fila">
+      <input id="archivo" type="file" accept=".xlsx,.xls">
+      <button class="btnAnalizar" onclick="analizarExcel()">Analizar Excel</button>
+      <button id="btnCargar" class="btnCargar" onclick="subirDatos()" disabled>Cargar a Supabase</button>
+    </div>
+    <div class="nota">
+      Se leen únicamente tema, especialidad, año, mes y estado P / R / RFF / RNP.
+      No se publica personal a capacitar ni instructor.
+    </div>
+  </div>
+
+  <div id="resumen" class="card" style="display:none;">
+    <h2>2. Vista previa</h2>
+    <div class="kpis">
+      <div class="kpi"><span>Temas detectados</span><strong id="kTemas">0</strong></div>
+      <div class="kpi"><span>Eventos mensuales</span><strong id="kEventos">0</strong></div>
+      <div class="kpi"><span>Planificados</span><strong id="kPlan">0</strong></div>
+      <div class="kpi"><span>Realizados</span><strong id="kReal">0</strong></div>
+    </div>
+  </div>
+
+  <div id="preview" class="card" style="display:none;">
+    <h2>Detalle detectado</h2>
+    <div class="tablaWrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Ítem</th>
+            <th>Tema</th>
+            <th>Especialidad</th>
+            <th>Año</th>
+            <th>Mes</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="tablaBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const SUPABASE_URL = "https://mzgbtejfgsrskiuymtwh.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Wen9hxBnae8wRrEEaP5lOQ_aNl9OCGd";
+const db = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+const MESES = [
+  "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+  "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+];
+
+const ESP = {
+  10:"General",
+  11:"Civil",
+  12:"Mecánica",
+  13:"Piping",
+  14:"Revestimiento",
+  15:"Electricidad",
+  16:"Instrumentación y Control"
+};
+
+let eventos = [];
+let temasDetectados = 0;
+let nombreArchivo = "";
+let sesionOk = false;
+
+function setEstado(texto,tipo=""){
+  const e=document.getElementById("estado");
+  e.textContent=texto;
+  e.className="estado"+(tipo?" "+tipo:"");
+}
+
+async function verificarSesion(){
+  const {data:{session}} = await db.auth.getSession();
+  if(!session){
+    setEstado("⚠️ No hay sesión iniciada. Ingresá primero desde Administración de Documentación.","error");
+    sesionOk=false;
+    return;
+  }
+  sesionOk=true;
+  setEstado("● Sesión activa · listo para cargar Capacitaciones","ok");
+}
+
+function valorHoja(ws,r,c){
+  const ref = XLSX.utils.encode_cell({r:r-1,c:c-1});
+  return ws[ref] ? ws[ref].v : null;
+}
+
+function texto(v){
+  return String(v ?? "").trim();
+}
+
+function normalizarEstado(v){
+  const s=texto(v).toUpperCase().replace(/\s+/g,"");
+  return ["P","R","RFF","RNP"].includes(s) ? s : "";
+}
+
+function buscarHojaPrograma(wb){
+  for(const nombre of wb.SheetNames){
+    const ws=wb.Sheets[nombre];
+    const titulo=texto(valorHoja(ws,1,6)).toUpperCase();
+    const cab=texto(valorHoja(ws,5,2)).toUpperCase();
+    if(titulo.includes("PROGRAMA DE CAPACITACION") || cab.includes("TEMA DEL CURSO")){
+      return ws;
+    }
+  }
+  return wb.Sheets[wb.SheetNames[0]];
+}
+
+async function analizarExcel(){
+  const input=document.getElementById("archivo");
+  if(!input.files.length){
+    setEstado("Seleccioná primero el archivo Excel.","error");
+    return;
+  }
+
+  try{
+    setEstado("⏳ Analizando Excel...");
+    nombreArchivo=input.files[0].name;
+
+    const buffer=await input.files[0].arrayBuffer();
+    const wb=XLSX.read(buffer,{type:"array"});
+    const ws=buscarHojaPrograma(wb);
+
+    let anio=Number(valorHoja(ws,5,17));
+    if(!Number.isFinite(anio) || anio<2000 || anio>2100){
+      anio=new Date().getFullYear();
+    }
+
+    eventos=[];
+    temasDetectados=0;
+
+    let vaciasSeguidas=0;
+
+    for(let r=7;r<=200;r++){
+      const item=valorHoja(ws,r,1);
+      const tema=texto(valorHoja(ws,r,2));
+
+      if(!tema){
+        vaciasSeguidas++;
+        if(vaciasSeguidas>=4) break;
+        continue;
+      }
+
+      vaciasSeguidas=0;
+
+      if(!Number.isFinite(Number(item))) continue;
+
+      temasDetectados++;
+
+      const especialidades=[];
+      for(let c=10;c<=16;c++){
+        const marca=texto(valorHoja(ws,r,c)).toUpperCase();
+        if(marca==="X" && ESP[c]) especialidades.push(ESP[c]);
+      }
+
+      for(let mes=1;mes<=12;mes++){
+        const col=16+mes; // Q:AB
+        const estado=normalizarEstado(valorHoja(ws,r,col));
+
+        if(!estado) continue;
+
+        eventos.push({
+          item:Number(item),
+          tema,
+          especialidades,
+          anio,
+          mes,
+          estado
+        });
+      }
+    }
+
+    if(!eventos.length){
+      throw new Error("No se detectaron estados P, R, RFF o RNP en las columnas mensuales.");
+    }
+
+    pintarPreview();
+    document.getElementById("btnCargar").disabled=!sesionOk;
+
+    setEstado(
+      `✓ Excel analizado: ${temasDetectados} temas y ${eventos.length} eventos mensuales detectados.`,
+      "ok"
+    );
+
+  }catch(err){
+    console.error(err);
+    eventos=[];
+    document.getElementById("btnCargar").disabled=true;
+    setEstado("❌ "+err.message,"error");
+  }
+}
+
+function pintarPreview(){
+  const plan=eventos.filter(x=>["P","R","RFF"].includes(x.estado)).length;
+  const real=eventos.filter(x=>["R","RFF","RNP"].includes(x.estado)).length;
+
+  document.getElementById("kTemas").textContent=temasDetectados;
+  document.getElementById("kEventos").textContent=eventos.length;
+  document.getElementById("kPlan").textContent=plan;
+  document.getElementById("kReal").textContent=real;
+
+  document.getElementById("resumen").style.display="block";
+  document.getElementById("preview").style.display="block";
+
+  document.getElementById("tablaBody").innerHTML=
+    eventos.map(x=>`
+      <tr>
+        <td>${x.item}</td>
+        <td>${esc(x.tema)}</td>
+        <td>${esc(x.especialidades.join(", ") || "General / sin marca")}</td>
+        <td>${x.anio}</td>
+        <td>${MESES[x.mes-1]}</td>
+        <td><span class="badge ${x.estado}">${x.estado}</span></td>
+      </tr>
+    `).join("");
+}
+
+async function subirDatos(){
+  if(!eventos.length){
+    setEstado("Primero analizá el Excel.","error");
+    return;
+  }
+
+  const {data:{session}}=await db.auth.getSession();
+  if(!session){
+    setEstado("❌ La sesión venció. Volvé a iniciar sesión desde Administración de Documentación.","error");
+    return;
+  }
+
+  const btn=document.getElementById("btnCargar");
+  btn.disabled=true;
+
+  let cargaId=null;
+
+  try{
+    setEstado("⏳ Creando carga en Supabase...");
+
+    const {data:carga,error:errorCarga}=await db
+      .from("capacitaciones_cargas")
+      .insert({
+        archivo_nombre:nombreArchivo,
+        usuario:session.user.email || "",
+        filas_detectadas:temasDetectados,
+        eventos_detectados:eventos.length
+      })
+      .select("id")
+      .single();
+
+    if(errorCarga) throw errorCarga;
+
+    cargaId=carga.id;
+
+    const filas=eventos.map(x=>({
+      carga_id:cargaId,
+      item:x.item,
+      tema:x.tema,
+      especialidades:x.especialidades,
+      anio:x.anio,
+      mes:x.mes,
+      estado:x.estado
+    }));
+
+    for(let i=0;i<filas.length;i+=100){
+      const lote=filas.slice(i,i+100);
+      const {error}=await db
+        .from("capacitaciones_registro")
+        .insert(lote);
+
+      if(error) throw error;
+    }
+
+    setEstado(
+      `✓ Carga completada. ${temasDetectados} temas y ${eventos.length} eventos procesados.`,
+      "ok"
+    );
+
+  }catch(err){
+    console.error(err);
+
+    if(cargaId){
+      await db
+        .from("capacitaciones_cargas")
+        .delete()
+        .eq("id",cargaId);
+    }
+
+    setEstado("❌ No se pudo completar la carga: "+err.message,"error");
+  }finally{
+    btn.disabled=false;
+  }
+}
+
+function esc(v){
+  return String(v ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+verificarSesion();
+</script>
+</body>
+</html>
+capacitaciones-admin.html
+HTML
