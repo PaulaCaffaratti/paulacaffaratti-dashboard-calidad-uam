@@ -281,6 +281,92 @@ main{
   }
 }
 
+
+.resumenEjecutivoGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+  margin-bottom:20px;
+}
+
+.resumenEjecutivoPanel{
+  background:white;
+  border:1px solid #e1e8ed;
+  border-radius:15px;
+  padding:20px 22px;
+  box-shadow:0 3px 12px rgba(20,50,80,.04);
+}
+
+.resumenEjecutivoPanel h3{
+  margin:0 0 16px;
+  color:var(--azul);
+  font-size:18px;
+}
+
+.resumenFila{
+  display:grid;
+  grid-template-columns:1fr 90px 110px;
+  align-items:center;
+  gap:14px;
+  padding:15px 0;
+  border-bottom:1px solid #e3e9ee;
+}
+
+.resumenFila:last-child{
+  border-bottom:0;
+}
+
+.resumenNombre{
+  font-size:13px;
+  font-weight:bold;
+  color:#344657;
+}
+
+.resumenCantidad{
+  text-align:right;
+  font-size:24px;
+  font-weight:bold;
+  color:var(--azul);
+}
+
+.resumenPct{
+  text-align:right;
+  font-size:24px;
+  font-weight:bold;
+}
+
+.resumenPct.violeta{color:var(--violeta);}
+.resumenPct.rojo{color:var(--rojo);}
+.resumenPct.amarillo{color:#d99500;}
+.resumenPct.verde{color:var(--verde);}
+
+.resumenNota{
+  margin-top:12px;
+  padding:11px 13px;
+  border-radius:9px;
+  background:#eef7fb;
+  color:#31566e;
+  font-size:11px;
+}
+
+@media(max-width:850px){
+  .resumenEjecutivoGrid{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:650px){
+  .resumenFila{
+    grid-template-columns:1fr 70px 80px;
+    gap:8px;
+  }
+
+  .resumenCantidad,
+  .resumenPct{
+    font-size:20px;
+  }
+}
+
 .panel{
   background:white;
   border:1px solid #e1e8ed;
@@ -451,72 +537,55 @@ body.embed .titulo{margin-top:0!important;}
       </div>
 
     </div>
+  </div>
 
-    <div class="kpisIndicadores">
+  <div class="resumenEjecutivoGrid">
 
-      <div class="kpi violeta" data-filtro="NC" onclick="filtrarKPI('NC',this)">
-        <span>No conformidades</span>
-        <div class="detalleKpi">
-          <strong id="kNC">0</strong>
-          <div id="kNCPct" class="porcentajeKpi">0,0%</div>
-        </div>
-        <div class="subKpi">Cantidad y % sobre el total de observaciones</div>
+    <section class="resumenEjecutivoPanel">
+      <h3>Desempeño sobre el total</h3>
+
+      <div class="resumenFila">
+        <div class="resumenNombre">No conformidades</div>
+        <div id="rNC" class="resumenCantidad">0</div>
+        <div id="rNCPct" class="resumenPct violeta">0,0%</div>
       </div>
 
-      <div class="kpi rojo" data-filtro="VENCIDO" onclick="filtrarKPI('VENCIDO',this)">
-        <span>Fuera de tiempo / Vencidas</span>
-        <div class="detalleKpi">
-          <strong id="kVencidas">0</strong>
-          <div id="kVencidasPct" class="porcentajeKpi">0,0%</div>
-        </div>
-        <div class="subKpi">Observaciones que no se cerraron en tiempo y forma</div>
+      <div class="resumenFila">
+        <div class="resumenNombre">Fuera de tiempo / vencidas</div>
+        <div id="rVencidas" class="resumenCantidad">0</div>
+        <div id="rVencidasPct" class="resumenPct rojo">0,0%</div>
       </div>
 
-    </div>
+      <div class="resumenNota">
+        Ambos indicadores se calculan sobre el total de observaciones Blister.
+      </div>
+    </section>
+
+    <section class="resumenEjecutivoPanel">
+      <h3>Tipo de observación sobre el total</h3>
+
+      <div class="resumenFila">
+        <div class="resumenNombre">Mejora</div>
+        <div id="rMejora" class="resumenCantidad">0</div>
+        <div id="rMejoraPct" class="resumenPct amarillo">0,0%</div>
+      </div>
+
+      <div class="resumenFila">
+        <div class="resumenNombre">Positiva</div>
+        <div id="rPositiva" class="resumenCantidad">0</div>
+        <div id="rPositivaPct" class="resumenPct verde">0,0%</div>
+      </div>
+
+      <div class="resumenNota">
+        La suma de Mejora + Positiva representa el total de observaciones.
+      </div>
+    </section>
 
   </div>
 
   <div class="graficos">
 
-    <section class="panel" style="grid-column:1 / -1">
-      <h3>Resumen de indicadores</h3>
-
-      <div class="resumenCabecera">
-        <div>Indicador</div>
-        <div>Cantidad</div>
-        <div>% del total</div>
-      </div>
-
-      <div class="resumenIndicadores">
-
-        <div class="filaIndicador violeta destacado">
-          <div class="nombre">No conformidades</div>
-          <div id="rNC" class="cantidad">0</div>
-          <div id="rNCPct" class="porcentaje">0,0%</div>
-        </div>
-
-        <div class="filaIndicador rojo destacado">
-          <div class="nombre">Fuera de tiempo / vencidas</div>
-          <div id="rVencidas" class="cantidad">0</div>
-          <div id="rVencidasPct" class="porcentaje">0,0%</div>
-        </div>
-
-        <div class="filaIndicador naranja">
-          <div class="nombre">Tipo de observación · Mejora</div>
-          <div id="rMejora" class="cantidad">0</div>
-          <div id="rMejoraPct" class="porcentaje">0,0%</div>
-        </div>
-
-        <div class="filaIndicador verde">
-          <div class="nombre">Tipo de observación · Positiva</div>
-          <div id="rPositiva" class="cantidad">0</div>
-          <div id="rPositivaPct" class="porcentaje">0,0%</div>
-        </div>
-
-      </div>
-    </section>
-
-    <section class="panel">
+<section class="panel">
       <h3>Observaciones por especialidad</h3>
       <div class="chartBox">
         <canvas id="chartEspecialidad"></canvas>
@@ -738,12 +807,6 @@ function pintarKPIs(){
 
   setTexto("kAbiertas",abiertas);
   setTexto("kAbiertasPct",formatoPct(porcentaje(abiertas)));
-
-  setTexto("kVencidas",vencidas);
-  setTexto("kVencidasPct",formatoPct(porcentaje(vencidas)));
-
-  setTexto("kNC",nc);
-  setTexto("kNCPct",formatoPct(porcentaje(nc)));
 
   setTexto("rNC",nc);
   setTexto("rNCPct",formatoPct(porcentaje(nc)));
