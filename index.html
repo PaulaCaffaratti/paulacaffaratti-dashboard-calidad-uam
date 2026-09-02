@@ -10,122 +10,6 @@
 <title>Dashboard Calidad | Duplicar Norte UAM</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-/* =========================================================
-   PRODUCCIÓN - RESUMEN PÚBLICO PREMOLDEADOS
-========================================================= */
-
-const PREM_SUPABASE_URL = "https://tnnioleawbhuqjuykrsf.supabase.co";
-const PREM_SUPABASE_KEY = "sb_publishable__gz2j09IN5vbQcPwdGnjKw_4NBMi1_O";
-const premDb = window.supabase.createClient(PREM_SUPABASE_URL, PREM_SUPABASE_KEY);
-
-const PREM_BASE_PROYECTO = [
-  {tipo:"B0A",cantidad:2,m3:3.91},{tipo:"B0B",cantidad:2,m3:3.91},{tipo:"B1",cantidad:14,m3:7.4},{tipo:"B2",cantidad:4,m3:2.5},{tipo:"B3",cantidad:4,m3:7.56},
-  {tipo:"F1",cantidad:20,m3:0.28},{tipo:"F2",cantidad:2,m3:0.31},{tipo:"FPE",cantidad:1,m3:0.64},{tipo:"TPE",cantidad:1,m3:0.26},{tipo:"F1A",cantidad:4,m3:0.28},
-  {tipo:"C1",cantidad:2,m3:0.993},{tipo:"C2",cantidad:5,m3:1.03},{tipo:"C3",cantidad:3,m3:1.03},{tipo:"C4",cantidad:4,m3:1.07},
-  {tipo:"S1",cantidad:2,m3:1.59},{tipo:"S2A",cantidad:4,m3:2.92},{tipo:"S2B",cantidad:1,m3:2.92},{tipo:"S3",cantidad:2,m3:1.77},{tipo:"S4A",cantidad:3,m3:1.1},{tipo:"S4B",cantidad:4,m3:0.55},{tipo:"S5",cantidad:2,m3:0.8},{tipo:"S6",cantidad:2,m3:0.3},
-  {tipo:"PTS-A",cantidad:2,m3:3.41},{tipo:"BTS",cantidad:1,m3:3.1},{tipo:"BTS-C",cantidad:1,m3:0.87},
-  {tipo:"FDS",cantidad:10,m3:1.5},{tipo:"ILUM",cantidad:4,m3:2.24},
-  {tipo:"FS-01",cantidad:20,m3:0.197},{tipo:"FS-02",cantidad:10,m3:0.128},{tipo:"FS-03",cantidad:20,m3:0.08},{tipo:"FS-06",cantidad:12,m3:0.3},
-  {tipo:"B-01",cantidad:1,m3:2.36},{tipo:"B-02",cantidad:1,m3:1.37},{tipo:"B-03",cantidad:1,m3:1.03},{tipo:"B-04",cantidad:4,m3:1.57},{tipo:"B-06",cantidad:1,m3:1.27},{tipo:"B-07",cantidad:3,m3:1.02},
-  {tipo:"FS-04",cantidad:1,m3:0.44},
-  {tipo:"MG-BA",cantidad:1,m3:1.75},{tipo:"MG-VB",cantidad:1,m3:0.59},{tipo:"MG-VA",cantidad:1,m3:0.46},{tipo:"MG-C",cantidad:1,m3:0.2},{tipo:"MG-BA2",cantidad:1,m3:0.58},{tipo:"MG-C2",cantidad:1,m3:0.2},
-  {tipo:"ALC-A",cantidad:1,m3:1.16},{tipo:"ALC-B",cantidad:18,m3:1.16},{tipo:"ALC-C",cantidad:1,m3:1.16},
-  {tipo:"TA-1",cantidad:1,m3:0.08},{tipo:"TA-2",cantidad:1,m3:0.1},{tipo:"TA-3",cantidad:2,m3:0.045},
-  {tipo:"LO-1",cantidad:1,m3:0.44},{tipo:"LO-2",cantidad:1,m3:0.36},
-  {tipo:"VI-1",cantidad:1,m3:0.07},{tipo:"VI-2",cantidad:1,m3:0.05},
-  {tipo:"MO-1",cantidad:1,m3:3.64},{tipo:"MO-2",cantidad:1,m3:3.64},
-  {tipo:"CD-516",cantidad:1,m3:0.2}
-];
-
-function premNormalizarTipo(tipo){
-  return String(tipo || "").trim().toUpperCase();
-}
-
-const PREM_M3_POR_TIPO = {};
-PREM_BASE_PROYECTO.forEach(item=>{
-  PREM_M3_POR_TIPO[premNormalizarTipo(item.tipo)] = item.m3;
-});
-
-function premVolumenPieza(pieza){
-  const valor = Number(pieza.m3);
-  if(Number.isFinite(valor) && valor > 0) return valor;
-  return Number(PREM_M3_POR_TIPO[premNormalizarTipo(pieza.tipo)] || 0);
-}
-
-function premFormatoNumeroM3(valor){
-  return Number(valor || 0).toLocaleString("es-AR",{
-    minimumFractionDigits:2,
-    maximumFractionDigits:2
-  });
-}
-
-function premVolumenTotalProyecto(){
-  return PREM_BASE_PROYECTO.reduce(
-    (total,item)=> total + Number(item.cantidad||0) * Number(item.m3||0),
-    0
-  );
-}
-
-function premCantidadTotalProyecto(){
-  return PREM_BASE_PROYECTO.reduce(
-    (total,item)=> total + Number(item.cantidad||0),
-    0
-  );
-}
-
-async function cargarResumenPremoldeados(){
-  const estado = document.getElementById("premConexion");
-  if(!estado) return;
-
-  const {data,error} = await premDb
-    .from("premoldeados")
-    .select("id,tipo,m3,etapa,montada,pintada")
-    .order("id",{ascending:true});
-
-  if(error){
-    estado.textContent = "❌ No se pudieron actualizar los datos de Premoldeados.";
-    console.error(error);
-    return;
-  }
-
-  const piezasPrem = data || [];
-
-  const listaTaller = piezasPrem.filter(p=>Number(p.etapa ?? 0) >= 0);
-  const listaLiberadas = piezasPrem.filter(p=>Number(p.etapa ?? 0) >= 1);
-  const listaObra = piezasPrem.filter(p=>Number(p.etapa ?? 0) >= 2);
-  const listaQaqc = piezasPrem.filter(p=>Number(p.etapa ?? 0) >= 3);
-  const listaMontadas = piezasPrem.filter(p=>p.montada === true);
-  const listaPintadas = piezasPrem.filter(p=>p.pintada === true);
-
-  const sumarM3 = lista => lista.reduce(
-    (suma,p)=> suma + premVolumenPieza(p),
-    0
-  );
-
-  setTexto("premTotal", piezasPrem.length);
-  setTexto("premCantidadPlanificada", premCantidadTotalProyecto());
-  setTexto("premVolumenProyecto", premFormatoNumeroM3(premVolumenTotalProyecto()) + " m³");
-
-  setTexto("premTaller", listaTaller.length);
-  setTexto("premLiberadas", listaLiberadas.length);
-  setTexto("premObra", listaObra.length);
-  setTexto("premQaqc", listaQaqc.length);
-  setTexto("premMontadas", listaMontadas.length);
-  setTexto("premPintadas", listaPintadas.length);
-
-  setTexto("premM3Taller", premFormatoNumeroM3(sumarM3(listaTaller)));
-  setTexto("premM3Liberadas", premFormatoNumeroM3(sumarM3(listaLiberadas)));
-  setTexto("premM3Obra", premFormatoNumeroM3(sumarM3(listaObra)));
-  setTexto("premM3Qaqc", premFormatoNumeroM3(sumarM3(listaQaqc)));
-  setTexto("premM3Montadas", premFormatoNumeroM3(sumarM3(listaMontadas)));
-  setTexto("premM3Pintadas", premFormatoNumeroM3(sumarM3(listaPintadas)));
-
-  estado.textContent = "● Datos actualizados automáticamente";
-}
-
-cargarResumenPremoldeados();
-setInterval(cargarResumenPremoldeados, 60000);
-
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -4220,6 +4104,124 @@ valor ?? ""
 );
 
 }
+
+
+
+/* =========================================================
+   PRODUCCIÓN - RESUMEN PÚBLICO PREMOLDEADOS
+========================================================= */
+
+const PREM_SUPABASE_URL = "https://tnnioleawbhuqjuykrsf.supabase.co";
+const PREM_SUPABASE_KEY = "sb_publishable__gz2j09IN5vbQcPwdGnjKw_4NBMi1_O";
+const premDb = window.supabase.createClient(PREM_SUPABASE_URL, PREM_SUPABASE_KEY);
+
+const PREM_BASE_PROYECTO = [
+  {tipo:"B0A",cantidad:2,m3:3.91},{tipo:"B0B",cantidad:2,m3:3.91},{tipo:"B1",cantidad:14,m3:7.4},{tipo:"B2",cantidad:4,m3:2.5},{tipo:"B3",cantidad:4,m3:7.56},
+  {tipo:"F1",cantidad:20,m3:0.28},{tipo:"F2",cantidad:2,m3:0.31},{tipo:"FPE",cantidad:1,m3:0.64},{tipo:"TPE",cantidad:1,m3:0.26},{tipo:"F1A",cantidad:4,m3:0.28},
+  {tipo:"C1",cantidad:2,m3:0.993},{tipo:"C2",cantidad:5,m3:1.03},{tipo:"C3",cantidad:3,m3:1.03},{tipo:"C4",cantidad:4,m3:1.07},
+  {tipo:"S1",cantidad:2,m3:1.59},{tipo:"S2A",cantidad:4,m3:2.92},{tipo:"S2B",cantidad:1,m3:2.92},{tipo:"S3",cantidad:2,m3:1.77},{tipo:"S4A",cantidad:3,m3:1.1},{tipo:"S4B",cantidad:4,m3:0.55},{tipo:"S5",cantidad:2,m3:0.8},{tipo:"S6",cantidad:2,m3:0.3},
+  {tipo:"PTS-A",cantidad:2,m3:3.41},{tipo:"BTS",cantidad:1,m3:3.1},{tipo:"BTS-C",cantidad:1,m3:0.87},
+  {tipo:"FDS",cantidad:10,m3:1.5},{tipo:"ILUM",cantidad:4,m3:2.24},
+  {tipo:"FS-01",cantidad:20,m3:0.197},{tipo:"FS-02",cantidad:10,m3:0.128},{tipo:"FS-03",cantidad:20,m3:0.08},{tipo:"FS-06",cantidad:12,m3:0.3},
+  {tipo:"B-01",cantidad:1,m3:2.36},{tipo:"B-02",cantidad:1,m3:1.37},{tipo:"B-03",cantidad:1,m3:1.03},{tipo:"B-04",cantidad:4,m3:1.57},{tipo:"B-06",cantidad:1,m3:1.27},{tipo:"B-07",cantidad:3,m3:1.02},
+  {tipo:"FS-04",cantidad:1,m3:0.44},
+  {tipo:"MG-BA",cantidad:1,m3:1.75},{tipo:"MG-VB",cantidad:1,m3:0.59},{tipo:"MG-VA",cantidad:1,m3:0.46},{tipo:"MG-C",cantidad:1,m3:0.2},{tipo:"MG-BA2",cantidad:1,m3:0.58},{tipo:"MG-C2",cantidad:1,m3:0.2},
+  {tipo:"ALC-A",cantidad:1,m3:1.16},{tipo:"ALC-B",cantidad:18,m3:1.16},{tipo:"ALC-C",cantidad:1,m3:1.16},
+  {tipo:"TA-1",cantidad:1,m3:0.08},{tipo:"TA-2",cantidad:1,m3:0.1},{tipo:"TA-3",cantidad:2,m3:0.045},
+  {tipo:"LO-1",cantidad:1,m3:0.44},{tipo:"LO-2",cantidad:1,m3:0.36},
+  {tipo:"VI-1",cantidad:1,m3:0.07},{tipo:"VI-2",cantidad:1,m3:0.05},
+  {tipo:"MO-1",cantidad:1,m3:3.64},{tipo:"MO-2",cantidad:1,m3:3.64},
+  {tipo:"CD-516",cantidad:1,m3:0.2}
+];
+
+function premNormalizarTipo(tipo){
+  return String(tipo || "").trim().toUpperCase();
+}
+
+const PREM_M3_POR_TIPO = {};
+PREM_BASE_PROYECTO.forEach(item=>{
+  PREM_M3_POR_TIPO[premNormalizarTipo(item.tipo)] = item.m3;
+});
+
+function premVolumenPieza(pieza){
+  const valor = Number(pieza.m3);
+  if(Number.isFinite(valor) && valor > 0) return valor;
+  return Number(PREM_M3_POR_TIPO[premNormalizarTipo(pieza.tipo)] || 0);
+}
+
+function premFormatoNumeroM3(valor){
+  return Number(valor || 0).toLocaleString("es-AR",{
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+  });
+}
+
+function premVolumenTotalProyecto(){
+  return PREM_BASE_PROYECTO.reduce(
+    (total,item)=> total + Number(item.cantidad||0) * Number(item.m3||0),
+    0
+  );
+}
+
+function premCantidadTotalProyecto(){
+  return PREM_BASE_PROYECTO.reduce(
+    (total,item)=> total + Number(item.cantidad||0),
+    0
+  );
+}
+
+async function cargarResumenPremoldeados(){
+  const estado = document.getElementById("premConexion");
+  if(!estado) return;
+
+  const {data,error} = await premDb
+    .from("premoldeados")
+    .select("id,tipo,m3,etapa,montada,pintada")
+    .order("id",{ascending:true});
+
+  if(error){
+    estado.textContent = "❌ No se pudieron actualizar los datos de Premoldeados.";
+    console.error(error);
+    return;
+  }
+
+  const piezasPrem = data || [];
+
+  const listaTaller = piezasPrem.filter(p=>Number(p.etapa ?? 0) >= 0);
+  const listaLiberadas = piezasPrem.filter(p=>Number(p.etapa ?? 0) >= 1);
+  const listaObra = piezasPrem.filter(p=>Number(p.etapa ?? 0) >= 2);
+  const listaQaqc = piezasPrem.filter(p=>Number(p.etapa ?? 0) >= 3);
+  const listaMontadas = piezasPrem.filter(p=>p.montada === true);
+  const listaPintadas = piezasPrem.filter(p=>p.pintada === true);
+
+  const sumarM3 = lista => lista.reduce(
+    (suma,p)=> suma + premVolumenPieza(p),
+    0
+  );
+
+  setTexto("premTotal", piezasPrem.length);
+  setTexto("premCantidadPlanificada", premCantidadTotalProyecto());
+  setTexto("premVolumenProyecto", premFormatoNumeroM3(premVolumenTotalProyecto()) + " m³");
+
+  setTexto("premTaller", listaTaller.length);
+  setTexto("premLiberadas", listaLiberadas.length);
+  setTexto("premObra", listaObra.length);
+  setTexto("premQaqc", listaQaqc.length);
+  setTexto("premMontadas", listaMontadas.length);
+  setTexto("premPintadas", listaPintadas.length);
+
+  setTexto("premM3Taller", premFormatoNumeroM3(sumarM3(listaTaller)));
+  setTexto("premM3Liberadas", premFormatoNumeroM3(sumarM3(listaLiberadas)));
+  setTexto("premM3Obra", premFormatoNumeroM3(sumarM3(listaObra)));
+  setTexto("premM3Qaqc", premFormatoNumeroM3(sumarM3(listaQaqc)));
+  setTexto("premM3Montadas", premFormatoNumeroM3(sumarM3(listaMontadas)));
+  setTexto("premM3Pintadas", premFormatoNumeroM3(sumarM3(listaPintadas)));
+
+  estado.textContent = "● Datos actualizados automáticamente";
+}
+
+cargarResumenPremoldeados();
+setInterval(cargarResumenPremoldeados, 60000);
 
 </script>
 
