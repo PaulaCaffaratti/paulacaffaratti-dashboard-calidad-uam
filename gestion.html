@@ -172,6 +172,13 @@ iframe{
       </button>
 
       <button
+      id="tabPiping"
+      class="tab"
+      onclick="abrirModulo('piping',this)">
+      🔧 PIPING
+      </button>
+
+      <button
       id="tabMaestro"
       class="tab"
       onclick="abrirModulo('maestro',this)">
@@ -187,7 +194,7 @@ iframe{
 
   <div class="aviso">
     Ingresá una sola vez desde Administración de Documentación.
-    Después podés cambiar de pestaña para cargar Blister, Capacitaciones o modificar el Listado Base.
+    Después podés cambiar de pestaña para cargar Blister, Capacitaciones, Piping o modificar el Listado Base.
   </div>
 
   <div class="contenedor">
@@ -206,6 +213,7 @@ const rutas = {
   documentacion:"admin.html",
   blister:"blister-admin.html",
   capacitaciones:"capacitaciones-admin.html",
+  piping:"piping-admin.html",
   maestro:"maestro.html"
 };
 
