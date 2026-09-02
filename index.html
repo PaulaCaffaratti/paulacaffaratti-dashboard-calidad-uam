@@ -9,7 +9,124 @@
 
 <title>Dashboard Calidad | Duplicar Norte UAM</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+/* =========================================================
+   PRODUCCIÓN - RESUMEN PÚBLICO PREMOLDEADOS
+========================================================= */
+
+const PREM_SUPABASE_URL = "https://tnnioleawbhuqjuykrsf.supabase.co";
+const PREM_SUPABASE_KEY = "sb_publishable__gz2j09IN5vbQcPwdGnjKw_4NBMi1_O";
+const premDb = window.supabase.createClient(PREM_SUPABASE_URL, PREM_SUPABASE_KEY);
+
+const PREM_BASE_PROYECTO = [
+  {tipo:"B0A",cantidad:2,m3:3.91},{tipo:"B0B",cantidad:2,m3:3.91},{tipo:"B1",cantidad:14,m3:7.4},{tipo:"B2",cantidad:4,m3:2.5},{tipo:"B3",cantidad:4,m3:7.56},
+  {tipo:"F1",cantidad:20,m3:0.28},{tipo:"F2",cantidad:2,m3:0.31},{tipo:"FPE",cantidad:1,m3:0.64},{tipo:"TPE",cantidad:1,m3:0.26},{tipo:"F1A",cantidad:4,m3:0.28},
+  {tipo:"C1",cantidad:2,m3:0.993},{tipo:"C2",cantidad:5,m3:1.03},{tipo:"C3",cantidad:3,m3:1.03},{tipo:"C4",cantidad:4,m3:1.07},
+  {tipo:"S1",cantidad:2,m3:1.59},{tipo:"S2A",cantidad:4,m3:2.92},{tipo:"S2B",cantidad:1,m3:2.92},{tipo:"S3",cantidad:2,m3:1.77},{tipo:"S4A",cantidad:3,m3:1.1},{tipo:"S4B",cantidad:4,m3:0.55},{tipo:"S5",cantidad:2,m3:0.8},{tipo:"S6",cantidad:2,m3:0.3},
+  {tipo:"PTS-A",cantidad:2,m3:3.41},{tipo:"BTS",cantidad:1,m3:3.1},{tipo:"BTS-C",cantidad:1,m3:0.87},
+  {tipo:"FDS",cantidad:10,m3:1.5},{tipo:"ILUM",cantidad:4,m3:2.24},
+  {tipo:"FS-01",cantidad:20,m3:0.197},{tipo:"FS-02",cantidad:10,m3:0.128},{tipo:"FS-03",cantidad:20,m3:0.08},{tipo:"FS-06",cantidad:12,m3:0.3},
+  {tipo:"B-01",cantidad:1,m3:2.36},{tipo:"B-02",cantidad:1,m3:1.37},{tipo:"B-03",cantidad:1,m3:1.03},{tipo:"B-04",cantidad:4,m3:1.57},{tipo:"B-06",cantidad:1,m3:1.27},{tipo:"B-07",cantidad:3,m3:1.02},
+  {tipo:"FS-04",cantidad:1,m3:0.44},
+  {tipo:"MG-BA",cantidad:1,m3:1.75},{tipo:"MG-VB",cantidad:1,m3:0.59},{tipo:"MG-VA",cantidad:1,m3:0.46},{tipo:"MG-C",cantidad:1,m3:0.2},{tipo:"MG-BA2",cantidad:1,m3:0.58},{tipo:"MG-C2",cantidad:1,m3:0.2},
+  {tipo:"ALC-A",cantidad:1,m3:1.16},{tipo:"ALC-B",cantidad:18,m3:1.16},{tipo:"ALC-C",cantidad:1,m3:1.16},
+  {tipo:"TA-1",cantidad:1,m3:0.08},{tipo:"TA-2",cantidad:1,m3:0.1},{tipo:"TA-3",cantidad:2,m3:0.045},
+  {tipo:"LO-1",cantidad:1,m3:0.44},{tipo:"LO-2",cantidad:1,m3:0.36},
+  {tipo:"VI-1",cantidad:1,m3:0.07},{tipo:"VI-2",cantidad:1,m3:0.05},
+  {tipo:"MO-1",cantidad:1,m3:3.64},{tipo:"MO-2",cantidad:1,m3:3.64},
+  {tipo:"CD-516",cantidad:1,m3:0.2}
+];
+
+function premNormalizarTipo(tipo){
+  return String(tipo || "").trim().toUpperCase();
+}
+
+const PREM_M3_POR_TIPO = {};
+PREM_BASE_PROYECTO.forEach(item=>{
+  PREM_M3_POR_TIPO[premNormalizarTipo(item.tipo)] = item.m3;
+});
+
+function premVolumenPieza(pieza){
+  const valor = Number(pieza.m3);
+  if(Number.isFinite(valor) && valor > 0) return valor;
+  return Number(PREM_M3_POR_TIPO[premNormalizarTipo(pieza.tipo)] || 0);
+}
+
+function premFormatoNumeroM3(valor){
+  return Number(valor || 0).toLocaleString("es-AR",{
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+  });
+}
+
+function premVolumenTotalProyecto(){
+  return PREM_BASE_PROYECTO.reduce(
+    (total,item)=> total + Number(item.cantidad||0) * Number(item.m3||0),
+    0
+  );
+}
+
+function premCantidadTotalProyecto(){
+  return PREM_BASE_PROYECTO.reduce(
+    (total,item)=> total + Number(item.cantidad||0),
+    0
+  );
+}
+
+async function cargarResumenPremoldeados(){
+  const estado = document.getElementById("premConexion");
+  if(!estado) return;
+
+  const {data,error} = await premDb
+    .from("premoldeados")
+    .select("id,tipo,m3,etapa,montada,pintada")
+    .order("id",{ascending:true});
+
+  if(error){
+    estado.textContent = "❌ No se pudieron actualizar los datos de Premoldeados.";
+    console.error(error);
+    return;
+  }
+
+  const piezasPrem = data || [];
+
+  const listaTaller = piezasPrem.filter(p=>Number(p.etapa ?? 0) >= 0);
+  const listaLiberadas = piezasPrem.filter(p=>Number(p.etapa ?? 0) >= 1);
+  const listaObra = piezasPrem.filter(p=>Number(p.etapa ?? 0) >= 2);
+  const listaQaqc = piezasPrem.filter(p=>Number(p.etapa ?? 0) >= 3);
+  const listaMontadas = piezasPrem.filter(p=>p.montada === true);
+  const listaPintadas = piezasPrem.filter(p=>p.pintada === true);
+
+  const sumarM3 = lista => lista.reduce(
+    (suma,p)=> suma + premVolumenPieza(p),
+    0
+  );
+
+  setTexto("premTotal", piezasPrem.length);
+  setTexto("premCantidadPlanificada", premCantidadTotalProyecto());
+  setTexto("premVolumenProyecto", premFormatoNumeroM3(premVolumenTotalProyecto()) + " m³");
+
+  setTexto("premTaller", listaTaller.length);
+  setTexto("premLiberadas", listaLiberadas.length);
+  setTexto("premObra", listaObra.length);
+  setTexto("premQaqc", listaQaqc.length);
+  setTexto("premMontadas", listaMontadas.length);
+  setTexto("premPintadas", listaPintadas.length);
+
+  setTexto("premM3Taller", premFormatoNumeroM3(sumarM3(listaTaller)));
+  setTexto("premM3Liberadas", premFormatoNumeroM3(sumarM3(listaLiberadas)));
+  setTexto("premM3Obra", premFormatoNumeroM3(sumarM3(listaObra)));
+  setTexto("premM3Qaqc", premFormatoNumeroM3(sumarM3(listaQaqc)));
+  setTexto("premM3Montadas", premFormatoNumeroM3(sumarM3(listaMontadas)));
+  setTexto("premM3Pintadas", premFormatoNumeroM3(sumarM3(listaPintadas)));
+
+  estado.textContent = "● Datos actualizados automáticamente";
+}
+
+cargarResumenPremoldeados();
+setInterval(cargarResumenPremoldeados, 60000);
+
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -1157,6 +1274,127 @@ grid-template-columns:1fr;
 .contenidoSeguimiento{padding:24px 22px;color:var(--gris);background:white;min-height:90px;}
 .contenidoSeguimiento p{margin:0;}
 
+
+/* RESUMEN PÚBLICO DE PREMOLDEADOS */
+
+.premResumen{
+  padding:22px;
+  background:#f4f7f9;
+}
+
+.premTotal{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  padding:24px 28px;
+  background:linear-gradient(135deg,#102f52,#174b76);
+  color:white;
+  border-radius:14px;
+  margin-bottom:18px;
+}
+
+.premTotal small{
+  font-size:12px;
+  font-weight:bold;
+  opacity:.82;
+}
+
+.premTotalNumero{
+  font-size:42px;
+  font-weight:800;
+  margin-top:5px;
+}
+
+.premTotalVolumen{
+  text-align:right;
+}
+
+.premTotalVolumen strong{
+  display:block;
+  font-size:30px;
+}
+
+.premTotalVolumen span{
+  font-size:12px;
+  opacity:.82;
+}
+
+.premPanel{
+  background:white;
+  border:1px solid #dce3ea;
+  border-radius:14px;
+  padding:22px;
+}
+
+.premPanel h3{
+  margin:0 0 18px;
+  font-size:17px;
+  color:#173650;
+}
+
+.premFlujo{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:10px;
+}
+
+.premEtapa{
+  background:#f7f9fb;
+  border:1px solid #dce4ec;
+  border-radius:11px;
+  padding:15px;
+  min-height:145px;
+}
+
+.premEtapaIcono{
+  font-size:22px;
+  margin-bottom:10px;
+}
+
+.premEtapaNombre{
+  font-size:11px;
+  font-weight:800;
+  color:#67788b;
+  text-transform:uppercase;
+}
+
+.premEtapaValor{
+  font-size:24px;
+  font-weight:800;
+  margin:5px 0 2px;
+  color:#173650;
+}
+
+.premEtapaValor small{
+  font-size:11px;
+  font-weight:700;
+  color:#718096;
+}
+
+.premEtapaM3{
+  margin:4px 0 0;
+  font-size:13px;
+  font-weight:800;
+  color:#255b88;
+}
+
+.premEstado{
+  margin-top:12px;
+  font-size:11px;
+  color:#718096;
+}
+
+@media(max-width:1150px){
+  .premFlujo{grid-template-columns:repeat(3,1fr);}
+}
+
+@media(max-width:700px){
+  .premTotal{align-items:flex-start;flex-direction:column;}
+  .premTotalVolumen{text-align:left;}
+  .premFlujo{grid-template-columns:repeat(2,1fr);}
+}
+
 </style>
 
 </head>
@@ -1777,14 +2015,97 @@ class="seccion">
 <details class="seguimientoProduccion">
 <summary>Seguimiento Premoldeados</summary>
 <div class="contenidoSeguimiento" style="padding:0;">
-<iframe
-  src="https://paulacaffaratti-premoldeados-uam.netlify.app/"
-  title="Seguimiento Premoldeados"
-  style="width:100%;height:980px;border:0;display:block;background:#f4f7f9;"
-  loading="lazy">
-</iframe>
-</div>
-</details>
+
+  <div class="premResumen">
+
+    <div class="premTotal">
+
+      <div>
+        <small>PREMOLDEADOS TOTALES</small>
+        <div class="premTotalNumero" id="premTotal">0</div>
+        <div style="font-size:12px;opacity:.82;">Base de Ingeniería</div>
+      </div>
+
+      <div class="premTotalVolumen">
+        <strong id="premVolumenProyecto">0,00 m³</strong>
+        <span><span id="premCantidadPlanificada">0</span> unidades planificadas</span>
+      </div>
+
+    </div>
+
+    <div class="premPanel">
+      <h3>🔄 Flujo de premoldeados</h3>
+
+      <div class="premFlujo">
+
+        <div class="premEtapa">
+          <div class="premEtapaIcono">🏭</div>
+          <div class="premEtapaNombre">En taller</div>
+          <div class="premEtapaValor">
+            <span id="premTaller">0</span>
+            <small>unidades</small>
+          </div>
+          <div class="premEtapaM3"><span id="premM3Taller">0,00</span> m³</div>
+        </div>
+
+        <div class="premEtapa">
+          <div class="premEtapaIcono">✅</div>
+          <div class="premEtapaNombre">Liberado en taller</div>
+          <div class="premEtapaValor">
+            <span id="premLiberadas">0</span>
+            <small>unidades</small>
+          </div>
+          <div class="premEtapaM3"><span id="premM3Liberadas">0,00</span> m³</div>
+        </div>
+
+        <div class="premEtapa">
+          <div class="premEtapaIcono">🚧</div>
+          <div class="premEtapaNombre">En obra</div>
+          <div class="premEtapaValor">
+            <span id="premObra">0</span>
+            <small>unidades</small>
+          </div>
+          <div class="premEtapaM3"><span id="premM3Obra">0,00</span> m³</div>
+        </div>
+
+        <div class="premEtapa">
+          <div class="premEtapaIcono">✔️</div>
+          <div class="premEtapaNombre">QA/QC</div>
+          <div class="premEtapaValor">
+            <span id="premQaqc">0</span>
+            <small>unidades</small>
+          </div>
+          <div class="premEtapaM3"><span id="premM3Qaqc">0,00</span> m³</div>
+        </div>
+
+        <div class="premEtapa">
+          <div class="premEtapaIcono">🏗️</div>
+          <div class="premEtapaNombre">Montado</div>
+          <div class="premEtapaValor">
+            <span id="premMontadas">0</span>
+            <small>unidades</small>
+          </div>
+          <div class="premEtapaM3"><span id="premM3Montadas">0,00</span> m³</div>
+        </div>
+
+        <div class="premEtapa">
+          <div class="premEtapaIcono">🎨</div>
+          <div class="premEtapaNombre">Pintado</div>
+          <div class="premEtapaValor">
+            <span id="premPintadas">0</span>
+            <small>unidades</small>
+          </div>
+          <div class="premEtapaM3"><span id="premM3Pintadas">0,00</span> m³</div>
+        </div>
+
+      </div>
+
+      <div class="premEstado" id="premConexion">⏳ Actualizando datos...</div>
+    </div>
+
+  </div>
+
+</div></details>
 
 <details class="seguimientoProduccion">
 <summary>Seguimiento de Instrumentación</summary>
