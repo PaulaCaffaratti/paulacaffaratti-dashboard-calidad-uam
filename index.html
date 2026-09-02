@@ -1224,7 +1224,7 @@ Curva S Documentación
 </h2>
 
 <span class="tag">
-Planificado vs Real
+Planificado · Presentado · Liberado
 </span>
 
 </div>
@@ -2223,6 +2223,58 @@ function pintarCurvaS(){
 const fechas = new Set();
 
 
+function fechaLiberacionDocumento(doc){
+
+if(
+!doc._liberado
+){
+
+return null;
+
+}
+
+
+/*
+Si el documento fue liberado manualmente,
+usamos la fecha del override manual.
+Si la liberación proviene del Excel,
+usamos la fecha de la última emisión LIB.
+*/
+
+if(
+doc.estado_manual === "LIBERADO" &&
+doc.estado_manual_fecha
+){
+
+return String(
+doc.estado_manual_fecha
+).slice(
+0,
+10
+);
+
+}
+
+
+if(
+doc.fecha_ultima_emision
+){
+
+return String(
+doc.fecha_ultima_emision
+).slice(
+0,
+10
+);
+
+}
+
+
+return null;
+
+}
+
+
 documentos.forEach(doc => {
 
 if(
@@ -2230,7 +2282,12 @@ doc.fecha_prevista_presentacion
 ){
 
 fechas.add(
+String(
 doc.fecha_prevista_presentacion
+).slice(
+0,
+10
+)
 );
 
 }
@@ -2241,7 +2298,29 @@ doc.fecha_primera_presentacion
 ){
 
 fechas.add(
+String(
 doc.fecha_primera_presentacion
+).slice(
+0,
+10
+)
+);
+
+}
+
+
+const fechaLiberacion =
+fechaLiberacionDocumento(
+doc
+);
+
+
+if(
+fechaLiberacion
+){
+
+fechas.add(
+fechaLiberacion
 );
 
 }
@@ -2260,6 +2339,8 @@ const plan = [];
 
 const real = [];
 
+const liberados = [];
+
 
 fechasOrdenadas
 .forEach(fecha => {
@@ -2273,7 +2354,12 @@ d =>
 
 d.fecha_prevista_presentacion &&
 
-d.fecha_prevista_presentacion <= fecha
+String(
+d.fecha_prevista_presentacion
+).slice(
+0,
+10
+) <= fecha
 
 ).length;
 
@@ -2286,7 +2372,36 @@ d =>
 
 d.fecha_primera_presentacion &&
 
-d.fecha_primera_presentacion <= fecha
+String(
+d.fecha_primera_presentacion
+).slice(
+0,
+10
+) <= fecha
+
+).length;
+
+
+const liberadosAcum =
+
+documentos.filter(
+
+d => {
+
+const fechaLiberacion =
+fechaLiberacionDocumento(
+d
+);
+
+return (
+
+fechaLiberacion &&
+
+fechaLiberacion <= fecha
+
+);
+
+}
 
 ).length;
 
@@ -2298,6 +2413,11 @@ planAcum
 
 real.push(
 realAcum
+);
+
+
+liberados.push(
+liberadosAcum
 );
 
 });
@@ -2370,6 +2490,27 @@ borderColor:
 
 backgroundColor:
 "#174f8a",
+
+borderWidth:3,
+
+pointRadius:2,
+
+tension:.25
+
+},
+
+{
+
+label:
+"Liberados",
+
+data:liberados,
+
+borderColor:
+"#1f9d55",
+
+backgroundColor:
+"#1f9d55",
 
 borderWidth:3,
 
