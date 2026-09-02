@@ -103,11 +103,24 @@ main{
   background:var(--rojoClaro);
   color:var(--rojo);
 }
-.kpis{
+.blisterResumen{
+  margin-bottom:22px;
+}
+.kpiTotalFila{
+  display:flex;
+  justify-content:center;
+  margin-bottom:16px;
+}
+.kpisEstado{
   display:grid;
-  grid-template-columns:repeat(6,1fr);
+  grid-template-columns:repeat(3,1fr);
   gap:14px;
-  margin-bottom:20px;
+  margin-bottom:16px;
+}
+.kpisIndicadores{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;
 }
 .kpi{
   background:white;
@@ -118,7 +131,13 @@ main{
   cursor:pointer;
   transition:.18s;
 }
-.kpi:hover{
+.kpiTotal{
+  width:min(360px,100%);
+  text-align:center;
+  cursor:default;
+  border-left:6px solid var(--azul);
+}
+.kpi:hover:not(.kpiTotal){
   transform:translateY(-2px);
   box-shadow:0 5px 14px rgba(20,50,80,.08);
 }
@@ -136,6 +155,26 @@ main{
   font-size:30px;
   color:var(--azul);
   margin-top:8px;
+}
+.kpi .detalleKpi{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:8px;
+}
+.kpi .detalleKpi strong{
+  margin:0;
+}
+.kpi .porcentajeKpi{
+  font-size:25px;
+  font-weight:bold;
+  color:var(--azul);
+}
+.kpi .subKpi{
+  margin-top:8px;
+  color:var(--gris);
+  font-size:11px;
 }
 .kpi.rojo{border-left-color:var(--rojo)}
 .kpi.naranja{border-left-color:var(--naranja)}
@@ -222,7 +261,8 @@ tr:hover td{
   margin-top:10px;
 }
 @media(max-width:1100px){
-  .kpis{grid-template-columns:repeat(3,1fr)}
+  .kpisEstado{grid-template-columns:repeat(3,1fr)}
+  .kpisIndicadores{grid-template-columns:1fr 1fr}
   .filtros{grid-template-columns:1fr 1fr 1fr}
 }
 @media(max-width:800px){
@@ -232,7 +272,7 @@ tr:hover td{
   header{padding:15px}
   .topbar{align-items:flex-start;flex-direction:column}
   main{padding:12px}
-  .kpis{grid-template-columns:1fr 1fr}
+  .kpisEstado,.kpisIndicadores{grid-template-columns:1fr}
   .filtros{grid-template-columns:1fr}
 }
 
@@ -270,36 +310,58 @@ body.embed .titulo{margin-top:0!important;}
     ⏳ Cargando información desde Supabase...
   </div>
 
-  <div class="kpis">
+  <div class="blisterResumen">
 
-    <div class="kpi" data-filtro="TODAS" onclick="filtrarKPI('TODAS',this)">
-      <span>Total</span>
-      <strong id="kTotal">0</strong>
+    <div class="kpiTotalFila">
+      <div class="kpi kpiTotal">
+        <span>Total de observaciones</span>
+        <strong id="kTotal">0</strong>
+        <div class="subKpi">Universo de observaciones Blister</div>
+      </div>
     </div>
 
-    <div class="kpi rojo" data-filtro="ABIERTO" onclick="filtrarKPI('ABIERTO',this)">
-      <span>Abiertas</span>
-      <strong id="kAbiertas">0</strong>
+    <div class="kpisEstado">
+
+      <div class="kpi verde" data-filtro="CERRADO" onclick="filtrarKPI('CERRADO',this)">
+        <span>Cerradas</span>
+        <strong id="kCerradas">0</strong>
+        <div class="subKpi">Observaciones cerradas</div>
+      </div>
+
+      <div class="kpi naranja" data-filtro="RESPONDIDO" onclick="filtrarKPI('RESPONDIDO',this)">
+        <span>Respondidas</span>
+        <strong id="kRespondidas">0</strong>
+        <div class="subKpi">Respondidas, aún no cerradas</div>
+      </div>
+
+      <div class="kpi rojo" data-filtro="ABIERTO" onclick="filtrarKPI('ABIERTO',this)">
+        <span>Abiertas</span>
+        <strong id="kAbiertas">0</strong>
+        <div class="subKpi">Observaciones todavía abiertas</div>
+      </div>
+
     </div>
 
-    <div class="kpi naranja" data-filtro="RESPONDIDO" onclick="filtrarKPI('RESPONDIDO',this)">
-      <span>Respondidas</span>
-      <strong id="kRespondidas">0</strong>
-    </div>
+    <div class="kpisIndicadores">
 
-    <div class="kpi verde" data-filtro="CERRADO" onclick="filtrarKPI('CERRADO',this)">
-      <span>Cerradas</span>
-      <strong id="kCerradas">0</strong>
-    </div>
+      <div class="kpi violeta" data-filtro="NC" onclick="filtrarKPI('NC',this)">
+        <span>No conformidades</span>
+        <div class="detalleKpi">
+          <strong id="kNC">0</strong>
+          <div id="kNCPct" class="porcentajeKpi">0,0%</div>
+        </div>
+        <div class="subKpi">Cantidad y % sobre el total de observaciones</div>
+      </div>
 
-    <div class="kpi rojo" data-filtro="VENCIDO" onclick="filtrarKPI('VENCIDO',this)">
-      <span>Vencidas</span>
-      <strong id="kVencidas">0</strong>
-    </div>
+      <div class="kpi rojo" data-filtro="VENCIDO" onclick="filtrarKPI('VENCIDO',this)">
+        <span>Fuera de tiempo / Vencidas</span>
+        <div class="detalleKpi">
+          <strong id="kVencidas">0</strong>
+          <div id="kVencidasPct" class="porcentajeKpi">0,0%</div>
+        </div>
+        <div class="subKpi">Observaciones que no se cerraron en tiempo y forma</div>
+      </div>
 
-    <div class="kpi violeta" data-filtro="NC" onclick="filtrarKPI('NC',this)">
-      <span>No conformidades</span>
-      <strong id="kNC">0</strong>
     </div>
 
   </div>
@@ -474,41 +536,75 @@ async function cargarDatos(){
 
 function pintarKPIs(){
 
-  setTexto("kTotal",datos.length);
+  const total =
+  datos.length;
+
+  const abiertas =
+  datos.filter(
+    x => estado(x)==="ABIERTO"
+  ).length;
+
+  const respondidas =
+  datos.filter(
+    x => estado(x)==="RESPONDIDO"
+  ).length;
+
+  const cerradas =
+  datos.filter(
+    x => estado(x)==="CERRADO"
+  ).length;
+
+  const vencidas =
+  datos.filter(
+    x => x.vencido===true
+  ).length;
+
+  const nc =
+  datos.filter(
+    x => x.no_conformidad===true
+  ).length;
+
+  setTexto("kTotal",total);
+  setTexto("kCerradas",cerradas);
+  setTexto("kRespondidas",respondidas);
+  setTexto("kAbiertas",abiertas);
+  setTexto("kVencidas",vencidas);
+  setTexto("kNC",nc);
+
+  const pctNC =
+  total === 0
+  ?
+  0
+  :
+  (nc / total) * 100;
+
+  const pctVencidas =
+  total === 0
+  ?
+  0
+  :
+  (vencidas / total) * 100;
 
   setTexto(
-    "kAbiertas",
-    datos.filter(
-      x => estado(x)==="ABIERTO"
-    ).length
+    "kNCPct",
+    pctNC.toLocaleString(
+      "es-AR",
+      {
+        minimumFractionDigits:1,
+        maximumFractionDigits:1
+      }
+    ) + "%"
   );
 
   setTexto(
-    "kRespondidas",
-    datos.filter(
-      x => estado(x)==="RESPONDIDO"
-    ).length
-  );
-
-  setTexto(
-    "kCerradas",
-    datos.filter(
-      x => estado(x)==="CERRADO"
-    ).length
-  );
-
-  setTexto(
-    "kVencidas",
-    datos.filter(
-      x => x.vencido===true
-    ).length
-  );
-
-  setTexto(
-    "kNC",
-    datos.filter(
-      x => x.no_conformidad===true
-    ).length
+    "kVencidasPct",
+    pctVencidas.toLocaleString(
+      "es-AR",
+      {
+        minimumFractionDigits:1,
+        maximumFractionDigits:1
+      }
+    ) + "%"
   );
 
 }
@@ -767,9 +863,9 @@ function llenarSelect(id,valores){
 function pintarGraficos(){
 
   const estados = {
-    ABIERTO:0,
+    CERRADO:0,
     RESPONDIDO:0,
-    CERRADO:0
+    ABIERTO:0
   };
 
   datos.forEach(
@@ -791,21 +887,42 @@ function pintarGraficos(){
   graficoEstado =
   crearBarra(
     "chartEstado",
-    Object.keys(estados),
-    Object.values(estados)
+    ["CERRADO","RESPONDIDO","ABIERTO"],
+    [
+      estados.CERRADO,
+      estados.RESPONDIDO,
+      estados.ABIERTO
+    ],
+    [
+      "#179447",
+      "#f28c28",
+      "#d83c3c"
+    ]
   );
 
-  const tipos =
-  contarPor(
-    datos,
-    "tipo_observacion"
-  );
+  const mejora =
+  datos.filter(
+    x =>
+    texto(x.tipo_observacion)
+    .toUpperCase() === "MEJORA"
+  ).length;
+
+  const positiva =
+  datos.filter(
+    x =>
+    texto(x.tipo_observacion)
+    .toUpperCase() === "POSITIVA"
+  ).length;
 
   graficoTipo =
   crearBarra(
     "chartTipo",
-    tipos.labels,
-    tipos.valores
+    ["MEJORA","POSITIVA"],
+    [mejora,positiva],
+    [
+      "#f2c94c",
+      "#179447"
+    ]
   );
 
   const especialidades =
@@ -839,8 +956,20 @@ function pintarGraficos(){
 function crearBarra(
 canvasId,
 labels,
-valores
+valores,
+colores = null
 ){
+
+  const dataset = {
+    label:"Cantidad",
+    data:valores
+  };
+
+  if(colores){
+    dataset.backgroundColor = colores;
+    dataset.borderColor = colores;
+    dataset.borderWidth = 1;
+  }
 
   return new Chart(
     document.getElementById(
@@ -851,10 +980,7 @@ valores
       data:{
         labels:labels,
         datasets:[
-          {
-            label:"Cantidad",
-            data:valores
-          }
+          dataset
         ]
       },
       options:{
