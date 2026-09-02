@@ -1141,6 +1141,22 @@ grid-template-columns:1fr;
 
 }
 
+
+/* PRODUCCIÓN - SEGUIMIENTOS DESPLEGABLES */
+.produccionPanel{background:white;border:1px solid #e0e7ec;border-radius:16px;padding:26px;box-shadow:0 4px 15px rgba(20,50,80,.04);}
+.produccionTitulo{margin:0 0 8px;color:var(--azul);font-size:26px;}
+.produccionBajada{margin:0 0 24px;color:var(--gris);font-size:14px;}
+.seguimientoProduccion{border:1px solid #dfe7ed;border-radius:13px;background:#fff;margin-bottom:13px;overflow:hidden;}
+.seguimientoProduccion:last-child{margin-bottom:0;}
+.seguimientoProduccion summary{list-style:none;cursor:pointer;padding:19px 22px;display:flex;align-items:center;justify-content:space-between;gap:15px;color:var(--azul);font-size:15px;font-weight:bold;user-select:none;}
+.seguimientoProduccion summary::-webkit-details-marker{display:none;}
+.seguimientoProduccion summary:hover{background:#f7fbfd;}
+.seguimientoProduccion summary::after{content:"+";width:30px;height:30px;min-width:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#eaf8fd;color:var(--azul);font-size:21px;font-weight:normal;}
+.seguimientoProduccion[open] summary{border-bottom:1px solid #e4eaef;background:#f7fbfd;}
+.seguimientoProduccion[open] summary::after{content:"−";}
+.contenidoSeguimiento{padding:24px 22px;color:var(--gris);background:white;min-height:90px;}
+.contenidoSeguimiento p{margin:0;}
+
 </style>
 
 </head>
@@ -1754,16 +1770,34 @@ Se conectará al Excel de Capacitaciones.
 id="produccion"
 class="seccion">
 
-<div class="proximamente">
+<div class="produccionPanel">
+<h2 class="produccionTitulo">Producción</h2>
+<p class="produccionBajada">Seguimiento de fabricación y montaje por especialidad.</p>
 
-<h2>
-Producción
-</h2>
+<details class="seguimientoProduccion">
+<summary>Seguimiento Premoldeados</summary>
+<div class="contenidoSeguimiento"><p>Contenido del seguimiento de Premoldeados.</p></div>
+</details>
 
-<p>
-Se conectará al Excel de Producción.
-</p>
+<details class="seguimientoProduccion">
+<summary>Seguimiento de Instrumentación</summary>
+<div class="contenidoSeguimiento"><p>Contenido del seguimiento de Instrumentación.</p></div>
+</details>
 
+<details class="seguimientoProduccion">
+<summary>Seguimiento de Electricidad</summary>
+<div class="contenidoSeguimiento"><p>Contenido del seguimiento de Electricidad.</p></div>
+</details>
+
+<details class="seguimientoProduccion">
+<summary>Seguimiento de Piping</summary>
+<div class="contenidoSeguimiento"><p>Contenido del seguimiento de Piping.</p></div>
+</details>
+
+<details class="seguimientoProduccion">
+<summary>Seguimiento de Estructuras</summary>
+<div class="contenidoSeguimiento"><p>Contenido del seguimiento de Estructuras.</p></div>
+</details>
 </div>
 
 </section>
