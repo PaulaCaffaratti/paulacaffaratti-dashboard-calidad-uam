@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Piping | Gestión de Calidad</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<style>
+*{box-sizing:border-box}
+:root{
+  --azul:#0b3568;
+  --celeste:#60c5e8;
+  --verde:#179447;
+  --rojo:#d83c3c;
+  --naranja:#f28c28;
+  --violeta:#6657b8;
+  --gris:#687787;
+  --fondo:#f4f7f9;
+  --borde:#dfe7ed;
+}
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:var(--fondo);
+  color:#1d2a36;
+}
+main{
+  max-width:1400px;
+  margin:auto;
+  padding:28px;
+}
+.card{
+  background:white;
+  border:1px solid var(--borde);
+  border-radius:16px;
+  padding:24px;
+  margin-bottom:20px;
+  box-shadow:0 4px 15px rgba(20,50,80,.04);
+}
+h1,h2{color:var(--azul);margin-top:0}
+h1{font-size:26px;margin-bottom:7px}
+h2{font-size:18px}
+.bajada{color:var(--gris);font-size:13px;margin:0}
+.estado{
+  padding:12px 14px;
+  border-radius:10px;
+  background:#eef7fb;
+  color:#31566e;
+  font-size:12px;
+  margin-bottom:18px;
+}
+.estado.ok{background:#eaf8ef;color:#176d3c}
+.estado.error{background:#fdecec;color:#a62f2f}
+.fila{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  align-items:center;
+}
+input[type=file]{
+  flex:1;
+  min-width:280px;
+  border:1px solid #ccd7df;
+  border-radius:9px;
+  padding:11px;
+  background:white;
+}
+button{
+  border:0;
+  border-radius:9px;
+  padding:12px 18px;
+  cursor:pointer;
+  font-weight:bold;
+}
+.btnAnalizar{background:var(--azul);color:white}
+.btnCargar{background:var(--verde);color:white}
+button:disabled{opacity:.45;cursor:not-allowed}
+.kpis{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:12px;
+  margin-top:18px;
+}
+.kpi{
+  border:1px solid var(--borde);
+  border-radius:12px;
+  padding:16px;
+  background:#fafbfd;
+}
+.kpi span{
+  display:block;
+  text-transform:uppercase;
+  color:var(--gris);
+  font-size:10px;
+  font-weight:bold;
+}
+.kpi strong{
+  display:block;
+  color:var(--azul);
+  font-size:27px;
+  margin-top:7px;
+}
+.kpi.verde{border-top:4px solid var(--verde)}
+.kpi.naranja{border-top:4px solid var(--naranja)}
+.kpi.violeta{border-top:4px solid var(--violeta)}
+.tablaWrap{
+  overflow:auto;
+  border:1px solid var(--borde);
+  border-radius:10px;
+  max-height:520px;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+th{
+  position:sticky;
+  top:0;
+  background:var(--azul);
+  color:white;
+  padding:10px;
+  text-align:left;
+  white-space:nowrap;
+}
+td{
+  padding:9px 10px;
+  border-bottom:1px solid #e8edf1;
+  vertical-align:top;
+}
+.badge{
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:15px;
+  font-size:10px;
+  font-weight:bold;
+}
+.SW{background:#eaf8ef;color:#176d3c}
+.FW{background:#fff3e5;color:#9a5d00}
+.FFW{background:#eeeafd;color:#5545a8}
+.nota{
+  margin-top:12px;
+  color:var(--gris);
+  font-size:11px;
+  line-height:1.5;
+}
+.grid2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+@media(max-width:1100px){
+  .kpis{grid-template-columns:repeat(3,1fr)}
+  .grid2{grid-template-columns:1fr}
+}
+@media(max-width:700px){
+  main{padding:14px}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+
+<body>
+<main>
+
+<div class="card">
+  <h1>🔧 Carga de Seguimiento de Piping</h1>
+  <p class="bajada">Trazabilidad de soldadura · carga privada para actualizar el seguimiento público de Producción.</p>
+</div>
+
+<div id="estado" class="estado">⏳ Verificando sesión...</div>
+
+<div class="card">
+  <h2>1. Seleccionar Excel</h2>
+  <div class="fila">
+    <input id="archivo" type="file" accept=".xlsx,.xls">
+    <button class="btnAnalizar" onclick="analizarExcel()">Analizar Excel</button>
+    <button id="btnCargar" class="btnCargar" onclick="subirDatos()" disabled>Cargar a Supabase</button>
+  </div>
+  <div class="nota">
+    Se analiza la hoja <b>Trazabilidad NQOG317</b> y la hoja <b>Resumen</b>.
+    El dashboard público utilizará únicamente valores agregados; la trazabilidad detallada queda privada.
+  </div>
+</div>
+
+<div id="resumen" class="card" style="display:none;">
+  <h2>2. Vista previa</h2>
+
+  <div class="kpis">
+    <div class="kpi"><span>Juntas</span><strong id="kJuntas">0</strong></div>
+    <div class="kpi"><span>Ø a ejecutar</span><strong id="kTotal">0"</strong></div>
+    <div class="kpi verde"><span>Ø ejecutadas</span><strong id="kEjecutado">0"</strong></div>
+    <div class="kpi naranja"><span>Ø pendientes</span><strong id="kPendiente">0"</strong></div>
+    <div class="kpi violeta"><span>Avance general</span><strong id="kAvance">0%</strong></div>
+  </div>
+</div>
+
+<div id="tipos" class="card" style="display:none;">
+  <h2>Avance por tipo de junta</h2>
+  <div class="tablaWrap" style="max-height:none;">
+    <table>
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Descripción</th>
+          <th>Juntas</th>
+          <th>Ø a ejecutar</th>
+          <th>Ø ejecutadas</th>
+          <th>Ø pendientes</th>
+          <th>% avance</th>
+        </tr>
+      </thead>
+      <tbody id="tablaTipos"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="grid2">
+  <div id="cuadernillos" class="card" style="display:none;">
+    <h2>Avance SW por cuadernillo</h2>
+    <div class="tablaWrap" style="max-height:none;">
+      <table>
+        <thead>
+          <tr>
+            <th>Cuadernillo</th>
+            <th>A construir</th>
+            <th>Construido</th>
+            <th>% avance</th>
+          </tr>
+        </thead>
+        <tbody id="tablaCuadernillos"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="detalle" class="card" style="display:none;">
+    <h2>Control de lectura</h2>
+    <div class="kpis" style="grid-template-columns:repeat(2,1fr);">
+      <div class="kpi"><span>Filas de trazabilidad</span><strong id="kFilas">0</strong></div>
+      <div class="kpi verde"><span>Con fecha soldadura</span><strong id="kSoldadas">0</strong></div>
+    </div>
+    <div class="nota">
+      Este control sirve para verificar la lectura del Excel antes de confirmar.
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+const SUPABASE_URL = "https://mzgbtejfgsrskiuymtwh.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Wen9hxBnae8wRrEEaP5lOQ_aNl9OCGd";
+const db = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+let sesionOk=false;
+let nombreArchivo="";
+let juntas=[];
+let resumenTipos=[];
+let resumenCuadernillos=[];
+let totalGeneral=null;
+
+function setEstado(texto,tipo=""){
+  const e=document.getElementById("estado");
+  e.textContent=texto;
+  e.className="estado"+(tipo?" "+tipo:"");
+}
+
+async function verificarSesion(){
+  const {data:{session}}=await db.auth.getSession();
+  if(!session){
+    setEstado("⚠️ No hay sesión iniciada. Ingresá primero desde Administración de Documentación.","error");
+    sesionOk=false;
+    return;
+  }
+  sesionOk=true;
+  setEstado("● Sesión activa · listo para cargar Piping","ok");
+}
+
+function txt(v){
+  return String(v ?? "").trim();
+}
+
+function num(v){
+  if(v===null || v===undefined || v==="") return null;
+  if(typeof v==="number") return Number.isFinite(v)?v:null;
+  const n=Number(String(v).replace(",","."));
+  return Number.isFinite(n)?n:null;
+}
+
+function fechaISO(v){
+  if(v===null || v===undefined || v==="") return null;
+
+  if(v instanceof Date && !isNaN(v.getTime())){
+    return v.toISOString().slice(0,10);
+  }
+
+  if(typeof v==="number"){
+    const p=XLSX.SSF.parse_date_code(v);
+    if(p){
+      return `${p.y}-${String(p.m).padStart(2,"0")}-${String(p.d).padStart(2,"0")}`;
+    }
+  }
+
+  const s=String(v).trim();
+
+  const dmy=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(dmy){
+    let y=Number(dmy[3]);
+    if(y<100) y+=2000;
+    return `${y}-${String(dmy[2]).padStart(2,"0")}-${String(dmy[1]).padStart(2,"0")}`;
+  }
+
+  const ymd=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if(ymd){
+    return `${ymd[1]}-${String(ymd[2]).padStart(2,"0")}-${String(ymd[3]).padStart(2,"0")}`;
+  }
+
+  return null;
+}
+
+function valor(ws,r,c){
+  const ref=XLSX.utils.encode_cell({r:r-1,c:c-1});
+  return ws[ref] ? ws[ref].v : null;
+}
+
+function pct(v){
+  return (Number(v||0)*100).toFixed(2).replace(".",",")+"%";
+}
+
+function pulgadas(v){
+  return Number(v||0).toLocaleString("es-AR",{minimumFractionDigits:0,maximumFractionDigits:2})+'"';
+}
+
+async function analizarExcel(){
+  const input=document.getElementById("archivo");
+
+  if(!input.files.length){
+    setEstado("Seleccioná primero el Excel de trazabilidad.","error");
+    return;
+  }
+
+  try{
+    setEstado("⏳ Analizando Excel...");
+    nombreArchivo=input.files[0].name;
+
+    const buffer=await input.files[0].arrayBuffer();
+    const wb=XLSX.read(buffer,{type:"array",cellDates:false});
+
+    const ws=wb.Sheets["Trazabilidad NQOG317"];
+    const wr=wb.Sheets["Resumen"];
+
+    if(!ws){
+      throw new Error('No se encontró la hoja "Trazabilidad NQOG317".');
+    }
+    if(!wr){
+      throw new Error('No se encontró la hoja "Resumen".');
+    }
+
+    juntas=[];
+
+    // Encabezados en fila 10; datos desde fila 11.
+    const range=XLSX.utils.decode_range(ws["!ref"] || "A1:AV1");
+
+    for(let r=11;r<=range.e.r+1;r++){
+
+      const linea=txt(valor(ws,r,4));
+      const juntaNumero=txt(valor(ws,r,11));
+      const tipo=txt(valor(ws,r,13)).toUpperCase();
+
+      if(!linea && !juntaNumero && !tipo){
+        continue;
+      }
+
+      juntas.push({
+        sistema:txt(valor(ws,r,1)) || null,
+        subsistema:txt(valor(ws,r,2)) || null,
+        cuadernillo:txt(valor(ws,r,3)) || null,
+        linea:linea || null,
+        hoja:txt(valor(ws,r,5)) || null,
+        revision:txt(valor(ws,r,6)) || null,
+        diametro:num(valor(ws,r,7)),
+        sch:txt(valor(ws,r,8)) || null,
+        espesor:num(valor(ws,r,9)),
+        piping_class:txt(valor(ws,r,10)) || null,
+        junta_numero:juntaNumero || null,
+        spool:txt(valor(ws,r,12)) || null,
+        tipo_junta:tipo || null,
+        diseno_junta:txt(valor(ws,r,14)) || null,
+        diametro_2:num(valor(ws,r,15)),
+        sch_2:txt(valor(ws,r,16)) || null,
+        espesor_2:num(valor(ws,r,17)),
+        ubicacion_estado:txt(valor(ws,r,18)) || null,
+        numero_serie:txt(valor(ws,r,19)) || null,
+        eps:txt(valor(ws,r,20)) || null,
+        aporte:txt(valor(ws,r,21)) || null,
+        soldador_raiz:txt(valor(ws,r,22)) || null,
+        soldador_relleno:txt(valor(ws,r,23)) || null,
+        fecha_soldadura:fechaISO(valor(ws,r,24)),
+        codigo_construccion:txt(valor(ws,r,25)) || null,
+        material_1:txt(valor(ws,r,26)) || null,
+        grado_material_1:txt(valor(ws,r,27)) || null,
+        colada_1:txt(valor(ws,r,28)) || null,
+        material_2:txt(valor(ws,r,29)) || null,
+        grado_material_2:txt(valor(ws,r,30)) || null,
+        colada_2:txt(valor(ws,r,31)) || null,
+        iv:txt(valor(ws,r,32)) || null,
+        porcentaje_end:num(valor(ws,r,33)),
+        lote:txt(valor(ws,r,34)) || null,
+        libera:txt(valor(ws,r,35)) || null,
+        ubicacion_ensayo:txt(valor(ws,r,36)) || null,
+        fecha_ensayo_1:fechaISO(valor(ws,r,37)),
+        informe_1:txt(valor(ws,r,38)) || null,
+        fecha_ensayo_2:fechaISO(valor(ws,r,39)),
+        resultado_1:txt(valor(ws,r,40)) || null,
+        informe_2:txt(valor(ws,r,41)) || null,
+        fecha_ensayo_3:fechaISO(valor(ws,r,42)),
+        resultado_2:txt(valor(ws,r,43)) || null,
+        observaciones:txt(valor(ws,r,44)) || null,
+        sistema_color:txt(valor(ws,r,45)) || null,
+        fecha_ph:fechaISO(valor(ws,r,46)),
+        fecha_pintura:fechaISO(valor(ws,r,47)),
+        ot:txt(valor(ws,r,48)) || null
+      });
+    }
+
+    // CUADERNILLOS: B11:F13
+    resumenCuadernillos=[];
+    for(let r=11;r<=13;r++){
+      const descripcion=txt(valor(wr,r,2));
+      if(!descripcion) continue;
+
+      const ejecutar=Number(num(valor(wr,r,3)) || 0);
+      const ejecutadas=Number(num(valor(wr,r,4)) || 0);
+      const avance=Number(num(valor(wr,r,5)) || 0);
+      const pendientePct=Number(num(valor(wr,r,6)) || 0);
+
+      resumenCuadernillos.push({
+        categoria:"CUADERNILLO",
+        codigo:descripcion.replace(/\D+/g,"") || descripcion,
+        descripcion,
+        juntas:null,
+        pulgadas_a_ejecutar:ejecutar,
+        pulgadas_ejecutadas:ejecutadas,
+        pulgadas_pendientes:Math.max(0,ejecutar-ejecutadas),
+        avance_porcentaje:avance,
+        pendiente_porcentaje:pendientePct
+      });
+    }
+
+    // TIPOS: B19:I21
+    resumenTipos=[];
+    for(let r=19;r<=21;r++){
+      const codigo=txt(valor(wr,r,2)).toUpperCase();
+      if(!codigo) continue;
+
+      resumenTipos.push({
+        categoria:"TIPO_JUNTA",
+        codigo,
+        descripcion:txt(valor(wr,r,3)) || null,
+        juntas:Number(num(valor(wr,r,4)) || 0),
+        pulgadas_a_ejecutar:Number(num(valor(wr,r,5)) || 0),
+        pulgadas_ejecutadas:Number(num(valor(wr,r,6)) || 0),
+        pulgadas_pendientes:Number(num(valor(wr,r,7)) || 0),
+        avance_porcentaje:Number(num(valor(wr,r,8)) || 0),
+        pendiente_porcentaje:Number(num(valor(wr,r,9)) || 0)
+      });
+    }
+
+    // TOTAL GENERAL: B22:I22
+    totalGeneral={
+      categoria:"TOTAL_GENERAL",
+      codigo:"TOTAL",
+      descripcion:"Total general de Piping",
+      juntas:Number(num(valor(wr,22,4)) || 0),
+      pulgadas_a_ejecutar:Number(num(valor(wr,22,5)) || 0),
+      pulgadas_ejecutadas:Number(num(valor(wr,22,6)) || 0),
+      pulgadas_pendientes:Number(num(valor(wr,22,7)) || 0),
+      avance_porcentaje:Number(num(valor(wr,22,8)) || 0),
+      pendiente_porcentaje:Number(num(valor(wr,22,9)) || 0)
+    };
+
+    if(!juntas.length){
+      throw new Error("No se detectaron juntas en la trazabilidad.");
+    }
+
+    if(!totalGeneral.pulgadas_a_ejecutar){
+      throw new Error("No se pudo leer el total general de la hoja Resumen.");
+    }
+
+    pintarPreview();
+
+    document.getElementById("btnCargar").disabled=!sesionOk;
+
+    setEstado(
+      `✓ Excel analizado: ${juntas.length} juntas y ${pulgadas(totalGeneral.pulgadas_a_ejecutar)} de alcance total.`,
+      "ok"
+    );
+
+  }catch(err){
+    console.error(err);
+    juntas=[];
+    resumenTipos=[];
+    resumenCuadernillos=[];
+    totalGeneral=null;
+    document.getElementById("btnCargar").disabled=true;
+    setEstado("❌ "+err.message,"error");
+  }
+}
+
+function pintarPreview(){
+
+  document.getElementById("kJuntas").textContent=totalGeneral.juntas;
+  document.getElementById("kTotal").textContent=pulgadas(totalGeneral.pulgadas_a_ejecutar);
+  document.getElementById("kEjecutado").textContent=pulgadas(totalGeneral.pulgadas_ejecutadas);
+  document.getElementById("kPendiente").textContent=pulgadas(totalGeneral.pulgadas_pendientes);
+  document.getElementById("kAvance").textContent=pct(totalGeneral.avance_porcentaje);
+
+  document.getElementById("kFilas").textContent=juntas.length;
+  document.getElementById("kSoldadas").textContent=
+    juntas.filter(x=>!!x.fecha_soldadura).length;
+
+  document.getElementById("tablaTipos").innerHTML=
+    resumenTipos.map(x=>`
+      <tr>
+        <td><span class="badge ${x.codigo}">${esc(x.codigo)}</span></td>
+        <td>${esc(x.descripcion || "")}</td>
+        <td>${x.juntas}</td>
+        <td>${pulgadas(x.pulgadas_a_ejecutar)}</td>
+        <td>${pulgadas(x.pulgadas_ejecutadas)}</td>
+        <td>${pulgadas(x.pulgadas_pendientes)}</td>
+        <td><strong>${pct(x.avance_porcentaje)}</strong></td>
+      </tr>
+    `).join("");
+
+  document.getElementById("tablaCuadernillos").innerHTML=
+    resumenCuadernillos.map(x=>`
+      <tr>
+        <td>${esc(x.descripcion)}</td>
+        <td>${pulgadas(x.pulgadas_a_ejecutar)}</td>
+        <td>${pulgadas(x.pulgadas_ejecutadas)}</td>
+        <td><strong>${pct(x.avance_porcentaje)}</strong></td>
+      </tr>
+    `).join("");
+
+  ["resumen","tipos","cuadernillos","detalle"].forEach(id=>{
+    document.getElementById(id).style.display="block";
+  });
+}
+
+async function subirDatos(){
+
+  if(!juntas.length || !totalGeneral){
+    setEstado("Primero analizá el Excel.","error");
+    return;
+  }
+
+  const {data:{session}}=await db.auth.getSession();
+
+  if(!session){
+    setEstado("❌ La sesión venció. Volvé a iniciar sesión desde Administración de Documentación.","error");
+    return;
+  }
+
+  const btn=document.getElementById("btnCargar");
+  btn.disabled=true;
+
+  let cargaId=null;
+
+  try{
+
+    setEstado("⏳ Creando carga de Piping...");
+
+    const {data:carga,error:errorCarga}=await db
+      .from("piping_cargas")
+      .insert({
+        archivo_nombre:nombreArchivo,
+        usuario:session.user.email || "",
+        juntas_detectadas:juntas.length,
+        observacion:"Carga desde trazabilidad de soldadura"
+      })
+      .select("id")
+      .single();
+
+    if(errorCarga) throw errorCarga;
+
+    cargaId=carga.id;
+
+    const detalle=juntas.map(x=>({...x,carga_id:cargaId}));
+
+    for(let i=0;i<detalle.length;i+=100){
+      const {error}=await db
+        .from("piping_juntas")
+        .insert(detalle.slice(i,i+100));
+
+      if(error) throw error;
+    }
+
+    const resumen=[
+      ...resumenCuadernillos,
+      ...resumenTipos,
+      totalGeneral
+    ].map(x=>({...x,carga_id:cargaId}));
+
+    const {error:errorResumen}=await db
+      .from("piping_resumen")
+      .insert(resumen);
+
+    if(errorResumen) throw errorResumen;
+
+    setEstado(
+      `✓ Carga completada: ${juntas.length} juntas · ${pulgadas(totalGeneral.pulgadas_ejecutadas)} ejecutadas · ${pct(totalGeneral.avance_porcentaje)} de avance.`,
+      "ok"
+    );
+
+  }catch(err){
+
+    console.error(err);
+
+    if(cargaId){
+      await db
+        .from("piping_cargas")
+        .delete()
+        .eq("id",cargaId);
+    }
+
+    setEstado("❌ No se pudo completar la carga: "+err.message,"error");
+
+  }finally{
+    btn.disabled=false;
+  }
+}
+
+function esc(v){
+  return String(v ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+verificarSesion();
+</script>
+</body>
+</html>
