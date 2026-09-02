@@ -481,16 +481,6 @@ color:var(--gris);
   border-left:6px solid var(--celeste);
 }
 
-.ecuacionResumen{
-  margin-top:10px;
-  font-size:11px;
-  color:var(--gris);
-  text-align:center;
-}
-
-.ecuacionResumen strong{
-  color:var(--azul);
-}
 
 @media(max-width:1150px){
   .arbolResumen{
@@ -1373,9 +1363,6 @@ Presentados que volvieron a nosotros
 </div>
 
 
-<div class="ecuacionResumen">
-<strong id="eqPresentados">0 + 0 + 0 = 0</strong>
-</div>
 
 </div>
 
@@ -1406,25 +1393,6 @@ Documentos todavía no presentados
 <div class="hijosPendientes">
 
 <div
-class="kpiJerarquia kpiHijo kpiVencidos clickable"
-onclick="abrirDetalle('vencidos')">
-
-<small>
-Vencidos sin presentar
-</small>
-
-<strong id="kVencidos">
-0
-</strong>
-
-<div class="sub">
-Fecha prevista superada
-</div>
-
-</div>
-
-
-<div
 class="kpiJerarquia kpiHijo kpiFuturos clickable"
 onclick="abrirDetalle('futuros')">
 
@@ -1442,11 +1410,25 @@ Aún dentro del plazo
 
 </div>
 
+
+<div
+class="kpiJerarquia kpiHijo kpiVencidos clickable"
+onclick="abrirDetalle('vencidos')">
+
+<small>
+Vencidos sin presentar
+</small>
+
+<strong id="kVencidos">
+0
+</strong>
+
+<div class="sub">
+Fecha prevista superada
 </div>
 
+</div>
 
-<div class="ecuacionResumen">
-<strong id="eqPendientes">0 + 0 = 0</strong>
 </div>
 
 </div>
@@ -2075,13 +2057,19 @@ d => d._futuro
 
 const cliente =
 documentos.filter(
-d => d._cliente
+d =>
+d._presentado &&
+!d._liberado &&
+d._cliente
 );
 
 
 const nuestro =
 documentos.filter(
-d => d._nuestro
+d =>
+d._presentado &&
+!d._liberado &&
+!d._cliente
 );
 
 
@@ -2133,26 +2121,6 @@ nuestro.length
 );
 
 
-setTexto(
-"eqPresentados",
-liberados.length +
-" + " +
-cliente.length +
-" + " +
-nuestro.length +
-" = " +
-presentados.length
-);
-
-
-setTexto(
-"eqPendientes",
-vencidos.length +
-" + " +
-futuros.length +
-" = " +
-pendientes.length
-);
 
 
 /* Cumplimiento */
@@ -2405,7 +2373,10 @@ if(tipo === "cliente"){
 
 lista =
 documentos.filter(
-d => d._cliente
+d =>
+d._presentado &&
+!d._liberado &&
+d._cliente
 );
 
 titulo =
@@ -2418,7 +2389,10 @@ if(tipo === "nuestro"){
 
 lista =
 documentos.filter(
-d => d._nuestro
+d =>
+d._presentado &&
+!d._liberado &&
+!d._cliente
 );
 
 titulo =
