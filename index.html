@@ -1078,6 +1078,201 @@ color:var(--gris);
 }
 
 
+
+/* CAPACITACIONES */
+
+.capPanel{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+
+.capEncabezado{
+  background:white;
+  border:1px solid #e1e8ed;
+  border-radius:16px;
+  padding:24px 26px;
+}
+
+.capEncabezado h2{
+  margin:0 0 6px;
+  color:var(--azul);
+  font-size:24px;
+}
+
+.capEncabezado p{
+  margin:0;
+  color:var(--gris);
+  font-size:13px;
+}
+
+.capKpis{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:14px;
+}
+
+.capKpi{
+  background:white;
+  border:1px solid #e1e8ed;
+  border-radius:15px;
+  padding:20px;
+  min-height:125px;
+}
+
+.capKpi small{
+  display:block;
+  color:var(--gris);
+  text-transform:uppercase;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.3px;
+  margin-bottom:9px;
+}
+
+.capKpi strong{
+  display:block;
+  color:var(--azul);
+  font-size:31px;
+  line-height:1;
+}
+
+.capKpi .capSub{
+  margin-top:9px;
+  font-size:11px;
+  color:var(--gris);
+  line-height:1.35;
+}
+
+.capKpi.destacado{
+  border-top:4px solid #179447;
+}
+
+.capKpi.avance{
+  border-top:4px solid #60c5e8;
+}
+
+.capKpi.rnp{
+  border-top:4px solid #7b68c7;
+}
+
+.capGrid{
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+  gap:20px;
+}
+
+.capCard{
+  background:white;
+  border:1px solid #e1e8ed;
+  border-radius:16px;
+  padding:22px;
+}
+
+.capCardHeader{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:18px;
+}
+
+.capCardHeader h3{
+  margin:0;
+  color:var(--azul);
+  font-size:17px;
+}
+
+.capTag{
+  border-radius:20px;
+  background:#eef6fb;
+  color:#31566e;
+  padding:6px 10px;
+  font-size:10px;
+  font-weight:bold;
+  white-space:nowrap;
+}
+
+.capChart{
+  height:330px;
+}
+
+.capCronograma{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:10px;
+}
+
+.capMes{
+  border:1px solid #e1e8ed;
+  border-radius:12px;
+  padding:12px 10px;
+  min-height:96px;
+  background:#fafbfd;
+}
+
+.capMes .mes{
+  color:var(--azul);
+  font-weight:bold;
+  font-size:12px;
+}
+
+.capMes .estado{
+  margin-top:9px;
+  font-size:11px;
+  font-weight:bold;
+}
+
+.capMes .dato{
+  color:var(--gris);
+  margin-top:5px;
+  font-size:10px;
+}
+
+.capMes.realizada{
+  background:#edf8f1;
+  border-color:#bfe6cc;
+}
+
+.capMes.realizada .estado{color:#178445}
+
+.capMes.pendiente{
+  background:#fff1ef;
+  border-color:#f2c7c0;
+}
+
+.capMes.pendiente .estado{color:#c34234}
+
+.capMes.futura{
+  background:#f7f9fb;
+}
+
+.capMes.futura .estado{color:#71808d}
+
+.capEstado{
+  padding:11px 14px;
+  border-radius:10px;
+  background:#eef7fb;
+  color:#31566e;
+  font-size:11px;
+}
+
+.capEstado.error{
+  background:#fdecec;
+  color:#a62f2f;
+}
+
+@media(max-width:1100px){
+  .capKpis{grid-template-columns:repeat(3,1fr)}
+  .capGrid{grid-template-columns:1fr}
+}
+
+@media(max-width:700px){
+  .capKpis{grid-template-columns:repeat(2,1fr)}
+  .capCronograma{grid-template-columns:repeat(2,1fr)}
+}
+
+
 /* CARGA */
 
 .cargando{
@@ -1873,15 +2068,73 @@ Se conectará al Excel de Hallazgos.
 id="capacitaciones"
 class="seccion">
 
-<div class="proximamente">
+<div class="capPanel">
 
-<h2>
-Capacitaciones
-</h2>
+  <div class="capEncabezado">
+    <h2>Capacitaciones</h2>
+    <p>Seguimiento del Programa de Capacitación · planificación mensual y cumplimiento a la fecha.</p>
+  </div>
 
-<p>
-Se conectará al Excel de Capacitaciones.
-</p>
+  <div class="capKpis">
+
+    <div class="capKpi">
+      <small>Planificadas programa</small>
+      <strong id="capPlanTotal">0</strong>
+      <div class="capSub">Total del programa vigente</div>
+    </div>
+
+    <div class="capKpi">
+      <small>Realizadas</small>
+      <strong id="capRealTotal">0</strong>
+      <div class="capSub">Capacitaciones planificadas realizadas</div>
+    </div>
+
+    <div class="capKpi destacado">
+      <small>Cumplimiento a la fecha</small>
+      <strong id="capCumplimiento">0%</strong>
+      <div class="capSub" id="capCumplimientoSub">Según planificación exigible</div>
+    </div>
+
+    <div class="capKpi avance">
+      <small>Avance del programa</small>
+      <strong id="capAvance">0%</strong>
+      <div class="capSub">Realizadas sobre el programa completo</div>
+    </div>
+
+    <div class="capKpi rnp">
+      <small>No programadas</small>
+      <strong id="capRnp">0</strong>
+      <div class="capSub">RNP · informadas por separado</div>
+    </div>
+
+  </div>
+
+  <div class="capGrid">
+
+    <div class="capCard">
+      <div class="capCardHeader">
+        <h3>Planificación mensual</h3>
+        <span class="capTag">Planificadas vs. realizadas</span>
+      </div>
+      <div class="capChart">
+        <canvas id="chartCapacitaciones"></canvas>
+      </div>
+    </div>
+
+    <div class="capCard">
+      <div class="capCardHeader">
+        <h3>Estado del programa</h3>
+        <span class="capTag">Abr 2026 · Ene 2027</span>
+      </div>
+
+      <div id="capCronograma" class="capCronograma"></div>
+
+      <div id="capConexion" class="capEstado" style="margin-top:16px;">
+        ⏳ Actualizando datos...
+      </div>
+    </div>
+
+  </div>
 
 </div>
 
@@ -2087,6 +2340,7 @@ let documentos = [];
 let chartS = null;
 
 let chartEsp = null;
+let chartCapacitaciones = null;
 
 
 /* INICIO */
@@ -4105,6 +4359,202 @@ valor ?? ""
 
 }
 
+
+
+/* =========================================================
+   CAPACITACIONES - DASHBOARD PÚBLICO
+========================================================= */
+
+const CAP_MESES = [
+  "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+  "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+];
+
+function capPct(valor){
+  return Number(valor || 0)
+    .toFixed(2)
+    .replace(".",",") + "%";
+}
+
+async function cargarCapacitaciones(){
+
+  const estado = document.getElementById("capConexion");
+  if(!estado) return;
+
+  try{
+
+    const {data,error} = await supabaseClient
+      .from("v_capacitaciones_dashboard")
+      .select("*")
+      .order("anio",{ascending:true})
+      .order("mes",{ascending:true});
+
+    if(error) throw error;
+
+    const filas = data || [];
+
+    if(!filas.length){
+      estado.textContent = "Sin datos de capacitaciones disponibles.";
+      return;
+    }
+
+    const planTotal = filas.reduce(
+      (s,x)=>s + Number(x.planificadas || 0),0
+    );
+
+    const realTotal = filas.reduce(
+      (s,x)=>s + Number(x.realizadas_planificadas || 0),0
+    );
+
+    const rnpTotal = filas.reduce(
+      (s,x)=>s + Number(x.realizadas_no_programadas || 0),0
+    );
+
+    const hoy = new Date();
+    const anioActual = hoy.getFullYear();
+    const mesActual = hoy.getMonth()+1;
+
+    const exigibles = filas.filter(x =>
+      Number(x.anio) < anioActual ||
+      (
+        Number(x.anio) === anioActual &&
+        Number(x.mes) <= mesActual
+      )
+    );
+
+    const planFecha = exigibles.reduce(
+      (s,x)=>s + Number(x.planificadas || 0),0
+    );
+
+    const realFecha = exigibles.reduce(
+      (s,x)=>s + Number(x.realizadas_planificadas || 0),0
+    );
+
+    const cumplimiento = planFecha
+      ? realFecha / planFecha * 100
+      : 100;
+
+    const avance = planTotal
+      ? realTotal / planTotal * 100
+      : 0;
+
+    setTexto("capPlanTotal",planTotal);
+    setTexto("capRealTotal",realTotal);
+    setTexto("capCumplimiento",capPct(cumplimiento));
+    setTexto("capAvance",capPct(avance));
+    setTexto("capRnp",rnpTotal);
+
+    setTexto(
+      "capCumplimientoSub",
+      planFecha
+        ? `${realFecha} de ${planFecha} previstas a la fecha`
+        : "Sin capacitaciones exigibles a la fecha"
+    );
+
+    const cronograma = document.getElementById("capCronograma");
+
+    cronograma.innerHTML = filas
+      .filter(x => Number(x.planificadas || 0) > 0)
+      .map(x => {
+
+        const anio = Number(x.anio);
+        const mes = Number(x.mes);
+        const plan = Number(x.planificadas || 0);
+        const real = Number(x.realizadas_planificadas || 0);
+
+        const futuro =
+          anio > anioActual ||
+          (anio === anioActual && mes > mesActual);
+
+        let clase = "futura";
+        let textoEstado = "Planificación futura";
+
+        if(real >= plan && plan > 0){
+          clase = "realizada";
+          textoEstado = "✓ Realizada";
+        }
+        else if(!futuro){
+          clase = "pendiente";
+          textoEstado = "● Pendiente";
+        }
+
+        return `
+          <div class="capMes ${clase}">
+            <div class="mes">${CAP_MESES[mes-1]} ${anio}</div>
+            <div class="estado">${textoEstado}</div>
+            <div class="dato">${real} realizada${real===1?"":"s"} / ${plan} prevista${plan===1?"":"s"}</div>
+          </div>
+        `;
+      })
+      .join("");
+
+    const canvas = document.getElementById("chartCapacitaciones");
+
+    if(chartCapacitaciones){
+      chartCapacitaciones.destroy();
+    }
+
+    chartCapacitaciones = new Chart(
+      canvas,
+      {
+        type:"bar",
+        data:{
+          labels:filas
+            .filter(x => Number(x.planificadas || 0) > 0)
+            .map(x => `${CAP_MESES[Number(x.mes)-1].slice(0,3)} ${String(x.anio).slice(-2)}`),
+          datasets:[
+            {
+              label:"Planificadas",
+              data:filas
+                .filter(x => Number(x.planificadas || 0) > 0)
+                .map(x => Number(x.planificadas || 0)),
+              backgroundColor:"#60c5e8",
+              borderRadius:5
+            },
+            {
+              label:"Realizadas",
+              data:filas
+                .filter(x => Number(x.planificadas || 0) > 0)
+                .map(x => Number(x.realizadas_planificadas || 0)),
+              backgroundColor:"#179447",
+              borderRadius:5
+            }
+          ]
+        },
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins:{
+            legend:{position:"bottom"}
+          },
+          scales:{
+            y:{
+              beginAtZero:true,
+              ticks:{precision:0,stepSize:1},
+              suggestedMax:1
+            },
+            x:{
+              grid:{display:false}
+            }
+          }
+        }
+      }
+    );
+
+    estado.textContent = "● Datos actualizados automáticamente";
+
+  }catch(err){
+
+    console.error(err);
+    estado.textContent =
+      "❌ No se pudieron actualizar los datos de Capacitaciones.";
+    estado.classList.add("error");
+
+  }
+}
+
+cargarCapacitaciones();
+setInterval(cargarCapacitaciones,60000);
 
 
 /* =========================================================
