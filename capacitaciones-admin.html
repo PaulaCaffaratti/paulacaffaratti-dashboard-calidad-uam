@@ -33,7 +33,7 @@ input[type=file]{flex:1;min-width:280px;border:1px solid #ccd7df;border-radius:9
 button{border:0;border-radius:9px;padding:12px 18px;cursor:pointer;font-weight:bold}
 .btnAnalizar{background:var(--azul);color:white}.btnCargar{background:var(--verde);color:white}
 button:disabled{opacity:.45;cursor:not-allowed}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:18px}
 .kpi{border:1px solid var(--borde);border-radius:12px;padding:16px;background:#fafbfd}
 .kpi span{display:block;text-transform:uppercase;color:var(--gris);font-size:10px;font-weight:bold}
 .kpi strong{display:block;color:var(--azul);font-size:25px;margin-top:6px}
@@ -45,7 +45,7 @@ td{padding:9px 10px;border-bottom:1px solid #e8edf1;vertical-align:top}
 .P{background:#eef2f5;color:#536574}.R{background:#eaf8ef;color:#176d3c}.RFF{background:#fff3e5;color:#9a5d00}.RNP{background:#e9f6fc;color:#17698c}
 .nota{margin-top:12px;color:var(--gris);font-size:11px;line-height:1.5}
 .subtitulo{color:var(--azul);font-weight:bold;margin-top:18px;margin-bottom:8px}
-@media(max-width:800px){main{padding:14px}.kpis{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:1050px){.kpis{grid-template-columns:repeat(3,1fr)}} @media(max-width:800px){main{padding:14px}.kpis{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 
@@ -75,9 +75,10 @@ td{padding:9px 10px;border-bottom:1px solid #e8edf1;vertical-align:top}
 <div id="resumen" class="card" style="display:none;">
   <h2>2. Vista previa</h2>
   <div class="kpis">
-    <div class="kpi"><span>Planificadas oficiales</span><strong id="kPlan">0</strong></div>
-    <div class="kpi"><span>Realizadas oficiales</span><strong id="kReal">0</strong></div>
-    <div class="kpi"><span>Cumplimiento</span><strong id="kCumpl">0%</strong></div>
+    <div class="kpi"><span>Planificadas anuales</span><strong id="kPlan">0</strong></div>
+    <div class="kpi"><span>Realizadas</span><strong id="kReal">0</strong></div>
+    <div class="kpi"><span>Cumplimiento a la fecha</span><strong id="kCumpl">0%</strong></div>
+    <div class="kpi"><span>Avance programa anual</span><strong id="kAvance">0%</strong></div>
     <div class="kpi"><span>No programadas RNP</span><strong id="kRnp">0</strong></div>
   </div>
 
@@ -276,12 +277,48 @@ async function analizarExcel(){
 }
 
 function pintarPreview(totalPlan,totalReal){
-  const cumplimiento=totalPlan>0 ? (totalReal/totalPlan)*100 : 0;
+  const hoy=new Date();
+  const anioActual=hoy.getFullYear();
+  const mesActual=hoy.getMonth()+1;
+
+  // Cumplimiento a la fecha:
+  // solo compara contra lo que ya correspondía ejecutar.
+  // Si el programa es de un año futuro, todavía no hay plan exigible.
+  // Si es de un año pasado, toma todo el año.
+  let planALaFecha=0;
+  let realALaFecha=0;
+
+  resumenMensual.forEach(x=>{
+    const corresponde =
+      x.anio < anioActual ||
+      (x.anio === anioActual && x.mes <= mesActual);
+
+    if(corresponde){
+      planALaFecha += x.planificadas;
+      realALaFecha += x.realizadas;
+    }
+  });
+
+  const cumplimientoFecha = planALaFecha>0
+    ? (realALaFecha/planALaFecha)*100
+    : 0;
+
+  const avanceAnual = totalPlan>0
+    ? (totalReal/totalPlan)*100
+    : 0;
+
   const rnp=eventos.filter(x=>x.estado==="RNP").length;
 
   document.getElementById("kPlan").textContent=totalPlan;
   document.getElementById("kReal").textContent=totalReal;
-  document.getElementById("kCumpl").textContent=cumplimiento.toFixed(2).replace(".",",")+"%";
+  document.getElementById("kCumpl").textContent=
+    planALaFecha>0
+      ? cumplimientoFecha.toFixed(2).replace(".",",")+"%"
+      : "Sin vencimientos";
+
+  document.getElementById("kAvance").textContent=
+    avanceAnual.toFixed(2).replace(".",",")+"%";
+
   document.getElementById("kRnp").textContent=rnp;
 
   document.getElementById("resumen").style.display="block";
@@ -289,13 +326,29 @@ function pintarPreview(totalPlan,totalReal){
 
   document.getElementById("tablaMensual").innerHTML=
     resumenMensual.map(x=>{
+      const hoy=new Date();
+      const anioActual=hoy.getFullYear();
+      const mesActual=hoy.getMonth()+1;
+
+      const futuro =
+        x.anio > anioActual ||
+        (x.anio === anioActual && x.mes > mesActual);
+
       const pct=x.planificadas>0 ? (x.realizadas/x.planificadas)*100 : 0;
+
+      let cumplimiento="-";
+      if(x.planificadas>0){
+        cumplimiento = futuro
+          ? "Planificación futura"
+          : pct.toFixed(1).replace(".",",")+"%";
+      }
+
       return `
         <tr>
           <td>${MESES[x.mes-1]}</td>
           <td>${x.planificadas || "-"}</td>
           <td>${x.realizadas || "-"}</td>
-          <td>${x.planificadas>0 ? pct.toFixed(1).replace(".",",")+"%" : "-"}</td>
+          <td>${cumplimiento}</td>
         </tr>
       `;
     }).join("");
@@ -312,7 +365,6 @@ function pintarPreview(totalPlan,totalReal){
       </tr>
     `).join("");
 }
-
 async function subirDatos(){
   if(!resumenMensual.length){
     setEstado("Primero analizá el Excel.","error");
