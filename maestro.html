@@ -81,6 +81,22 @@ tr:hover td{background:#f8fbfd}
 @media(max-width:700px){.editorModalGrid{grid-template-columns:1fr}.editorModalGrid .full{grid-column:span 1}}
 @media(max-width:1050px){.gridForm{grid-template-columns:repeat(2,1fr)}.span4{grid-column:span 2}.filtros{grid-template-columns:1fr 1fr}.resumen{grid-template-columns:1fr 1fr}}
 @media(max-width:650px){main{padding:14px}.gridForm,.filtros,.resumen{grid-template-columns:1fr}.span2,.span4{grid-column:span 1}.toolbar{align-items:flex-start;flex-direction:column}}
+
+.avisoCriticoListado{
+  margin:18px 0 22px;
+  padding:20px 24px;
+  background:#fff0f0;
+  border:2px solid #d92d20;
+  border-left:8px solid #d92d20;
+  border-radius:12px;
+  color:#b42318;
+  font-size:20px;
+  font-weight:900;
+  line-height:1.4;
+  text-align:center;
+  text-transform:uppercase;
+}
+
 </style>
 </head>
 <body>
@@ -126,6 +142,11 @@ tr:hover td{background:#f8fbfd}
     <div class="aviso">
       Para conservar la trazabilidad, los documentos no se eliminan: se <strong>desactivan</strong>. El historial de estados y cargas queda vinculado al mismo ID interno.
     </div>
+
+<div class="avisoCriticoListado">
+  ⚠️ NO DEBE MODIFICARSE A MENOS QUE SE AGREGUEN DOCUMENTOS NUEVOS AL LISTADO O SE ELIMINEN DOCUMENTOS.
+</div>
+
 
     <div class="resumen">
       <div class="kpi"><small>Total registros</small><strong id="kTotal">0</strong></div>
