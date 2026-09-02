@@ -368,98 +368,73 @@ color:var(--gris);
 .nivelUniverso{
   display:flex;
   justify-content:center;
-  position:relative;
-  margin-bottom:36px;
-}
-
-.nivelUniverso::after{
-  content:"";
-  position:absolute;
-  left:50%;
-  bottom:-36px;
-  width:2px;
-  height:36px;
-  background:#cbd8e1;
+  margin-bottom:26px;
 }
 
 .kpiJerarquia{
   background:white;
-  border-radius:16px;
-  padding:22px 24px;
   border:1px solid #e0e7ec;
-  box-shadow:0 4px 15px rgba(20,50,80,.05);
-  min-height:128px;
+  border-radius:15px;
+  padding:18px 20px;
+  box-shadow:0 4px 14px rgba(20,50,80,.05);
+}
+
+.kpiJerarquia.clickable{
   cursor:pointer;
   transition:.18s;
 }
 
-.kpiJerarquia:hover{
-  transform:translateY(-3px);
-  box-shadow:0 8px 20px rgba(20,50,80,.12);
+.kpiJerarquia.clickable:hover{
+  transform:translateY(-2px);
+  box-shadow:0 7px 18px rgba(20,50,80,.10);
 }
 
 .kpiJerarquia small{
   display:block;
-  font-size:11px;
+  font-size:10px;
   font-weight:bold;
   letter-spacing:.5px;
   color:var(--gris);
   text-transform:uppercase;
-  margin-bottom:12px;
+  margin-bottom:8px;
 }
 
 .kpiJerarquia strong{
   display:block;
-  font-size:34px;
+  font-size:30px;
   color:var(--azul);
-  margin-bottom:8px;
+  margin-bottom:6px;
 }
 
 .kpiJerarquia .sub{
-  font-size:12px;
+  font-size:11px;
   color:var(--gris);
-  line-height:1.4;
+  line-height:1.35;
 }
 
 .kpiUniverso{
-  width:min(330px,100%);
+  width:min(360px,100%);
   border-left:6px solid var(--azul);
+  text-align:center;
 }
 
-.ramasPrincipales{
+.arbolResumen{
   display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:28px;
-  position:relative;
-  margin-bottom:22px;
+  grid-template-columns:1.35fr 1fr;
+  gap:22px;
+  align-items:start;
 }
 
-.ramasPrincipales::before{
-  content:"";
-  position:absolute;
-  top:-18px;
-  left:25%;
-  right:25%;
-  height:2px;
-  background:#cbd8e1;
-}
-
-.rama{
-  position:relative;
-}
-
-.rama::before{
-  content:"";
-  position:absolute;
-  top:-18px;
-  left:50%;
-  width:2px;
-  height:18px;
-  background:#cbd8e1;
+.grupoResumen{
+  background:#f8fbfd;
+  border:1px solid #e2eaf0;
+  border-radius:16px;
+  padding:14px;
 }
 
 .kpiPadre{
-  min-height:118px;
+  min-height:108px;
+  margin-bottom:14px;
 }
 
 .kpiPresentados{
@@ -470,31 +445,20 @@ color:var(--gris);
   border-left:6px solid #8aa1b3;
 }
 
-.hijosResumen{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:28px;
-}
-
 .hijosPresentados{
   display:grid;
-  grid-template-columns:1fr;
-  gap:16px;
-  padding-left:18px;
-  border-left:2px solid #d7e2e9;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
 }
 
 .hijosPendientes{
   display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:16px;
-  padding-left:18px;
-  border-left:2px solid #d7e2e9;
-  align-content:start;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
 }
 
 .kpiHijo{
-  min-height:120px;
+  min-height:112px;
 }
 
 .kpiLiberados{
@@ -505,6 +469,10 @@ color:var(--gris);
   border-left:6px solid var(--violeta);
 }
 
+.kpiNuestro{
+  border-left:6px solid #f28c28;
+}
+
 .kpiVencidos{
   border-left:6px solid var(--rojo);
 }
@@ -513,32 +481,30 @@ color:var(--gris);
   border-left:6px solid var(--celeste);
 }
 
-@media(max-width:1000px){
-  .ramasPrincipales,
-  .hijosResumen{
+.ecuacionResumen{
+  margin-top:10px;
+  font-size:11px;
+  color:var(--gris);
+  text-align:center;
+}
+
+.ecuacionResumen strong{
+  color:var(--azul);
+}
+
+@media(max-width:1150px){
+  .arbolResumen{
     grid-template-columns:1fr;
-  }
-
-  .ramasPrincipales::before,
-  .nivelUniverso::after,
-  .rama::before{
-    display:none;
-  }
-
-  .hijosPendientes{
-    grid-template-columns:1fr 1fr;
   }
 }
 
-@media(max-width:650px){
-  .hijosPendientes{
+@media(max-width:800px){
+  .hijosPresentados{
     grid-template-columns:1fr;
   }
 
-  .hijosPresentados,
   .hijosPendientes{
-    padding-left:0;
-    border-left:0;
+    grid-template-columns:1fr;
   }
 }
 
@@ -1301,9 +1267,7 @@ class="seccion activa">
 
 <div class="nivelUniverso">
 
-<div
-class="kpiJerarquia kpiUniverso"
-onclick="abrirUniverso()">
+<div class="kpiJerarquia kpiUniverso">
 
 <small>
 Universo documental
@@ -1322,12 +1286,15 @@ Total de documentos del listado base
 </div>
 
 
-<div class="ramasPrincipales">
+<div class="arbolResumen">
 
-<div class="rama">
+
+<!-- PRESENTADOS -->
+
+<div class="grupoResumen">
 
 <div
-class="kpiJerarquia kpiPadre kpiPresentados"
+class="kpiJerarquia kpiPadre kpiPresentados clickable"
 onclick="abrirDetalle('presentados')">
 
 <small>
@@ -1344,40 +1311,11 @@ Documentos que ya fueron presentados
 
 </div>
 
-</div>
-
-
-<div class="rama">
-
-<div
-class="kpiJerarquia kpiPadre kpiPendientes"
-onclick="abrirDetalle('pendientes')">
-
-<small>
-Pendientes de presentar
-</small>
-
-<strong id="kPendientes">
-0
-</strong>
-
-<div class="sub">
-Documentos todavía no presentados
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-
-<div class="hijosResumen">
 
 <div class="hijosPresentados">
 
 <div
-class="kpiJerarquia kpiHijo kpiLiberados"
+class="kpiJerarquia kpiHijo kpiLiberados clickable"
 onclick="abrirDetalle('liberados')">
 
 <small>
@@ -1389,14 +1327,14 @@ Liberados
 </strong>
 
 <div class="sub">
-Tocar para ver detalle
+Aprobados / liberados
 </div>
 
 </div>
 
 
 <div
-class="kpiJerarquia kpiHijo kpiCliente"
+class="kpiJerarquia kpiHijo kpiCliente clickable"
 onclick="abrirDetalle('cliente')">
 
 <small>
@@ -1413,13 +1351,62 @@ Pendientes de devolución
 
 </div>
 
+
+<div
+class="kpiJerarquia kpiHijo kpiNuestro clickable"
+onclick="abrirDetalle('nuestro')">
+
+<small>
+En nuestro poder / corrección
+</small>
+
+<strong id="kNuestro">
+0
+</strong>
+
+<div class="sub">
+Presentados que volvieron a nosotros
+</div>
+
+</div>
+
+</div>
+
+
+<div class="ecuacionResumen">
+<strong id="eqPresentados">0 + 0 + 0 = 0</strong>
+</div>
+
+</div>
+
+
+<!-- PENDIENTES -->
+
+<div class="grupoResumen">
+
+<div
+class="kpiJerarquia kpiPadre kpiPendientes clickable"
+onclick="abrirDetalle('pendientes')">
+
+<small>
+Pendientes de presentar
+</small>
+
+<strong id="kPendientes">
+0
+</strong>
+
+<div class="sub">
+Documentos todavía no presentados
+</div>
+
 </div>
 
 
 <div class="hijosPendientes">
 
 <div
-class="kpiJerarquia kpiHijo kpiVencidos"
+class="kpiJerarquia kpiHijo kpiVencidos clickable"
 onclick="abrirDetalle('vencidos')">
 
 <small>
@@ -1438,7 +1425,7 @@ Fecha prevista superada
 
 
 <div
-class="kpiJerarquia kpiHijo kpiFuturos"
+class="kpiJerarquia kpiHijo kpiFuturos clickable"
 onclick="abrirDetalle('futuros')">
 
 <small>
@@ -1456,6 +1443,14 @@ Aún dentro del plazo
 </div>
 
 </div>
+
+
+<div class="ecuacionResumen">
+<strong id="eqPendientes">0 + 0 = 0</strong>
+</div>
+
+</div>
+
 
 </div>
 
@@ -2084,6 +2079,12 @@ d => d._cliente
 );
 
 
+const nuestro =
+documentos.filter(
+d => d._nuestro
+);
+
+
 setTexto(
 "kUniverso",
 universo
@@ -2123,6 +2124,34 @@ futuros.length
 setTexto(
 "kCliente",
 cliente.length
+);
+
+
+setTexto(
+"kNuestro",
+nuestro.length
+);
+
+
+setTexto(
+"eqPresentados",
+liberados.length +
+" + " +
+cliente.length +
+" + " +
+nuestro.length +
+" = " +
+presentados.length
+);
+
+
+setTexto(
+"eqPendientes",
+vencidos.length +
+" + " +
+futuros.length +
+" = " +
+pendientes.length
 );
 
 
@@ -2381,6 +2410,19 @@ d => d._cliente
 
 titulo =
 "Documentos en poder del cliente";
+
+}
+
+
+if(tipo === "nuestro"){
+
+lista =
+documentos.filter(
+d => d._nuestro
+);
+
+titulo =
+"Documentos en nuestro poder / corrección";
 
 }
 
