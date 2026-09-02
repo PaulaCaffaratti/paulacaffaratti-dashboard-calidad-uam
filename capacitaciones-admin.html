@@ -67,8 +67,10 @@ td{padding:9px 10px;border-bottom:1px solid #e8edf1;vertical-align:top}
     <button id="btnCargar" class="btnCargar" onclick="subirDatos()" disabled>Cargar a Supabase</button>
   </div>
   <div class="nota">
-    El lector toma como referencia oficial el resumen mensual del archivo:
-    <b>Planificadas</b> y <b>Realizadas</b>. Las capacitaciones <b>RNP</b> se muestran aparte y no aumentan el cumplimiento del programa.
+    El lector toma la planificación directamente del cuerpo del programa.
+    Cada marca <b>R / RFF / P</b> representa una capacitación programada en ese mes.
+    Las <b>RNP</b> se muestran aparte y no aumentan el cumplimiento del programa.
+    Se admite planificación que continúe en el año siguiente.
   </div>
 </div>
 
@@ -195,30 +197,32 @@ async function analizarExcel(){
     const wb=XLSX.read(buffer,{type:"array",cellFormula:true});
     const ws=buscarHojaPrograma(wb);
 
-    anioPrograma=Number(valorHoja(ws,5,17));
-    if(!Number.isFinite(anioPrograma) || anioPrograma<2000 || anioPrograma>2100){
-      anioPrograma=new Date().getFullYear();
+    const anioBase=Number(valorHoja(ws,5,17));
+    anioPrograma=(Number.isFinite(anioBase) && anioBase>=2000 && anioBase<=2100)
+      ? anioBase
+      : new Date().getFullYear();
+
+    // Detectamos bloques de año/mes directamente desde las filas 5 y 6.
+    // En este archivo: Q:AB = 2026 y AC = enero 2027.
+    const columnasMes=[];
+    let anioVigente=null;
+
+    for(let c=17;c<=60;c++){
+      const posibleAnio=Number(valorHoja(ws,5,c));
+      if(Number.isFinite(posibleAnio) && posibleAnio>=2000 && posibleAnio<=2100){
+        anioVigente=posibleAnio;
+      }
+
+      const mes=Number(valorHoja(ws,6,c));
+      if(anioVigente && Number.isFinite(mes) && mes>=1 && mes<=12){
+        columnasMes.push({col:c,anio:anioVigente,mes});
+      }
     }
 
-    // 1) RESUMEN MENSUAL OFICIAL DEL ARCHIVO
-    // Fila 20 = Planificadas
-    // Fila 21 = Realizadas
-    // Columnas Q:AB = enero:diciembre (17:28)
-    resumenMensual=[];
-    for(let mes=1;mes<=12;mes++){
-      const col=16+mes;
-      resumenMensual.push({
-        anio:anioPrograma,
-        mes,
-        planificadas:numero(valorHoja(ws,20,col)),
-        realizadas:numero(valorHoja(ws,21,col))
-      });
+    if(!columnasMes.length){
+      throw new Error("No se pudieron detectar las columnas de año y mes del programa.");
     }
 
-    const totalPlan=resumenMensual.reduce((a,x)=>a+x.planificadas,0);
-    const totalReal=resumenMensual.reduce((a,x)=>a+x.realizadas,0);
-
-    // 2) DETALLE DEL CUERPO DEL PROGRAMA
     eventos=[];
     temasDetectados=0;
     let vacias=0;
@@ -233,39 +237,71 @@ async function analizarExcel(){
         continue;
       }
       vacias=0;
-      if(!Number.isFinite(Number(item))) continue;
 
+      if(!Number.isFinite(Number(item))) continue;
       temasDetectados++;
 
       const especialidades=[];
       for(let c=10;c<=16;c++){
-        if(texto(valorHoja(ws,r,c)).toUpperCase()==="X" && ESP[c]) especialidades.push(ESP[c]);
+        if(texto(valorHoja(ws,r,c)).toUpperCase()==="X" && ESP[c]){
+          especialidades.push(ESP[c]);
+        }
       }
 
-      for(let mes=1;mes<=12;mes++){
-        const col=16+mes;
-        const estado=normalizarEstado(valorHoja(ws,r,col));
+      for(const cm of columnasMes){
+        const estado=normalizarEstado(valorHoja(ws,r,cm.col));
         if(!estado) continue;
 
         eventos.push({
           item:Number(item),
           tema,
           especialidades,
-          anio:anioPrograma,
-          mes,
+          anio:cm.anio,
+          mes:cm.mes,
           estado
         });
       }
     }
 
-    if(totalPlan===0 && totalReal===0){
-      throw new Error("No se encontró el resumen mensual oficial de Planificadas / Realizadas.");
+    // La planificación oficial se obtiene de P + R + RFF del cuerpo.
+    // RNP queda fuera porque no fue programada.
+    const planificados=eventos.filter(x=>["P","R","RFF"].includes(x.estado));
+    const realizadosPlan=eventos.filter(x=>["R","RFF"].includes(x.estado));
+
+    resumenMensual=[];
+    const claves=[...new Set(columnasMes.map(x=>`${x.anio}-${String(x.mes).padStart(2,"0")}`))];
+
+    for(const clave of claves){
+      const [anioS,mesS]=clave.split("-");
+      const anio=Number(anioS), mes=Number(mesS);
+
+      const plan=planificados.filter(x=>x.anio===anio && x.mes===mes).length;
+      const real=realizadosPlan.filter(x=>x.anio===anio && x.mes===mes).length;
+
+      resumenMensual.push({
+        anio,
+        mes,
+        planificadas:plan,
+        realizadas:real
+      });
+    }
+
+    resumenMensual.sort((a,b)=>(a.anio-b.anio)||(a.mes-b.mes));
+
+    const totalPlan=planificados.length;
+    const totalReal=realizadosPlan.length;
+
+    if(totalPlan===0){
+      throw new Error("No se detectaron capacitaciones planificadas en el cuerpo del programa.");
     }
 
     pintarPreview(totalPlan,totalReal);
     document.getElementById("btnCargar").disabled=!sesionOk;
 
-    setEstado(`✓ Excel analizado correctamente: ${totalPlan} capacitaciones planificadas y ${totalReal} realizadas según el resumen oficial.`, "ok");
+    setEstado(
+      `✓ Programa detectado: ${totalPlan} planificadas, ${totalReal} realizadas y ${eventos.filter(x=>x.estado==="RNP").length} no programadas.`,
+      "ok"
+    );
 
   }catch(err){
     console.error(err);
@@ -275,7 +311,6 @@ async function analizarExcel(){
     setEstado("❌ "+err.message,"error");
   }
 }
-
 function pintarPreview(totalPlan,totalReal){
   const hoy=new Date();
   const anioActual=hoy.getFullYear();
@@ -345,7 +380,7 @@ function pintarPreview(totalPlan,totalReal){
 
       return `
         <tr>
-          <td>${MESES[x.mes-1]}</td>
+          <td>${MESES[x.mes-1]} ${x.anio}</td>
           <td>${x.planificadas || "-"}</td>
           <td>${x.realizadas || "-"}</td>
           <td>${cumplimiento}</td>
@@ -475,7 +510,7 @@ async function subirDatos(){
       if(error) throw error;
     }
 
-    setEstado(`✓ Carga completada: ${totalPlan} planificadas y ${totalReal} realizadas según el resumen mensual oficial.`, "ok");
+    setEstado(`✓ Carga completada: ${totalPlan} planificadas y ${totalReal} realizadas según el cuerpo del programa.`, "ok");
 
   }catch(err){
     console.error(err);
