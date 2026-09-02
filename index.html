@@ -356,6 +356,192 @@ color:var(--gris);
 
 /* GRIDS */
 
+
+/* =========================================================
+   RESUMEN DOCUMENTAL JERÁRQUICO
+========================================================= */
+
+.resumenJerarquia{
+  margin-bottom:30px;
+}
+
+.nivelUniverso{
+  display:flex;
+  justify-content:center;
+  position:relative;
+  margin-bottom:36px;
+}
+
+.nivelUniverso::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:-36px;
+  width:2px;
+  height:36px;
+  background:#cbd8e1;
+}
+
+.kpiJerarquia{
+  background:white;
+  border-radius:16px;
+  padding:22px 24px;
+  border:1px solid #e0e7ec;
+  box-shadow:0 4px 15px rgba(20,50,80,.05);
+  min-height:128px;
+  cursor:pointer;
+  transition:.18s;
+}
+
+.kpiJerarquia:hover{
+  transform:translateY(-3px);
+  box-shadow:0 8px 20px rgba(20,50,80,.12);
+}
+
+.kpiJerarquia small{
+  display:block;
+  font-size:11px;
+  font-weight:bold;
+  letter-spacing:.5px;
+  color:var(--gris);
+  text-transform:uppercase;
+  margin-bottom:12px;
+}
+
+.kpiJerarquia strong{
+  display:block;
+  font-size:34px;
+  color:var(--azul);
+  margin-bottom:8px;
+}
+
+.kpiJerarquia .sub{
+  font-size:12px;
+  color:var(--gris);
+  line-height:1.4;
+}
+
+.kpiUniverso{
+  width:min(330px,100%);
+  border-left:6px solid var(--azul);
+}
+
+.ramasPrincipales{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:28px;
+  position:relative;
+  margin-bottom:22px;
+}
+
+.ramasPrincipales::before{
+  content:"";
+  position:absolute;
+  top:-18px;
+  left:25%;
+  right:25%;
+  height:2px;
+  background:#cbd8e1;
+}
+
+.rama{
+  position:relative;
+}
+
+.rama::before{
+  content:"";
+  position:absolute;
+  top:-18px;
+  left:50%;
+  width:2px;
+  height:18px;
+  background:#cbd8e1;
+}
+
+.kpiPadre{
+  min-height:118px;
+}
+
+.kpiPresentados{
+  border-left:6px solid var(--celeste);
+}
+
+.kpiPendientes{
+  border-left:6px solid #8aa1b3;
+}
+
+.hijosResumen{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:28px;
+}
+
+.hijosPresentados{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:16px;
+  padding-left:18px;
+  border-left:2px solid #d7e2e9;
+}
+
+.hijosPendientes{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  padding-left:18px;
+  border-left:2px solid #d7e2e9;
+  align-content:start;
+}
+
+.kpiHijo{
+  min-height:120px;
+}
+
+.kpiLiberados{
+  border-left:6px solid var(--verde);
+}
+
+.kpiCliente{
+  border-left:6px solid var(--violeta);
+}
+
+.kpiVencidos{
+  border-left:6px solid var(--rojo);
+}
+
+.kpiFuturos{
+  border-left:6px solid var(--celeste);
+}
+
+@media(max-width:1000px){
+  .ramasPrincipales,
+  .hijosResumen{
+    grid-template-columns:1fr;
+  }
+
+  .ramasPrincipales::before,
+  .nivelUniverso::after,
+  .rama::before{
+    display:none;
+  }
+
+  .hijosPendientes{
+    grid-template-columns:1fr 1fr;
+  }
+}
+
+@media(max-width:650px){
+  .hijosPendientes{
+    grid-template-columns:1fr;
+  }
+
+  .hijosPresentados,
+  .hijosPendientes{
+    padding-left:0;
+    border-left:0;
+  }
+}
+
 .grid2{
 
 display:grid;
@@ -1111,11 +1297,12 @@ id="resumen"
 class="seccion activa">
 
 
-<div class="kpis">
+<div class="resumenJerarquia">
 
+<div class="nivelUniverso">
 
 <div
-class="kpi azul click"
+class="kpiJerarquia kpiUniverso"
 onclick="abrirUniverso()">
 
 <small>
@@ -1127,14 +1314,70 @@ Universo documental
 </strong>
 
 <div class="sub">
-Tocar para ver Presentados / Pendientes
+Total de documentos del listado base
 </div>
 
 </div>
 
+</div>
+
+
+<div class="ramasPrincipales">
+
+<div class="rama">
 
 <div
-class="kpi verde click"
+class="kpiJerarquia kpiPadre kpiPresentados"
+onclick="abrirDetalle('presentados')">
+
+<small>
+Presentados
+</small>
+
+<strong id="kPresentados">
+0
+</strong>
+
+<div class="sub">
+Documentos que ya fueron presentados
+</div>
+
+</div>
+
+</div>
+
+
+<div class="rama">
+
+<div
+class="kpiJerarquia kpiPadre kpiPendientes"
+onclick="abrirDetalle('pendientes')">
+
+<small>
+Pendientes de presentar
+</small>
+
+<strong id="kPendientes">
+0
+</strong>
+
+<div class="sub">
+Documentos todavía no presentados
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="hijosResumen">
+
+<div class="hijosPresentados">
+
+<div
+class="kpiJerarquia kpiHijo kpiLiberados"
 onclick="abrirDetalle('liberados')">
 
 <small>
@@ -1153,7 +1396,30 @@ Tocar para ver detalle
 
 
 <div
-class="kpi rojo click"
+class="kpiJerarquia kpiHijo kpiCliente"
+onclick="abrirDetalle('cliente')">
+
+<small>
+En poder del cliente
+</small>
+
+<strong id="kCliente">
+0
+</strong>
+
+<div class="sub">
+Pendientes de devolución
+</div>
+
+</div>
+
+</div>
+
+
+<div class="hijosPendientes">
+
+<div
+class="kpiJerarquia kpiHijo kpiVencidos"
 onclick="abrirDetalle('vencidos')">
 
 <small>
@@ -1172,7 +1438,7 @@ Fecha prevista superada
 
 
 <div
-class="kpi click"
+class="kpiJerarquia kpiHijo kpiFuturos"
 onclick="abrirDetalle('futuros')">
 
 <small>
@@ -1189,25 +1455,9 @@ Aún dentro del plazo
 
 </div>
 
-
-<div
-class="kpi violeta click"
-onclick="abrirDetalle('cliente')">
-
-<small>
-En poder del cliente
-</small>
-
-<strong id="kCliente">
-0
-</strong>
-
-<div class="sub">
-Pendientes de devolución
 </div>
 
 </div>
-
 
 </div>
 
@@ -1837,6 +2087,18 @@ d => d._cliente
 setTexto(
 "kUniverso",
 universo
+);
+
+
+setTexto(
+"kPresentados",
+presentados.length
+);
+
+
+setTexto(
+"kPendientes",
+pendientes.length
 );
 
 
