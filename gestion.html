@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestión de Calidad UAM</title>
+
+<style>
+*{box-sizing:border-box}
+:root{
+  --azul:#0c356a;
+  --celeste:#60c5e8;
+  --gris:#687787;
+  --fondo:#f4f7f9;
+  --blanco:#ffffff;
+  --borde:#dfe7ec;
+}
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:var(--fondo);
+  color:#1d2a36;
+}
+header{
+  background:var(--blanco);
+  border-bottom:1px solid var(--borde);
+}
+.topbar{
+  max-width:1600px;
+  margin:auto;
+  padding:20px 28px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+}
+.marca{
+  display:flex;
+  gap:14px;
+  align-items:center;
+}
+.barra{
+  width:10px;
+  height:68px;
+  border-radius:8px;
+  background:var(--celeste);
+}
+.marca h1{
+  margin:0;
+  color:var(--azul);
+  font-size:28px;
+}
+.marca p{
+  margin:5px 0 0;
+  color:var(--gris);
+  font-size:13px;
+}
+.nav{
+  background:var(--azul);
+}
+.tabs{
+  max-width:1600px;
+  margin:auto;
+  display:flex;
+  gap:0;
+  overflow:auto;
+}
+.tab{
+  appearance:none;
+  border:0;
+  background:transparent;
+  color:white;
+  padding:18px 26px;
+  font-size:13px;
+  font-weight:bold;
+  cursor:pointer;
+  border-bottom:6px solid transparent;
+  white-space:nowrap;
+}
+.tab:hover{
+  background:rgba(255,255,255,.06);
+}
+.tab.activo{
+  border-bottom-color:var(--celeste);
+  background:rgba(255,255,255,.05);
+}
+main{
+  max-width:1600px;
+  margin:auto;
+  padding:20px;
+}
+.aviso{
+  background:#eef7fb;
+  border-left:4px solid var(--celeste);
+  border-radius:10px;
+  padding:12px 14px;
+  margin-bottom:15px;
+  color:#31566e;
+  font-size:12px;
+}
+.contenedor{
+  background:white;
+  border:1px solid var(--borde);
+  border-radius:14px;
+  overflow:hidden;
+  min-height:1150px;
+  box-shadow:0 3px 12px rgba(20,50,80,.05);
+}
+iframe{
+  width:100%;
+  min-height:1150px;
+  border:0;
+  display:block;
+  background:white;
+}
+@media(max-width:700px){
+  .topbar{
+    padding:16px;
+  }
+  .marca h1{
+    font-size:21px;
+  }
+  .barra{
+    height:55px;
+  }
+  .tab{
+    padding:15px 17px;
+  }
+  main{
+    padding:10px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+
+  <div class="topbar">
+    <div class="marca">
+      <div class="barra"></div>
+      <div>
+        <h1>DUPLICAR NORTE UAM</h1>
+        <p>Gestión de Inputs · Calidad</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <div class="tabs">
+
+      <button
+      id="tabDocumentacion"
+      class="tab activo"
+      onclick="abrirModulo('documentacion',this)">
+      📄 ADMINISTRACIÓN DE DOCUMENTACIÓN
+      </button>
+
+      <button
+      id="tabBlister"
+      class="tab"
+      onclick="abrirModulo('blister',this)">
+      ⚠️ OBSERVACIONES BLISTER
+      </button>
+
+      <button
+      id="tabMaestro"
+      class="tab"
+      onclick="abrirModulo('maestro',this)">
+      📋 LISTADO BASE
+      </button>
+
+    </div>
+  </div>
+
+</header>
+
+<main>
+
+  <div class="aviso">
+    Ingresá una sola vez desde Administración de Documentación.
+    Después podés cambiar de pestaña para cargar Blister o modificar el Listado Base.
+  </div>
+
+  <div class="contenedor">
+    <iframe
+    id="visor"
+    src="admin.html"
+    title="Gestión de Calidad">
+    </iframe>
+  </div>
+
+</main>
+
+<script>
+
+const rutas = {
+  documentacion:"admin.html",
+  blister:"blister-admin.html",
+  maestro:"maestro.html"
+};
+
+let moduloActual =
+"documentacion";
+
+
+function abrirModulo(
+modulo,
+boton
+){
+
+  if(
+    !rutas[modulo]
+  ){
+    return;
+  }
+
+  document
+  .querySelectorAll(
+    ".tab"
+  )
+  .forEach(
+    x =>
+    x.classList.remove(
+      "activo"
+    )
+  );
+
+  boton
+  .classList
+  .add(
+    "activo"
+  );
+
+  moduloActual =
+  modulo;
+
+  const visor =
+  document
+  .getElementById(
+    "visor"
+  );
+
+  /*
+  El iframe se carga recién cuando se toca la pestaña.
+  Así, si el usuario ya inició sesión en admin.html,
+  las otras páginas toman la misma sesión de Supabase.
+  */
+  visor.src =
+  rutas[modulo] +
+  "?v=" +
+  Date.now();
+
+  window.scrollTo(
+    {
+      top:0,
+      behavior:"smooth"
+    }
+  );
+
+}
+
+
+/*
+Ajusta la altura según la página cargada.
+Si por seguridad del navegador no pudiera leerla,
+queda la altura mínima de 1150 px.
+*/
+document
+.getElementById(
+  "visor"
+)
+.addEventListener(
+  "load",
+  function(){
+
+    try{
+
+      const doc =
+      this.contentWindow.document;
+
+      const alto =
+      Math.max(
+        doc.body.scrollHeight,
+        doc.documentElement.scrollHeight,
+        1150
+      );
+
+      this.style.height =
+      alto +
+      "px";
+
+    }
+    catch(e){
+
+      this.style.height =
+      "1150px";
+
+    }
+
+  }
+);
+
+</script>
+
+</body>
+</html>
