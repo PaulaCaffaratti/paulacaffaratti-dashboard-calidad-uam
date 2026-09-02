@@ -235,6 +235,11 @@ tr:hover td{
   .kpis{grid-template-columns:1fr 1fr}
   .filtros{grid-template-columns:1fr}
 }
+
+body.embed header{display:none!important;}
+body.embed main{max-width:none!important;padding:18px!important;}
+body.embed .titulo{margin-top:0!important;}
+
 </style>
 </head>
 
@@ -997,6 +1002,13 @@ function escaparAttr(valor){
   return escapar(valor);
 }
 
+</script>
+
+
+<script>
+if(new URLSearchParams(window.location.search).get("embed")==="1"){
+  document.body.classList.add("embed");
+}
 </script>
 
 </body>
