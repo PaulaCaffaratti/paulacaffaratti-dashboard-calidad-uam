@@ -1548,21 +1548,7 @@ Dashboard de Indicadores de Calidad
 
 </div>
 
-
-<div class="actualizacion">
-
-<small>
-Última actualización
-</small>
-
-<strong id="fechaActualizacion">
-Consultando...
-</strong>
-
 </div>
-
-</div>
-
 
 <nav>
 
@@ -2526,10 +2512,6 @@ pintarEspecialidades();
 cargarEspecialidades();
 
 filtrarTabla();
-
-ultimaActualizacion();
-
-
 document
 .getElementById("cargando")
 .style.display =
@@ -4100,78 +4082,6 @@ PENDIENTE
 `;
 
 }
-
-
-/* ÚLTIMA ACTUALIZACIÓN */
-
-function ultimaActualizacion(){
-
-const fechas =
-
-documentos
-
-.map(
-d =>
-d.fecha_actualizacion
-)
-
-.filter(Boolean)
-
-.map(
-d =>
-new Date(d)
-)
-
-.filter(
-d =>
-!isNaN(
-d.getTime()
-)
-);
-
-
-if(!fechas.length){
-
-setTexto(
-
-"fechaActualizacion",
-
-"Sin actualizaciones registradas"
-
-);
-
-return;
-
-}
-
-
-const max =
-
-new Date(
-
-Math.max(
-
-...fechas.map(
-d => d.getTime()
-)
-
-)
-
-);
-
-
-setTexto(
-
-"fechaActualizacion",
-
-max.toLocaleString(
-"es-AR"
-)
-
-);
-
-}
-
 
 /* MODAL */
 
