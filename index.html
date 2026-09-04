@@ -3149,6 +3149,54 @@ return null;
 }
 
 
+function fechaPresentacionDocumento(doc){
+
+if(
+!doc._presentado
+){
+
+return null;
+
+}
+
+/*
+Para reconstruir la curva histórica de PRESENTADOS:
+1) fecha_primera_presentacion, si existe.
+2) fecha_ultima_emision, si falta la primera presentación.
+3) hoy, sólo si no existe ninguna fecha real disponible.
+*/
+
+if(
+doc.fecha_primera_presentacion
+){
+
+return String(
+doc.fecha_primera_presentacion
+).slice(
+0,
+10
+);
+
+}
+
+if(
+doc.fecha_ultima_emision
+){
+
+return String(
+doc.fecha_ultima_emision
+).slice(
+0,
+10
+);
+
+}
+
+return hoyISO();
+
+}
+
+
 documentos.forEach(doc => {
 
 if(
@@ -3167,17 +3215,17 @@ doc.fecha_prevista_presentacion
 }
 
 
+const fechaPresentacion =
+fechaPresentacionDocumento(
+doc
+);
+
 if(
-doc.fecha_primera_presentacion
+fechaPresentacion
 ){
 
 fechas.add(
-String(
-doc.fecha_primera_presentacion
-).slice(
-0,
-10
-)
+fechaPresentacion
 );
 
 }
@@ -3238,20 +3286,25 @@ d.fecha_prevista_presentacion
 ).length;
 
 
+const hoy = hoyISO();
+
 const realAcum =
 
 documentos.filter(
 
-d =>
+d => {
 
-d.fecha_primera_presentacion &&
+const fechaPresentacion =
+fechaPresentacionDocumento(
+d
+);
 
-String(
-d.fecha_primera_presentacion
-).slice(
-0,
-10
-) <= fecha
+return (
+fechaPresentacion &&
+fechaPresentacion <= fecha
+);
+
+}
 
 ).length;
 
@@ -3284,8 +3337,6 @@ plan.push(
 planAcum
 );
 
-
-const hoy = hoyISO();
 
 real.push(
 fecha <= hoy ? realAcum : null
