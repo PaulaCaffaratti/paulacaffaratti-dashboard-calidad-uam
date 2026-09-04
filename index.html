@@ -3285,13 +3285,14 @@ planAcum
 );
 
 
+const hoy = hoyISO();
+
 real.push(
-realAcum
+fecha <= hoy ? realAcum : null
 );
 
-
 liberados.push(
-liberadosAcum
+fecha <= hoy ? liberadosAcum : null
 );
 
 });
@@ -3369,7 +3370,9 @@ borderWidth:3,
 
 pointRadius:2,
 
-tension:.25
+tension:.25,
+
+spanGaps:false
 
 },
 
@@ -3390,7 +3393,9 @@ borderWidth:3,
 
 pointRadius:2,
 
-tension:.25
+tension:.25,
+
+spanGaps:false
 
 }
 
