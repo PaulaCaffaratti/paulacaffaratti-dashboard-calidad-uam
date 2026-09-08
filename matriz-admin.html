@@ -10,7 +10,10 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <style>
-*{box-sizing:border-box}
+
+*{
+  box-sizing:border-box;
+}
 
 :root{
   --azul:#0c356a;
@@ -173,10 +176,21 @@ button{
   font-size:28px;
 }
 
-.kpi.verde{border-top-color:var(--verde)}
-.kpi.naranja{border-top-color:var(--naranja)}
-.kpi.violeta{border-top-color:var(--violeta)}
-.kpi.rojo{border-top-color:var(--rojo)}
+.kpi.verde{
+  border-top-color:var(--verde);
+}
+
+.kpi.naranja{
+  border-top-color:var(--naranja);
+}
+
+.kpi.violeta{
+  border-top-color:var(--violeta);
+}
+
+.kpi.rojo{
+  border-top-color:var(--rojo);
+}
 
 .tablaWrap{
   overflow:auto;
@@ -296,12 +310,22 @@ td{
 }
 
 @media(max-width:1100px){
-  .kpis{grid-template-columns:repeat(3,1fr)}
-  .especialidades{grid-template-columns:repeat(3,1fr)}
+
+  .kpis{
+    grid-template-columns:repeat(3,1fr);
+  }
+
+  .especialidades{
+    grid-template-columns:repeat(3,1fr);
+  }
+
 }
 
 @media(max-width:700px){
-  main{padding:14px}
+
+  main{
+    padding:14px;
+  }
 
   .kpis,
   .especialidades{
@@ -311,7 +335,9 @@ td{
   input[type=file]{
     min-width:100%;
   }
+
 }
+
 </style>
 </head>
 
@@ -320,13 +346,15 @@ td{
 <main>
 
 <div class="encabezado">
+
   <h1>📊 Matriz de Calidad</h1>
 
   <p>
     Carga de la Matriz de Seguimiento de Actividades.
     El sistema detecta automáticamente las columnas de identificación
-    y todos los registros de Calidad existentes en el Excel.
+    y los registros de Calidad existentes en el Excel.
   </p>
+
 </div>
 
 
@@ -369,18 +397,23 @@ td{
     Seleccioná el archivo Excel actualizado.
   </div>
 
-  <div id="infoColumnas" class="infoColumnas" style="display:none;"></div>
+  <div
+    id="infoColumnas"
+    class="infoColumnas"
+    style="display:none;">
+  </div>
 
   <div class="nota">
-    Podés agregar filas nuevas y también nuevas columnas de registros.
-    Las columnas de identificación se buscan por nombre, por lo que no dependen
-    de una posición fija.
+    Podés agregar nuevas filas y nuevas columnas de registros de Calidad.
+    Las columnas auxiliares como OBSERVACIONES no se incluyen en los
+    cálculos del avance.
   </div>
 
 </div>
 
 
 <div id="resultado" style="display:none;">
+
 
 <div class="kpis">
 
@@ -416,24 +449,38 @@ td{
 
   <h2>Avance general</h2>
 
-  <div class="kpis" style="grid-template-columns:1fr 1fr;margin-bottom:0;">
+  <div
+    class="kpis"
+    style="grid-template-columns:1fr 1fr;margin-bottom:0;"
+  >
 
     <div class="kpi naranja">
+
       <small>Avance elaborado</small>
-      <strong id="kElaborado">0%</strong>
+
+      <strong id="kElaborado">
+        0%
+      </strong>
 
       <div class="nota">
         Registros 1 + 1P sobre registros aplicables
       </div>
+
     </div>
 
+
     <div class="kpi verde">
+
       <small>Avance cerrado</small>
-      <strong id="kCerradoPct">0%</strong>
+
+      <strong id="kCerradoPct">
+        0%
+      </strong>
 
       <div class="nota">
         Registros 1 sobre registros aplicables
       </div>
+
     </div>
 
   </div>
@@ -462,28 +509,44 @@ td{
     <table>
 
       <thead>
+
         <tr>
+
           <th>Especialidad</th>
+
           <th>TAG</th>
+
           <th>Descripción</th>
+
           <th>Status Index</th>
+
           <th>Sistema</th>
+
           <th>Descripción Sistema</th>
+
           <th>Subsistema</th>
+
           <th>Descripción Subsistema</th>
+
           <th>Pend.</th>
+
           <th>1P</th>
+
           <th>Cerrados</th>
+
         </tr>
+
       </thead>
 
-      <tbody id="tablaPreview"></tbody>
+      <tbody id="tablaPreview">
+      </tbody>
 
     </table>
 
   </div>
 
 </div>
+
 
 </div>
 
@@ -492,6 +555,7 @@ td{
 
 <script>
 
+
 /* ======================================================
    SUPABASE
 ====================================================== */
@@ -499,8 +563,10 @@ td{
 const SUPABASE_URL =
 "https://mzgbtejfgsrskiuymtwh.supabase.co";
 
+
 const SUPABASE_KEY =
 "sb_publishable_Wen9hxBnae8wRrEEaP5lOQ_aNl9OCGd";
+
 
 const supabaseClient =
 window.supabase.createClient(
@@ -508,8 +574,11 @@ window.supabase.createClient(
   SUPABASE_KEY
 );
 
+
 let filasMatriz = [];
+
 let usuarioActual = null;
+
 let columnasRegistrosDetectadas = [];
 
 
@@ -531,14 +600,18 @@ async function verificarSesion(){
   } =
   await supabaseClient.auth.getSession();
 
+
   const usuario =
   data?.session?.user || null;
+
 
   usuarioActual =
   usuario;
 
+
   const caja =
   document.getElementById("usuario");
+
 
   if(error){
 
@@ -546,7 +619,9 @@ async function verificarSesion(){
     "⚠️ No se pudo verificar la sesión.";
 
     return;
+
   }
+
 
   if(!usuario){
 
@@ -554,12 +629,15 @@ async function verificarSesion(){
     "⚠️ No hay sesión iniciada. Ingresá primero desde Administración de Documentación.";
 
     return;
+
   }
+
 
   caja.innerHTML =
   "✅ Usuario conectado: <strong>" +
   escapar(usuario.email || "") +
   "</strong>";
+
 }
 
 
@@ -576,18 +654,21 @@ function texto(valor){
     return "";
   }
 
+
   return String(valor).trim();
+
 }
 
 
 function normalizarTextoClave(valor){
 
   return texto(valor)
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g,"")
-    .toUpperCase()
-    .replace(/\s+/g," ")
-    .trim();
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g,"")
+  .toUpperCase()
+  .replace(/\s+/g," ")
+  .trim();
+
 }
 
 
@@ -596,17 +677,27 @@ function normalizarEspecialidad(valor){
   const v =
   normalizarTextoClave(valor);
 
-  if(v.includes("CIVIL")){
+
+  if(
+    v.includes("CIVIL")
+  ){
     return "Civil";
   }
 
-  if(v.includes("PIP")){
+
+  if(
+    v.includes("PIP")
+  ){
     return "Piping";
   }
 
-  if(v.includes("MEC")){
+
+  if(
+    v.includes("MEC")
+  ){
     return "Mecánica";
   }
+
 
   if(
     v.includes("ELEC") ||
@@ -615,6 +706,7 @@ function normalizarEspecialidad(valor){
     return "Electricidad";
   }
 
+
   if(
     v.includes("INSTR") ||
     v === "I"
@@ -622,7 +714,9 @@ function normalizarEspecialidad(valor){
     return "Instrumentación";
   }
 
+
   return texto(valor);
+
 }
 
 
@@ -633,6 +727,7 @@ function normalizarEstado(valor){
   .toUpperCase()
   .replace(/\s+/g,"");
 
+
   if(
     v === "N/A" ||
     v === "NA" ||
@@ -641,12 +736,14 @@ function normalizarEstado(valor){
     return "N/A";
   }
 
+
   if(
     v === "1P" ||
     v === "1-P"
   ){
     return "1P";
   }
+
 
   if(
     v === "1" ||
@@ -655,6 +752,7 @@ function normalizarEstado(valor){
     return "1";
   }
 
+
   if(
     v === "0" ||
     v === "0.0"
@@ -662,7 +760,49 @@ function normalizarEstado(valor){
     return "0";
   }
 
+
   return texto(valor);
+
+}
+
+
+/* ======================================================
+   COLUMNAS QUE NO SON REGISTROS
+====================================================== */
+
+function esColumnaAuxiliar(nombre){
+
+  const n =
+  normalizarTextoClave(nombre);
+
+
+  const columnasIgnoradas = [
+
+    "OBSERVACIONES",
+    "OBSERVACION",
+
+    "COMENTARIOS",
+    "COMENTARIO",
+
+    "NOTAS",
+    "NOTA",
+
+    "REMARKS",
+    "REMARK",
+
+    "RESPONSABLE",
+
+    "FECHA",
+
+    "FECHA DE CARGA"
+
+  ];
+
+
+  return columnasIgnoradas.includes(
+    n
+  );
+
 }
 
 
@@ -673,11 +813,17 @@ function normalizarEstado(valor){
 function buscarFilaEncabezados(datos){
 
   const clavesEsperadas = [
+
     "ESPECIALIDAD",
+
     "TAG",
+
     "DESCRIPCION",
+
     "STATUS INDEX"
+
   ];
+
 
   for(
     let i = 0;
@@ -687,7 +833,10 @@ function buscarFilaEncabezados(datos){
 
     const fila =
     (datos[i] || [])
-    .map(normalizarTextoClave);
+    .map(
+      normalizarTextoClave
+    );
+
 
     const coincidencias =
     clavesEsperadas.filter(
@@ -695,21 +844,31 @@ function buscarFilaEncabezados(datos){
       fila.includes(clave)
     ).length;
 
-    if(coincidencias >= 3){
+
+    if(
+      coincidencias >= 3
+    ){
       return i;
     }
+
   }
 
+
   return -1;
+
 }
 
 
-function buscarIndice(encabezados, variantes){
+function buscarIndice(
+  encabezados,
+  variantes
+){
 
   const normalizados =
   encabezados.map(
     normalizarTextoClave
   );
+
 
   for(
     const variante of variantes
@@ -717,15 +876,23 @@ function buscarIndice(encabezados, variantes){
 
     const indice =
     normalizados.indexOf(
-      normalizarTextoClave(variante)
+      normalizarTextoClave(
+        variante
+      )
     );
 
-    if(indice !== -1){
+
+    if(
+      indice !== -1
+    ){
       return indice;
     }
+
   }
 
+
   return -1;
+
 }
 
 
@@ -736,10 +903,14 @@ function buscarIndice(encabezados, variantes){
 async function procesarArchivo(){
 
   const input =
-  document.getElementById("archivo");
+  document.getElementById(
+    "archivo"
+  );
+
 
   const archivo =
   input.files[0];
+
 
   if(!archivo){
 
@@ -749,22 +920,29 @@ async function procesarArchivo(){
     );
 
     return;
+
   }
+
 
   mostrarEstado(
     "⏳ Leyendo Excel...",
     "cargando"
   );
 
+
   document
-  .getElementById("btnGuardar")
+  .getElementById(
+    "btnGuardar"
+  )
   .disabled =
   true;
+
 
   try{
 
     const buffer =
     await archivo.arrayBuffer();
+
 
     const workbook =
     XLSX.read(
@@ -775,26 +953,39 @@ async function procesarArchivo(){
       }
     );
 
+
     const nombreHojaMatriz =
     workbook.SheetNames.find(
-      n =>
-      normalizarTextoClave(n) ===
+      nombre =>
+      normalizarTextoClave(
+        nombre
+      ) ===
       "MATRIZ"
     );
 
-    if(!nombreHojaMatriz){
+
+    if(
+      !nombreHojaMatriz
+    ){
 
       throw new Error(
         'No se encontró la hoja "Matriz".'
       );
+
     }
+
 
     const nombreHojaSistemas =
     workbook.SheetNames.find(
-      n =>
-      normalizarTextoClave(n)
-      .includes("LISTA DE SIS")
+      nombre =>
+      normalizarTextoClave(
+        nombre
+      )
+      .includes(
+        "LISTA DE SIS"
+      )
     );
+
 
     const mapaSistemas =
     nombreHojaSistemas
@@ -807,6 +998,7 @@ async function procesarArchivo(){
     :
     {};
 
+
     filasMatriz =
     leerMatriz(
       workbook.Sheets[
@@ -815,6 +1007,7 @@ async function procesarArchivo(){
       mapaSistemas
     );
 
+
     if(
       filasMatriz.length === 0
     ){
@@ -822,35 +1015,52 @@ async function procesarArchivo(){
       throw new Error(
         "No se encontraron elementos válidos en la matriz."
       );
+
     }
 
+
     actualizarResumen();
+
     pintarPreview();
 
+
     document
-    .getElementById("resultado")
+    .getElementById(
+      "resultado"
+    )
     .style.display =
     "block";
 
+
     document
-    .getElementById("btnGuardar")
+    .getElementById(
+      "btnGuardar"
+    )
     .disabled =
     false;
 
+
+    const info =
     document
-    .getElementById("infoColumnas")
-    .style.display =
+    .getElementById(
+      "infoColumnas"
+    );
+
+
+    info.style.display =
     "block";
 
-    document
-    .getElementById("infoColumnas")
-    .innerHTML =
+
+    info.innerHTML =
     "<strong>Columnas de registros detectadas:</strong> " +
     columnasRegistrosDetectadas.length +
-    "<br>" +
+    "<br><br>" +
     escapar(
-      columnasRegistrosDetectadas.join(" · ")
+      columnasRegistrosDetectadas.join(
+        " · "
+      )
     );
+
 
     mostrarEstado(
       "✅ Excel leído correctamente. " +
@@ -862,19 +1072,27 @@ async function procesarArchivo(){
     );
 
   }
+
   catch(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
+
 
     filasMatriz = [];
+
     columnasRegistrosDetectadas = [];
+
 
     mostrarEstado(
       "❌ Error al leer el Excel: " +
       error.message,
       "error"
     );
+
   }
+
 }
 
 
@@ -894,10 +1112,15 @@ function leerSistemas(sheet){
     }
   );
 
+
   const mapa = {};
 
+
   const filaEncabezados =
-  buscarFilaEncabezadosSistema(datos);
+  buscarFilaEncabezadosSistema(
+    datos
+  );
+
 
   if(
     filaEncabezados === -1
@@ -905,8 +1128,22 @@ function leerSistemas(sheet){
     return mapa;
   }
 
+
   const encabezados =
-  datos[filaEncabezados] || [];
+  datos[
+    filaEncabezados
+  ] || [];
+
+
+  /*
+  En tu hoja Lista de Sis y SubS
+  también aceptamos los encabezados:
+  N° SIS
+  DESCRIPCION SISTEMA
+  N° SS
+  DESCRIPCION SUBSISTEMA
+  */
+
 
   const idxSistema =
   buscarIndice(
@@ -914,9 +1151,13 @@ function leerSistemas(sheet){
     [
       "Sistema",
       "Código Sistema",
-      "Codigo Sistema"
+      "Codigo Sistema",
+      "N° SIS",
+      "N SIS",
+      "Nº SIS"
     ]
   );
+
 
   const idxDescSistema =
   buscarIndice(
@@ -927,47 +1168,65 @@ function leerSistemas(sheet){
     ]
   );
 
+
   const idxSubsistema =
   buscarIndice(
     encabezados,
     [
       "Subsistema",
       "Código Subsistema",
-      "Codigo Subsistema"
+      "Codigo Subsistema",
+      "N° SS",
+      "N SS",
+      "Nº SS"
     ]
   );
+
 
   const idxDescSubsistema =
   buscarIndice(
     encabezados,
     [
       "Descripcion Subsistema",
-      "Descripción Subsistema"
+      "Descripción Subsistema",
+      "Descripcion Subistema",
+      "Descripción Subistema"
     ]
   );
 
+
   for(
-    let i = filaEncabezados + 1;
+    let i =
+    filaEncabezados + 1;
+
     i < datos.length;
+
     i++
   ){
 
     const fila =
     datos[i] || [];
 
+
     const sistema =
     idxSistema >= 0
     ?
-    texto(fila[idxSistema])
+    texto(
+      fila[idxSistema]
+    )
     :
     "";
+
 
     const subsistemaRaw =
     idxSubsistema >= 0
     ?
-    texto(fila[idxSubsistema])
+    texto(
+      fila[idxSubsistema]
+    )
     :
     "";
+
 
     if(
       !sistema ||
@@ -976,79 +1235,180 @@ function leerSistemas(sheet){
       continue;
     }
 
+
     const subsistema =
     normalizarSubsistema(
       subsistemaRaw
     );
 
+
     const clave =
-    normalizarTextoClave(sistema) +
+    normalizarNumeroSistema(
+      sistema
+    ) +
     "|" +
     subsistema;
 
+
     mapa[clave] = {
 
-      sistema,
+      sistema:
+      normalizarNumeroSistema(
+        sistema
+      ),
 
       descripcionSistema:
       idxDescSistema >= 0
       ?
-      texto(fila[idxDescSistema])
+      texto(
+        fila[
+          idxDescSistema
+        ]
+      )
       :
       "",
 
+      subsistema:
       subsistema,
 
       descripcionSubsistema:
       idxDescSubsistema >= 0
       ?
-      texto(fila[idxDescSubsistema])
+      texto(
+        fila[
+          idxDescSubsistema
+        ]
+      )
       :
       ""
+
     };
+
   }
 
+
   return mapa;
+
 }
 
 
-function buscarFilaEncabezadosSistema(datos){
+function buscarFilaEncabezadosSistema(
+  datos
+){
 
   for(
     let i = 0;
-    i < Math.min(datos.length,40);
+    i < Math.min(
+      datos.length,
+      40
+    );
     i++
   ){
 
     const fila =
     (datos[i] || [])
-    .map(normalizarTextoClave);
+    .map(
+      normalizarTextoClave
+    );
+
+
+    const tieneSistema =
+    fila.some(
+      x =>
+      x === "SISTEMA" ||
+      x === "N° SIS" ||
+      x === "N SIS" ||
+      x === "Nº SIS"
+    );
+
+
+    const tieneSubsistema =
+    fila.some(
+      x =>
+      x === "SUBSISTEMA" ||
+      x === "N° SS" ||
+      x === "N SS" ||
+      x === "Nº SS"
+    );
+
 
     if(
-      fila.some(x => x === "SISTEMA") &&
-      fila.some(x => x === "SUBSISTEMA")
+      tieneSistema &&
+      tieneSubsistema
     ){
       return i;
     }
+
   }
 
+
   return -1;
+
 }
 
 
-function normalizarSubsistema(valor){
+function normalizarSubsistema(
+  valor
+){
 
   const original =
   texto(valor);
 
-  const soloNumeros =
-  original.replace(/\D/g,"");
 
-  if(soloNumeros){
-    return soloNumeros.padStart(3,"0");
+  const soloNumeros =
+  original.replace(
+    /\D/g,
+    ""
+  );
+
+
+  if(
+    soloNumeros
+  ){
+
+    return soloNumeros
+    .padStart(
+      3,
+      "0"
+    );
+
   }
 
+
   return original;
+
+}
+
+
+function normalizarNumeroSistema(
+  valor
+){
+
+  const original =
+  texto(valor);
+
+
+  const numeros =
+  original.match(
+    /\d+/
+  );
+
+
+  if(
+    numeros
+  ){
+
+    return numeros[0]
+    .padStart(
+      2,
+      "0"
+    );
+
+  }
+
+
+  return original;
+
 }
 
 
@@ -1071,8 +1431,12 @@ function leerMatriz(
     }
   );
 
+
   const filaEncabezados =
-  buscarFilaEncabezados(datos);
+  buscarFilaEncabezados(
+    datos
+  );
+
 
   if(
     filaEncabezados === -1
@@ -1081,29 +1445,47 @@ function leerMatriz(
     throw new Error(
       "No pude detectar la fila de encabezados de la hoja Matriz."
     );
+
   }
 
+
   const encabezados =
-  datos[filaEncabezados]
-  .map(x => texto(x));
+  datos[
+    filaEncabezados
+  ]
+  .map(
+    x =>
+    texto(x)
+  );
+
 
   const idxEspecialidad =
   buscarIndice(
     encabezados,
-    ["Especialidad"]
+    [
+      "Especialidad"
+    ]
   );
+
 
   const idxTag =
   buscarIndice(
     encabezados,
-    ["TAG"]
+    [
+      "TAG"
+    ]
   );
+
 
   const idxDescripcion =
   buscarIndice(
     encabezados,
-    ["Descripción","Descripcion"]
+    [
+      "Descripción",
+      "Descripcion"
+    ]
   );
+
 
   const idxPid =
   buscarIndice(
@@ -1116,6 +1498,7 @@ function leerMatriz(
     ]
   );
 
+
   const idxStatus =
   buscarIndice(
     encabezados,
@@ -1125,11 +1508,15 @@ function leerMatriz(
     ]
   );
 
+
   const idxSistema =
   buscarIndice(
     encabezados,
-    ["Sistema"]
+    [
+      "Sistema"
+    ]
   );
+
 
   const idxDescSistema =
   buscarIndice(
@@ -1140,11 +1527,15 @@ function leerMatriz(
     ]
   );
 
+
   const idxSubsistema =
   buscarIndice(
     encabezados,
-    ["Subsistema"]
+    [
+      "Subsistema"
+    ]
   );
+
 
   const idxDescSubsistema =
   buscarIndice(
@@ -1166,6 +1557,7 @@ function leerMatriz(
     throw new Error(
       "Faltan columnas principales. Se requieren como mínimo: Especialidad, TAG, Descripción y Status Index."
     );
+
   }
 
 
@@ -1182,7 +1574,10 @@ function leerMatriz(
       idxSubsistema,
       idxDescSubsistema
     ]
-    .filter(x => x >= 0)
+    .filter(
+      x =>
+      x >= 0
+    )
   );
 
 
@@ -1196,15 +1591,37 @@ function leerMatriz(
       indice
     ) => {
 
-      if(!nombre){
-        return;
-      }
 
       if(
-        indicesFijos.has(indice)
+        !nombre
       ){
         return;
       }
+
+
+      if(
+        indicesFijos.has(
+          indice
+        )
+      ){
+        return;
+      }
+
+
+      /*
+      IMPORTANTE:
+      OBSERVACIONES y otras columnas auxiliares
+      NO se cuentan como registros.
+      */
+
+      if(
+        esColumnaAuxiliar(
+          nombre
+        )
+      ){
+        return;
+      }
+
 
       columnasRegistros.push(
         {
@@ -1219,16 +1636,21 @@ function leerMatriz(
 
   columnasRegistrosDetectadas =
   columnasRegistros.map(
-    x => x.nombre
+    columna =>
+    columna.nombre
   );
 
 
-  const resultado = [];
+  const resultado =
+  [];
 
 
   for(
-    let i = filaEncabezados + 1;
+    let i =
+    filaEncabezados + 1;
+
     i < datos.length;
+
     i++
   ){
 
@@ -1238,32 +1660,35 @@ function leerMatriz(
 
     const especialidadOriginal =
     texto(
-      fila[idxEspecialidad]
+      fila[
+        idxEspecialidad
+      ]
     );
 
 
     const tag =
     texto(
-      fila[idxTag]
+      fila[
+        idxTag
+      ]
     );
 
 
     const descripcion =
     texto(
-      fila[idxDescripcion]
+      fila[
+        idxDescripcion
+      ]
     );
 
 
     const statusIndex =
     texto(
-      fila[idxStatus]
+      fila[
+        idxStatus
+      ]
     );
 
-
-    /*
-    Si toda la identificación está vacía,
-    consideramos que terminó la tabla.
-    */
 
     if(
       !especialidadOriginal &&
@@ -1276,85 +1701,103 @@ function leerMatriz(
 
 
     /*
-    Si el Excel ya trae Sistema / Subsistema,
-    usamos esos valores.
-
-    Si no los trae, intentamos obtenerlos
-    desde Status Index + Lista de Sis y SubS.
+    Preferimos calcular Sistema/Subsistema
+    desde Status Index porque es la referencia
+    más estable para el dashboard.
     */
 
+
+    const infoStatus =
+    obtenerSistemaDesdeStatus(
+      statusIndex,
+      mapaSistemas
+    );
+
+
     let sistema =
-    idxSistema >= 0
-    ?
-    texto(fila[idxSistema])
-    :
-    "";
+    infoStatus.sistema;
 
 
     let descripcionSistema =
-    idxDescSistema >= 0
-    ?
-    texto(fila[idxDescSistema])
-    :
-    "";
+    infoStatus.descripcionSistema;
 
 
     let subsistema =
-    idxSubsistema >= 0
-    ?
-    normalizarSubsistema(
-      fila[idxSubsistema]
-    )
-    :
-    "";
+    infoStatus.subsistema;
 
 
     let descripcionSubsistema =
-    idxDescSubsistema >= 0
-    ?
-    texto(
-      fila[idxDescSubsistema]
-    )
-    :
-    "";
+    infoStatus.descripcionSubsistema;
+
+
+    /*
+    Si no pudimos obtenerlo desde Status Index,
+    usamos las columnas que ya tenga el Excel.
+    */
 
 
     if(
-      !sistema ||
-      !subsistema
+      !sistema &&
+      idxSistema >= 0
     ){
 
-      const infoStatus =
-      obtenerSistemaDesdeStatus(
-        statusIndex,
-        mapaSistemas
+      sistema =
+      texto(
+        fila[
+          idxSistema
+        ]
       );
-
-
-      if(!sistema){
-        sistema =
-        infoStatus.sistema;
-      }
-
-      if(!descripcionSistema){
-        descripcionSistema =
-        infoStatus.descripcionSistema;
-      }
-
-      if(!subsistema){
-        subsistema =
-        infoStatus.subsistema;
-      }
-
-      if(!descripcionSubsistema){
-        descripcionSubsistema =
-        infoStatus.descripcionSubsistema;
-      }
 
     }
 
 
-    const registros = {};
+    if(
+      !descripcionSistema &&
+      idxDescSistema >= 0
+    ){
+
+      descripcionSistema =
+      texto(
+        fila[
+          idxDescSistema
+        ]
+      );
+
+    }
+
+
+    if(
+      !subsistema &&
+      idxSubsistema >= 0
+    ){
+
+      subsistema =
+      normalizarSubsistema(
+        fila[
+          idxSubsistema
+        ]
+      );
+
+    }
+
+
+    if(
+      !descripcionSubsistema &&
+      idxDescSubsistema >= 0
+    ){
+
+      descripcionSubsistema =
+      texto(
+        fila[
+          idxDescSubsistema
+        ]
+      );
+
+    }
+
+
+    const registros =
+    {};
 
 
     columnasRegistros.forEach(
@@ -1373,53 +1816,62 @@ function leerMatriz(
     );
 
 
-    resultado.push({
+    resultado.push(
+      {
 
-      especialidad:
-      normalizarEspecialidad(
-        especialidadOriginal
-      ),
+        especialidad:
+        normalizarEspecialidad(
+          especialidadOriginal
+        ),
 
-      tag:
-      tag || null,
+        tag:
+        tag || null,
 
-      descripcion:
-      descripcion || null,
+        descripcion:
+        descripcion || null,
 
-      pid_listado:
-      idxPid >= 0
-      ?
-      texto(fila[idxPid]) || null
-      :
-      null,
+        pid_listado:
+        idxPid >= 0
+        ?
+        texto(
+          fila[
+            idxPid
+          ]
+        ) || null
+        :
+        null,
 
-      status_index:
-      statusIndex || null,
+        status_index:
+        statusIndex || null,
 
-      sistema:
-      sistema || null,
+        sistema:
+        sistema || null,
 
-      descripcion_sistema:
-      descripcionSistema || null,
+        descripcion_sistema:
+        descripcionSistema || null,
 
-      subsistema:
-      subsistema || null,
+        subsistema:
+        subsistema || null,
 
-      descripcion_subsistema:
-      descripcionSubsistema || null,
+        descripcion_subsistema:
+        descripcionSubsistema || null,
 
-      registros
+        registros:
+        registros
 
-    });
+      }
+    );
 
   }
 
+
   return resultado;
+
 }
 
 
 /* ======================================================
-   EXTRAER DESDE STATUS INDEX
+   SISTEMA DESDE STATUS INDEX
 ====================================================== */
 
 function obtenerSistemaDesdeStatus(
@@ -1427,77 +1879,109 @@ function obtenerSistemaDesdeStatus(
   mapa
 ){
 
-  const resultado = {
+  const resultado =
+  {
+
     sistema:"",
     descripcionSistema:"",
     subsistema:"",
     descripcionSubsistema:""
+
   };
 
 
-  if(!status){
+  if(
+    !status
+  ){
     return resultado;
   }
 
 
+  /*
+  Ejemplo esperado:
+
+  EPC-AL-VS / UAM / 02 - 001
+
+  Extraemos:
+  sistema = 02
+  subsistema = 001
+  */
+
+
   const coincidencia =
   status.match(
-    /^EPC-(.+?)\s*-\s*(\d+)\s*$/
+    /\/\s*(\d+)\s*-\s*(\d+)\s*$/
   );
 
 
-  if(!coincidencia){
+  if(
+    !coincidencia
+  ){
     return resultado;
   }
 
 
   const sistema =
-  texto(
+  String(
     coincidencia[1]
+  )
+  .padStart(
+    2,
+    "0"
   );
 
 
   const subsistema =
-  normalizarSubsistema(
+  String(
     coincidencia[2]
+  )
+  .padStart(
+    3,
+    "0"
   );
 
 
   resultado.sistema =
   sistema;
 
+
   resultado.subsistema =
   subsistema;
 
 
   const clave =
-  normalizarTextoClave(
-    sistema
-  ) +
+  sistema +
   "|" +
   subsistema;
 
 
   const encontrado =
-  mapa[clave];
+  mapa[
+    clave
+  ];
 
 
-  if(encontrado){
+  if(
+    encontrado
+  ){
 
     resultado.descripcionSistema =
     encontrado.descripcionSistema;
+
 
     resultado.descripcionSubsistema =
     encontrado.descripcionSubsistema;
 
   }
 
+
   return resultado;
+
 }
 
 
 /* ======================================================
-   CONTEO
+   CONTEO DE ESTADOS
 ====================================================== */
 
 function contarEstados(
@@ -1505,8 +1989,11 @@ function contarEstados(
 ){
 
   let pendiente = 0;
+
   let cliente = 0;
+
   let cerrado = 0;
+
   let na = 0;
 
 
@@ -1525,20 +2012,37 @@ function contarEstados(
             estado
           );
 
-          if(e === "0"){
+
+          if(
+            e === "0"
+          ){
+
             pendiente++;
+
           }
 
-          else if(e === "1P"){
+          else if(
+            e === "1P"
+          ){
+
             cliente++;
+
           }
 
-          else if(e === "1"){
+          else if(
+            e === "1"
+          ){
+
             cerrado++;
+
           }
 
-          else if(e === "N/A"){
+          else if(
+            e === "N/A"
+          ){
+
             na++;
+
           }
 
         }
@@ -1549,16 +2053,19 @@ function contarEstados(
 
 
   return {
+
     pendiente,
     cliente,
     cerrado,
     na
+
   };
+
 }
 
 
 /* ======================================================
-   RESUMEN
+   RESUMEN GENERAL
 ====================================================== */
 
 function actualizarResumen(){
@@ -1609,38 +2116,47 @@ function actualizarResumen(){
     filasMatriz.length
   );
 
+
   setTexto(
     "kPendientes",
     totales.pendiente
   );
+
 
   setTexto(
     "kCliente",
     totales.cliente
   );
 
+
   setTexto(
     "kCerrados",
     totales.cerrado
   );
+
 
   setTexto(
     "kNA",
     totales.na
   );
 
+
   setTexto(
     "kElaborado",
-    elaborado.toFixed(1) + "%"
+    elaborado.toFixed(1) +
+    "%"
   );
+
 
   setTexto(
     "kCerradoPct",
-    cerrado.toFixed(1) + "%"
+    cerrado.toFixed(1) +
+    "%"
   );
 
 
   pintarEspecialidades();
+
 }
 
 
@@ -1650,12 +2166,19 @@ function actualizarResumen(){
 
 function pintarEspecialidades(){
 
-  const especialidades = [
+  const especialidades =
+  [
+
     "Civil",
+
     "Piping",
+
     "Mecánica",
+
     "Electricidad",
+
     "Instrumentación"
+
   ];
 
 
@@ -1672,10 +2195,11 @@ function pintarEspecialidades(){
   especialidades.forEach(
     especialidad => {
 
+
       const filas =
       filasMatriz.filter(
-        f =>
-        f.especialidad ===
+        fila =>
+        fila.especialidad ===
         especialidad
       );
 
@@ -1738,23 +2262,30 @@ function pintarEspecialidades(){
         </strong>
 
         <span>
-          ${filas.length} elementos
+          ${filas.length}
+          elementos
         </span>
 
         <span>
           Elaborado:
-          <b>${elaborado.toFixed(1)}%</b>
+          <b>
+            ${elaborado.toFixed(1)}%
+          </b>
         </span>
 
         <span>
           Cerrado:
-          <b>${cerrado.toFixed(1)}%</b>
+          <b>
+            ${cerrado.toFixed(1)}%
+          </b>
         </span>
 
         <div class="progreso">
+
           <div
             style="width:${Math.min(cerrado,100)}%">
           </div>
+
         </div>
 
       `;
@@ -1766,11 +2297,12 @@ function pintarEspecialidades(){
 
     }
   );
+
 }
 
 
 /* ======================================================
-   PREVIEW
+   VISTA PREVIA
 ====================================================== */
 
 function pintarPreview(){
@@ -1786,13 +2318,19 @@ function pintarPreview(){
 
 
   filasMatriz
-  .slice(0,150)
+  .slice(
+    0,
+    150
+  )
   .forEach(
     fila => {
 
+
       const total =
       contarEstados(
-        [fila]
+        [
+          fila
+        ]
       );
 
 
@@ -1805,53 +2343,75 @@ function pintarPreview(){
       tr.innerHTML = `
 
         <td>
-          ${escapar(fila.especialidad || "")}
+          ${escapar(
+            fila.especialidad || ""
+          )}
         </td>
 
         <td>
-          ${escapar(fila.tag || "")}
+          ${escapar(
+            fila.tag || ""
+          )}
         </td>
 
         <td>
-          ${escapar(fila.descripcion || "")}
+          ${escapar(
+            fila.descripcion || ""
+          )}
         </td>
 
         <td>
-          ${escapar(fila.status_index || "")}
+          ${escapar(
+            fila.status_index || ""
+          )}
         </td>
 
         <td>
-          ${escapar(fila.sistema || "")}
+          ${escapar(
+            fila.sistema || ""
+          )}
         </td>
 
         <td>
-          ${escapar(fila.descripcion_sistema || "")}
+          ${escapar(
+            fila.descripcion_sistema || ""
+          )}
         </td>
 
         <td>
-          ${escapar(fila.subsistema || "")}
+          ${escapar(
+            fila.subsistema || ""
+          )}
         </td>
 
         <td>
-          ${escapar(fila.descripcion_subsistema || "")}
+          ${escapar(
+            fila.descripcion_subsistema || ""
+          )}
         </td>
 
         <td>
+
           <span class="badge cero">
             ${total.pendiente}
           </span>
+
         </td>
 
         <td>
+
           <span class="badge unop">
             ${total.cliente}
           </span>
+
         </td>
 
         <td>
+
           <span class="badge uno">
             ${total.cerrado}
           </span>
+
         </td>
 
       `;
@@ -1863,11 +2423,12 @@ function pintarPreview(){
 
     }
   );
+
 }
 
 
 /* ======================================================
-   GUARDAR
+   GUARDAR EN SUPABASE
 ====================================================== */
 
 async function guardarSupabase(){
@@ -1882,6 +2443,7 @@ async function guardarSupabase(){
     );
 
     return;
+
   }
 
 
@@ -1893,7 +2455,9 @@ async function guardarSupabase(){
   await supabaseClient.auth.getSession();
 
 
-  if(!session){
+  if(
+    !session
+  ){
 
     mostrarEstado(
       "❌ No hay una sesión iniciada. Ingresá primero desde Administración de Documentación.",
@@ -1901,6 +2465,7 @@ async function guardarSupabase(){
     );
 
     return;
+
   }
 
 
@@ -1910,7 +2475,9 @@ async function guardarSupabase(){
   );
 
 
-  if(!confirmar){
+  if(
+    !confirmar
+  ){
     return;
   }
 
@@ -1926,10 +2493,12 @@ async function guardarSupabase(){
 
 
   const fechaCarga =
-  new Date().toISOString();
+  new Date()
+  .toISOString();
 
 
   try{
+
 
     mostrarEstado(
       "⏳ Guardando nueva matriz...",
@@ -1941,6 +2510,7 @@ async function guardarSupabase(){
     filasMatriz.map(
       fila => ({
         ...fila,
+
         fecha_carga:
         fechaCarga
       })
@@ -1953,7 +2523,9 @@ async function guardarSupabase(){
 
     for(
       let i = 0;
+
       i < filasGuardar.length;
+
       i += TAMANIO_LOTE
     ){
 
@@ -1976,8 +2548,12 @@ async function guardarSupabase(){
       );
 
 
-      if(error){
+      if(
+        error
+      ){
+
         throw error;
+
       }
 
 
@@ -1991,7 +2567,14 @@ async function guardarSupabase(){
         filasGuardar.length,
         "cargando"
       );
+
     }
+
+
+    /*
+    Recién cuando terminó correctamente
+    eliminamos la matriz anterior.
+    */
 
 
     const {
@@ -2009,8 +2592,12 @@ async function guardarSupabase(){
     );
 
 
-    if(errorBorrado){
+    if(
+      errorBorrado
+    ){
+
       throw errorBorrado;
+
     }
 
 
@@ -2024,9 +2611,20 @@ async function guardarSupabase(){
     );
 
   }
+
   catch(error){
 
-    console.error(error);
+
+    console.error(
+      error
+    );
+
+
+    /*
+    Si la carga falló parcialmente,
+    eliminamos solamente esta carga nueva.
+    */
+
 
     try{
 
@@ -2041,8 +2639,13 @@ async function guardarSupabase(){
       );
 
     }
+
     catch(e){
-      console.error(e);
+
+      console.error(
+        e
+      );
+
     }
 
 
@@ -2053,12 +2656,14 @@ async function guardarSupabase(){
     );
 
   }
+
   finally{
 
     boton.disabled =
     false;
 
   }
+
 }
 
 
@@ -2076,10 +2681,16 @@ function setTexto(
     id
   );
 
-  if(elemento){
+
+  if(
+    elemento
+  ){
+
     elemento.textContent =
     valor;
+
   }
+
 }
 
 
@@ -2093,27 +2704,48 @@ function mostrarEstado(
     "estado"
   );
 
+
   estado.className =
   "estado " +
   (
     tipo || ""
   );
 
+
   estado.innerHTML =
   mensaje;
+
 }
 
 
-function escapar(valor){
+function escapar(
+  valor
+){
 
   return String(
     valor ?? ""
   )
-  .replace(/&/g,"&amp;")
-  .replace(/</g,"&lt;")
-  .replace(/>/g,"&gt;")
-  .replace(/"/g,"&quot;")
-  .replace(/'/g,"&#039;");
+  .replace(
+    /&/g,
+    "&amp;"
+  )
+  .replace(
+    /</g,
+    "&lt;"
+  )
+  .replace(
+    />/g,
+    "&gt;"
+  )
+  .replace(
+    /"/g,
+    "&quot;"
+  )
+  .replace(
+    /'/g,
+    "&#039;"
+  );
+
 }
 
 </script>
