@@ -1,0 +1,2122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Matriz de Calidad</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<style>
+*{box-sizing:border-box}
+
+:root{
+  --azul:#0c356a;
+  --celeste:#60c5e8;
+  --verde:#179447;
+  --rojo:#dc3b3b;
+  --naranja:#f28c28;
+  --violeta:#6657b8;
+  --gris:#687787;
+  --fondo:#f4f7f9;
+  --borde:#dfe7ec;
+}
+
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:var(--fondo);
+  color:#1d2a36;
+}
+
+main{
+  max-width:1450px;
+  margin:auto;
+  padding:28px;
+}
+
+.encabezado{
+  background:white;
+  border:1px solid var(--borde);
+  border-radius:16px;
+  padding:25px 28px;
+  margin-bottom:20px;
+}
+
+.encabezado h1{
+  margin:0 0 7px;
+  color:var(--azul);
+  font-size:25px;
+}
+
+.encabezado p{
+  margin:0;
+  color:var(--gris);
+  font-size:13px;
+  line-height:1.5;
+}
+
+.card{
+  background:white;
+  border:1px solid var(--borde);
+  border-radius:16px;
+  padding:25px;
+  margin-bottom:20px;
+  box-shadow:0 4px 15px rgba(20,50,80,.04);
+}
+
+.card h2{
+  margin:0 0 18px;
+  color:var(--azul);
+  font-size:18px;
+}
+
+.usuario{
+  background:#eef7fb;
+  color:#31566e;
+  border-radius:10px;
+  padding:12px 14px;
+  margin-bottom:18px;
+  font-size:12px;
+}
+
+.carga{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  align-items:center;
+}
+
+input[type=file]{
+  border:1px solid #ccd7df;
+  border-radius:9px;
+  padding:10px;
+  background:white;
+  min-width:300px;
+}
+
+button{
+  border:0;
+  border-radius:9px;
+  padding:12px 20px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.btnPrincipal{
+  background:var(--azul);
+  color:white;
+}
+
+.btnPrincipal:hover{
+  background:#154d85;
+}
+
+.btnPrincipal:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
+
+.estado{
+  margin-top:16px;
+  padding:12px 14px;
+  border-radius:9px;
+  background:#eef7fb;
+  color:#31566e;
+  font-size:12px;
+}
+
+.estado.ok{
+  background:#eaf8ef;
+  color:#176d3c;
+}
+
+.estado.error{
+  background:#fdecec;
+  color:#a62f2f;
+}
+
+.estado.cargando{
+  background:#fff3e5;
+  color:#965500;
+}
+
+.kpis{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:14px;
+  margin-bottom:20px;
+}
+
+.kpi{
+  background:white;
+  border:1px solid var(--borde);
+  border-radius:14px;
+  padding:19px;
+  border-top:4px solid var(--celeste);
+}
+
+.kpi small{
+  display:block;
+  color:var(--gris);
+  font-size:10px;
+  text-transform:uppercase;
+  font-weight:bold;
+  margin-bottom:8px;
+}
+
+.kpi strong{
+  display:block;
+  color:var(--azul);
+  font-size:28px;
+}
+
+.kpi.verde{border-top-color:var(--verde)}
+.kpi.naranja{border-top-color:var(--naranja)}
+.kpi.violeta{border-top-color:var(--violeta)}
+.kpi.rojo{border-top-color:var(--rojo)}
+
+.tablaWrap{
+  overflow:auto;
+  max-height:500px;
+  border:1px solid var(--borde);
+  border-radius:10px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:11px;
+}
+
+thead{
+  position:sticky;
+  top:0;
+  z-index:5;
+}
+
+th{
+  background:var(--azul);
+  color:white;
+  padding:10px;
+  text-align:left;
+  white-space:nowrap;
+}
+
+td{
+  padding:9px 10px;
+  border-bottom:1px solid #e7edf1;
+  white-space:nowrap;
+}
+
+.badge{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:15px;
+  font-weight:bold;
+  font-size:10px;
+}
+
+.badge.cero{
+  background:#fdecec;
+  color:#a62f2f;
+}
+
+.badge.unop{
+  background:#fff3e5;
+  color:#955400;
+}
+
+.badge.uno{
+  background:#eaf8ef;
+  color:#176d3c;
+}
+
+.badge.na{
+  background:#edf1f4;
+  color:#687787;
+}
+
+.especialidades{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:12px;
+}
+
+.especialidad{
+  border:1px solid var(--borde);
+  border-radius:12px;
+  padding:15px;
+  background:#fafcfd;
+}
+
+.especialidad strong{
+  color:var(--azul);
+  font-size:16px;
+  display:block;
+}
+
+.especialidad span{
+  color:var(--gris);
+  font-size:11px;
+  display:block;
+  margin-top:5px;
+}
+
+.progreso{
+  margin-top:10px;
+  height:9px;
+  border-radius:20px;
+  background:#e5ebef;
+  overflow:hidden;
+}
+
+.progreso div{
+  height:100%;
+  background:var(--verde);
+}
+
+.nota{
+  color:var(--gris);
+  font-size:11px;
+  line-height:1.5;
+  margin-top:15px;
+}
+
+.infoColumnas{
+  margin-top:15px;
+  padding:12px 14px;
+  background:#f7f9fb;
+  border-radius:10px;
+  color:#526577;
+  font-size:11px;
+  line-height:1.5;
+}
+
+@media(max-width:1100px){
+  .kpis{grid-template-columns:repeat(3,1fr)}
+  .especialidades{grid-template-columns:repeat(3,1fr)}
+}
+
+@media(max-width:700px){
+  main{padding:14px}
+
+  .kpis,
+  .especialidades{
+    grid-template-columns:1fr 1fr;
+  }
+
+  input[type=file]{
+    min-width:100%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<main>
+
+<div class="encabezado">
+  <h1>📊 Matriz de Calidad</h1>
+
+  <p>
+    Carga de la Matriz de Seguimiento de Actividades.
+    El sistema detecta automáticamente las columnas de identificación
+    y todos los registros de Calidad existentes en el Excel.
+  </p>
+</div>
+
+
+<div class="card">
+
+  <h2>Cargar matriz</h2>
+
+  <div id="usuario" class="usuario">
+    Verificando sesión...
+  </div>
+
+  <div class="carga">
+
+    <input
+      type="file"
+      id="archivo"
+      accept=".xlsx,.xlsm,.xls"
+    >
+
+    <button
+      id="btnProcesar"
+      class="btnPrincipal"
+      onclick="procesarArchivo()"
+    >
+      Leer Excel
+    </button>
+
+    <button
+      id="btnGuardar"
+      class="btnPrincipal"
+      onclick="guardarSupabase()"
+      disabled
+    >
+      Guardar matriz
+    </button>
+
+  </div>
+
+  <div id="estado" class="estado">
+    Seleccioná el archivo Excel actualizado.
+  </div>
+
+  <div id="infoColumnas" class="infoColumnas" style="display:none;"></div>
+
+  <div class="nota">
+    Podés agregar filas nuevas y también nuevas columnas de registros.
+    Las columnas de identificación se buscan por nombre, por lo que no dependen
+    de una posición fija.
+  </div>
+
+</div>
+
+
+<div id="resultado" style="display:none;">
+
+<div class="kpis">
+
+  <div class="kpi">
+    <small>Elementos</small>
+    <strong id="kElementos">0</strong>
+  </div>
+
+  <div class="kpi rojo">
+    <small>Registros pendientes · 0</small>
+    <strong id="kPendientes">0</strong>
+  </div>
+
+  <div class="kpi naranja">
+    <small>En poder del cliente · 1P</small>
+    <strong id="kCliente">0</strong>
+  </div>
+
+  <div class="kpi verde">
+    <small>Cerrados · 1</small>
+    <strong id="kCerrados">0</strong>
+  </div>
+
+  <div class="kpi violeta">
+    <small>No aplica · N/A</small>
+    <strong id="kNA">0</strong>
+  </div>
+
+</div>
+
+
+<div class="card">
+
+  <h2>Avance general</h2>
+
+  <div class="kpis" style="grid-template-columns:1fr 1fr;margin-bottom:0;">
+
+    <div class="kpi naranja">
+      <small>Avance elaborado</small>
+      <strong id="kElaborado">0%</strong>
+
+      <div class="nota">
+        Registros 1 + 1P sobre registros aplicables
+      </div>
+    </div>
+
+    <div class="kpi verde">
+      <small>Avance cerrado</small>
+      <strong id="kCerradoPct">0%</strong>
+
+      <div class="nota">
+        Registros 1 sobre registros aplicables
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+
+<div class="card">
+
+  <h2>Avance por especialidad</h2>
+
+  <div
+    id="especialidades"
+    class="especialidades">
+  </div>
+
+</div>
+
+
+<div class="card">
+
+  <h2>Vista previa de elementos</h2>
+
+  <div class="tablaWrap">
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Especialidad</th>
+          <th>TAG</th>
+          <th>Descripción</th>
+          <th>Status Index</th>
+          <th>Sistema</th>
+          <th>Descripción Sistema</th>
+          <th>Subsistema</th>
+          <th>Descripción Subsistema</th>
+          <th>Pend.</th>
+          <th>1P</th>
+          <th>Cerrados</th>
+        </tr>
+      </thead>
+
+      <tbody id="tablaPreview"></tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+</div>
+
+</main>
+
+
+<script>
+
+/* ======================================================
+   SUPABASE
+====================================================== */
+
+const SUPABASE_URL =
+"https://mzgbtejfgsrskiuymtwh.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_Wen9hxBnae8wRrEEaP5lOQ_aNl9OCGd";
+
+const supabaseClient =
+window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+let filasMatriz = [];
+let usuarioActual = null;
+let columnasRegistrosDetectadas = [];
+
+
+/* ======================================================
+   INICIO
+====================================================== */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  verificarSesion
+);
+
+
+async function verificarSesion(){
+
+  const {
+    data,
+    error
+  } =
+  await supabaseClient.auth.getSession();
+
+  const usuario =
+  data?.session?.user || null;
+
+  usuarioActual =
+  usuario;
+
+  const caja =
+  document.getElementById("usuario");
+
+  if(error){
+
+    caja.innerHTML =
+    "⚠️ No se pudo verificar la sesión.";
+
+    return;
+  }
+
+  if(!usuario){
+
+    caja.innerHTML =
+    "⚠️ No hay sesión iniciada. Ingresá primero desde Administración de Documentación.";
+
+    return;
+  }
+
+  caja.innerHTML =
+  "✅ Usuario conectado: <strong>" +
+  escapar(usuario.email || "") +
+  "</strong>";
+}
+
+
+/* ======================================================
+   NORMALIZACIONES
+====================================================== */
+
+function texto(valor){
+
+  if(
+    valor === null ||
+    valor === undefined
+  ){
+    return "";
+  }
+
+  return String(valor).trim();
+}
+
+
+function normalizarTextoClave(valor){
+
+  return texto(valor)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .toUpperCase()
+    .replace(/\s+/g," ")
+    .trim();
+}
+
+
+function normalizarEspecialidad(valor){
+
+  const v =
+  normalizarTextoClave(valor);
+
+  if(v.includes("CIVIL")){
+    return "Civil";
+  }
+
+  if(v.includes("PIP")){
+    return "Piping";
+  }
+
+  if(v.includes("MEC")){
+    return "Mecánica";
+  }
+
+  if(
+    v.includes("ELEC") ||
+    v === "E"
+  ){
+    return "Electricidad";
+  }
+
+  if(
+    v.includes("INSTR") ||
+    v === "I"
+  ){
+    return "Instrumentación";
+  }
+
+  return texto(valor);
+}
+
+
+function normalizarEstado(valor){
+
+  const v =
+  texto(valor)
+  .toUpperCase()
+  .replace(/\s+/g,"");
+
+  if(
+    v === "N/A" ||
+    v === "NA" ||
+    v === "N.A."
+  ){
+    return "N/A";
+  }
+
+  if(
+    v === "1P" ||
+    v === "1-P"
+  ){
+    return "1P";
+  }
+
+  if(
+    v === "1" ||
+    v === "1.0"
+  ){
+    return "1";
+  }
+
+  if(
+    v === "0" ||
+    v === "0.0"
+  ){
+    return "0";
+  }
+
+  return texto(valor);
+}
+
+
+/* ======================================================
+   BUSCAR ENCABEZADOS
+====================================================== */
+
+function buscarFilaEncabezados(datos){
+
+  const clavesEsperadas = [
+    "ESPECIALIDAD",
+    "TAG",
+    "DESCRIPCION",
+    "STATUS INDEX"
+  ];
+
+  for(
+    let i = 0;
+    i < Math.min(datos.length,40);
+    i++
+  ){
+
+    const fila =
+    (datos[i] || [])
+    .map(normalizarTextoClave);
+
+    const coincidencias =
+    clavesEsperadas.filter(
+      clave =>
+      fila.includes(clave)
+    ).length;
+
+    if(coincidencias >= 3){
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+
+function buscarIndice(encabezados, variantes){
+
+  const normalizados =
+  encabezados.map(
+    normalizarTextoClave
+  );
+
+  for(
+    const variante of variantes
+  ){
+
+    const indice =
+    normalizados.indexOf(
+      normalizarTextoClave(variante)
+    );
+
+    if(indice !== -1){
+      return indice;
+    }
+  }
+
+  return -1;
+}
+
+
+/* ======================================================
+   LEER EXCEL
+====================================================== */
+
+async function procesarArchivo(){
+
+  const input =
+  document.getElementById("archivo");
+
+  const archivo =
+  input.files[0];
+
+  if(!archivo){
+
+    mostrarEstado(
+      "Seleccioná primero un archivo Excel.",
+      "error"
+    );
+
+    return;
+  }
+
+  mostrarEstado(
+    "⏳ Leyendo Excel...",
+    "cargando"
+  );
+
+  document
+  .getElementById("btnGuardar")
+  .disabled =
+  true;
+
+  try{
+
+    const buffer =
+    await archivo.arrayBuffer();
+
+    const workbook =
+    XLSX.read(
+      buffer,
+      {
+        type:"array",
+        cellDates:true
+      }
+    );
+
+    const nombreHojaMatriz =
+    workbook.SheetNames.find(
+      n =>
+      normalizarTextoClave(n) ===
+      "MATRIZ"
+    );
+
+    if(!nombreHojaMatriz){
+
+      throw new Error(
+        'No se encontró la hoja "Matriz".'
+      );
+    }
+
+    const nombreHojaSistemas =
+    workbook.SheetNames.find(
+      n =>
+      normalizarTextoClave(n)
+      .includes("LISTA DE SIS")
+    );
+
+    const mapaSistemas =
+    nombreHojaSistemas
+    ?
+    leerSistemas(
+      workbook.Sheets[
+        nombreHojaSistemas
+      ]
+    )
+    :
+    {};
+
+    filasMatriz =
+    leerMatriz(
+      workbook.Sheets[
+        nombreHojaMatriz
+      ],
+      mapaSistemas
+    );
+
+    if(
+      filasMatriz.length === 0
+    ){
+
+      throw new Error(
+        "No se encontraron elementos válidos en la matriz."
+      );
+    }
+
+    actualizarResumen();
+    pintarPreview();
+
+    document
+    .getElementById("resultado")
+    .style.display =
+    "block";
+
+    document
+    .getElementById("btnGuardar")
+    .disabled =
+    false;
+
+    document
+    .getElementById("infoColumnas")
+    .style.display =
+    "block";
+
+    document
+    .getElementById("infoColumnas")
+    .innerHTML =
+    "<strong>Columnas de registros detectadas:</strong> " +
+    columnasRegistrosDetectadas.length +
+    "<br>" +
+    escapar(
+      columnasRegistrosDetectadas.join(" · ")
+    );
+
+    mostrarEstado(
+      "✅ Excel leído correctamente. " +
+      filasMatriz.length +
+      " elementos encontrados y " +
+      columnasRegistrosDetectadas.length +
+      " columnas de registros detectadas.",
+      "ok"
+    );
+
+  }
+  catch(error){
+
+    console.error(error);
+
+    filasMatriz = [];
+    columnasRegistrosDetectadas = [];
+
+    mostrarEstado(
+      "❌ Error al leer el Excel: " +
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+/* ======================================================
+   LISTA SISTEMA / SUBSISTEMA
+====================================================== */
+
+function leerSistemas(sheet){
+
+  const datos =
+  XLSX.utils.sheet_to_json(
+    sheet,
+    {
+      header:1,
+      defval:"",
+      raw:false
+    }
+  );
+
+  const mapa = {};
+
+  const filaEncabezados =
+  buscarFilaEncabezadosSistema(datos);
+
+  if(
+    filaEncabezados === -1
+  ){
+    return mapa;
+  }
+
+  const encabezados =
+  datos[filaEncabezados] || [];
+
+  const idxSistema =
+  buscarIndice(
+    encabezados,
+    [
+      "Sistema",
+      "Código Sistema",
+      "Codigo Sistema"
+    ]
+  );
+
+  const idxDescSistema =
+  buscarIndice(
+    encabezados,
+    [
+      "Descripcion Sistema",
+      "Descripción Sistema"
+    ]
+  );
+
+  const idxSubsistema =
+  buscarIndice(
+    encabezados,
+    [
+      "Subsistema",
+      "Código Subsistema",
+      "Codigo Subsistema"
+    ]
+  );
+
+  const idxDescSubsistema =
+  buscarIndice(
+    encabezados,
+    [
+      "Descripcion Subsistema",
+      "Descripción Subsistema"
+    ]
+  );
+
+  for(
+    let i = filaEncabezados + 1;
+    i < datos.length;
+    i++
+  ){
+
+    const fila =
+    datos[i] || [];
+
+    const sistema =
+    idxSistema >= 0
+    ?
+    texto(fila[idxSistema])
+    :
+    "";
+
+    const subsistemaRaw =
+    idxSubsistema >= 0
+    ?
+    texto(fila[idxSubsistema])
+    :
+    "";
+
+    if(
+      !sistema ||
+      !subsistemaRaw
+    ){
+      continue;
+    }
+
+    const subsistema =
+    normalizarSubsistema(
+      subsistemaRaw
+    );
+
+    const clave =
+    normalizarTextoClave(sistema) +
+    "|" +
+    subsistema;
+
+    mapa[clave] = {
+
+      sistema,
+
+      descripcionSistema:
+      idxDescSistema >= 0
+      ?
+      texto(fila[idxDescSistema])
+      :
+      "",
+
+      subsistema,
+
+      descripcionSubsistema:
+      idxDescSubsistema >= 0
+      ?
+      texto(fila[idxDescSubsistema])
+      :
+      ""
+    };
+  }
+
+  return mapa;
+}
+
+
+function buscarFilaEncabezadosSistema(datos){
+
+  for(
+    let i = 0;
+    i < Math.min(datos.length,40);
+    i++
+  ){
+
+    const fila =
+    (datos[i] || [])
+    .map(normalizarTextoClave);
+
+    if(
+      fila.some(x => x === "SISTEMA") &&
+      fila.some(x => x === "SUBSISTEMA")
+    ){
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+
+function normalizarSubsistema(valor){
+
+  const original =
+  texto(valor);
+
+  const soloNumeros =
+  original.replace(/\D/g,"");
+
+  if(soloNumeros){
+    return soloNumeros.padStart(3,"0");
+  }
+
+  return original;
+}
+
+
+/* ======================================================
+   MATRIZ DINÁMICA
+====================================================== */
+
+function leerMatriz(
+  sheet,
+  mapaSistemas
+){
+
+  const datos =
+  XLSX.utils.sheet_to_json(
+    sheet,
+    {
+      header:1,
+      defval:"",
+      raw:false
+    }
+  );
+
+  const filaEncabezados =
+  buscarFilaEncabezados(datos);
+
+  if(
+    filaEncabezados === -1
+  ){
+
+    throw new Error(
+      "No pude detectar la fila de encabezados de la hoja Matriz."
+    );
+  }
+
+  const encabezados =
+  datos[filaEncabezados]
+  .map(x => texto(x));
+
+  const idxEspecialidad =
+  buscarIndice(
+    encabezados,
+    ["Especialidad"]
+  );
+
+  const idxTag =
+  buscarIndice(
+    encabezados,
+    ["TAG"]
+  );
+
+  const idxDescripcion =
+  buscarIndice(
+    encabezados,
+    ["Descripción","Descripcion"]
+  );
+
+  const idxPid =
+  buscarIndice(
+    encabezados,
+    [
+      "PI&D/Listado",
+      "P&ID/Listado",
+      "PID/Listado",
+      "PI&D"
+    ]
+  );
+
+  const idxStatus =
+  buscarIndice(
+    encabezados,
+    [
+      "Status Index",
+      "STATUS INDEX"
+    ]
+  );
+
+  const idxSistema =
+  buscarIndice(
+    encabezados,
+    ["Sistema"]
+  );
+
+  const idxDescSistema =
+  buscarIndice(
+    encabezados,
+    [
+      "Descripcion Sistema",
+      "Descripción Sistema"
+    ]
+  );
+
+  const idxSubsistema =
+  buscarIndice(
+    encabezados,
+    ["Subsistema"]
+  );
+
+  const idxDescSubsistema =
+  buscarIndice(
+    encabezados,
+    [
+      "Descripcion Subsistema",
+      "Descripción Subsistema"
+    ]
+  );
+
+
+  if(
+    idxEspecialidad === -1 ||
+    idxTag === -1 ||
+    idxDescripcion === -1 ||
+    idxStatus === -1
+  ){
+
+    throw new Error(
+      "Faltan columnas principales. Se requieren como mínimo: Especialidad, TAG, Descripción y Status Index."
+    );
+  }
+
+
+  const indicesFijos =
+  new Set(
+    [
+      idxEspecialidad,
+      idxTag,
+      idxDescripcion,
+      idxPid,
+      idxStatus,
+      idxSistema,
+      idxDescSistema,
+      idxSubsistema,
+      idxDescSubsistema
+    ]
+    .filter(x => x >= 0)
+  );
+
+
+  const columnasRegistros =
+  [];
+
+
+  encabezados.forEach(
+    (
+      nombre,
+      indice
+    ) => {
+
+      if(!nombre){
+        return;
+      }
+
+      if(
+        indicesFijos.has(indice)
+      ){
+        return;
+      }
+
+      columnasRegistros.push(
+        {
+          indice,
+          nombre
+        }
+      );
+
+    }
+  );
+
+
+  columnasRegistrosDetectadas =
+  columnasRegistros.map(
+    x => x.nombre
+  );
+
+
+  const resultado = [];
+
+
+  for(
+    let i = filaEncabezados + 1;
+    i < datos.length;
+    i++
+  ){
+
+    const fila =
+    datos[i] || [];
+
+
+    const especialidadOriginal =
+    texto(
+      fila[idxEspecialidad]
+    );
+
+
+    const tag =
+    texto(
+      fila[idxTag]
+    );
+
+
+    const descripcion =
+    texto(
+      fila[idxDescripcion]
+    );
+
+
+    const statusIndex =
+    texto(
+      fila[idxStatus]
+    );
+
+
+    /*
+    Si toda la identificación está vacía,
+    consideramos que terminó la tabla.
+    */
+
+    if(
+      !especialidadOriginal &&
+      !tag &&
+      !descripcion &&
+      !statusIndex
+    ){
+      continue;
+    }
+
+
+    /*
+    Si el Excel ya trae Sistema / Subsistema,
+    usamos esos valores.
+
+    Si no los trae, intentamos obtenerlos
+    desde Status Index + Lista de Sis y SubS.
+    */
+
+    let sistema =
+    idxSistema >= 0
+    ?
+    texto(fila[idxSistema])
+    :
+    "";
+
+
+    let descripcionSistema =
+    idxDescSistema >= 0
+    ?
+    texto(fila[idxDescSistema])
+    :
+    "";
+
+
+    let subsistema =
+    idxSubsistema >= 0
+    ?
+    normalizarSubsistema(
+      fila[idxSubsistema]
+    )
+    :
+    "";
+
+
+    let descripcionSubsistema =
+    idxDescSubsistema >= 0
+    ?
+    texto(
+      fila[idxDescSubsistema]
+    )
+    :
+    "";
+
+
+    if(
+      !sistema ||
+      !subsistema
+    ){
+
+      const infoStatus =
+      obtenerSistemaDesdeStatus(
+        statusIndex,
+        mapaSistemas
+      );
+
+
+      if(!sistema){
+        sistema =
+        infoStatus.sistema;
+      }
+
+      if(!descripcionSistema){
+        descripcionSistema =
+        infoStatus.descripcionSistema;
+      }
+
+      if(!subsistema){
+        subsistema =
+        infoStatus.subsistema;
+      }
+
+      if(!descripcionSubsistema){
+        descripcionSubsistema =
+        infoStatus.descripcionSubsistema;
+      }
+
+    }
+
+
+    const registros = {};
+
+
+    columnasRegistros.forEach(
+      columna => {
+
+        registros[
+          columna.nombre
+        ] =
+        normalizarEstado(
+          fila[
+            columna.indice
+          ]
+        );
+
+      }
+    );
+
+
+    resultado.push({
+
+      especialidad:
+      normalizarEspecialidad(
+        especialidadOriginal
+      ),
+
+      tag:
+      tag || null,
+
+      descripcion:
+      descripcion || null,
+
+      pid_listado:
+      idxPid >= 0
+      ?
+      texto(fila[idxPid]) || null
+      :
+      null,
+
+      status_index:
+      statusIndex || null,
+
+      sistema:
+      sistema || null,
+
+      descripcion_sistema:
+      descripcionSistema || null,
+
+      subsistema:
+      subsistema || null,
+
+      descripcion_subsistema:
+      descripcionSubsistema || null,
+
+      registros
+
+    });
+
+  }
+
+  return resultado;
+}
+
+
+/* ======================================================
+   EXTRAER DESDE STATUS INDEX
+====================================================== */
+
+function obtenerSistemaDesdeStatus(
+  status,
+  mapa
+){
+
+  const resultado = {
+    sistema:"",
+    descripcionSistema:"",
+    subsistema:"",
+    descripcionSubsistema:""
+  };
+
+
+  if(!status){
+    return resultado;
+  }
+
+
+  const coincidencia =
+  status.match(
+    /^EPC-(.+?)\s*-\s*(\d+)\s*$/
+  );
+
+
+  if(!coincidencia){
+    return resultado;
+  }
+
+
+  const sistema =
+  texto(
+    coincidencia[1]
+  );
+
+
+  const subsistema =
+  normalizarSubsistema(
+    coincidencia[2]
+  );
+
+
+  resultado.sistema =
+  sistema;
+
+  resultado.subsistema =
+  subsistema;
+
+
+  const clave =
+  normalizarTextoClave(
+    sistema
+  ) +
+  "|" +
+  subsistema;
+
+
+  const encontrado =
+  mapa[clave];
+
+
+  if(encontrado){
+
+    resultado.descripcionSistema =
+    encontrado.descripcionSistema;
+
+    resultado.descripcionSubsistema =
+    encontrado.descripcionSubsistema;
+
+  }
+
+  return resultado;
+}
+
+
+/* ======================================================
+   CONTEO
+====================================================== */
+
+function contarEstados(
+  filas
+){
+
+  let pendiente = 0;
+  let cliente = 0;
+  let cerrado = 0;
+  let na = 0;
+
+
+  filas.forEach(
+    fila => {
+
+      Object
+      .values(
+        fila.registros || {}
+      )
+      .forEach(
+        estado => {
+
+          const e =
+          normalizarEstado(
+            estado
+          );
+
+          if(e === "0"){
+            pendiente++;
+          }
+
+          else if(e === "1P"){
+            cliente++;
+          }
+
+          else if(e === "1"){
+            cerrado++;
+          }
+
+          else if(e === "N/A"){
+            na++;
+          }
+
+        }
+      );
+
+    }
+  );
+
+
+  return {
+    pendiente,
+    cliente,
+    cerrado,
+    na
+  };
+}
+
+
+/* ======================================================
+   RESUMEN
+====================================================== */
+
+function actualizarResumen(){
+
+  const totales =
+  contarEstados(
+    filasMatriz
+  );
+
+
+  const aplicables =
+  totales.pendiente +
+  totales.cliente +
+  totales.cerrado;
+
+
+  const elaborado =
+  aplicables
+  ?
+  (
+    (
+      totales.cliente +
+      totales.cerrado
+    )
+    /
+    aplicables
+  )
+  * 100
+  :
+  0;
+
+
+  const cerrado =
+  aplicables
+  ?
+  (
+    totales.cerrado
+    /
+    aplicables
+  )
+  * 100
+  :
+  0;
+
+
+  setTexto(
+    "kElementos",
+    filasMatriz.length
+  );
+
+  setTexto(
+    "kPendientes",
+    totales.pendiente
+  );
+
+  setTexto(
+    "kCliente",
+    totales.cliente
+  );
+
+  setTexto(
+    "kCerrados",
+    totales.cerrado
+  );
+
+  setTexto(
+    "kNA",
+    totales.na
+  );
+
+  setTexto(
+    "kElaborado",
+    elaborado.toFixed(1) + "%"
+  );
+
+  setTexto(
+    "kCerradoPct",
+    cerrado.toFixed(1) + "%"
+  );
+
+
+  pintarEspecialidades();
+}
+
+
+/* ======================================================
+   ESPECIALIDADES
+====================================================== */
+
+function pintarEspecialidades(){
+
+  const especialidades = [
+    "Civil",
+    "Piping",
+    "Mecánica",
+    "Electricidad",
+    "Instrumentación"
+  ];
+
+
+  const contenedor =
+  document.getElementById(
+    "especialidades"
+  );
+
+
+  contenedor.innerHTML =
+  "";
+
+
+  especialidades.forEach(
+    especialidad => {
+
+      const filas =
+      filasMatriz.filter(
+        f =>
+        f.especialidad ===
+        especialidad
+      );
+
+
+      const total =
+      contarEstados(
+        filas
+      );
+
+
+      const aplicables =
+      total.pendiente +
+      total.cliente +
+      total.cerrado;
+
+
+      const elaborado =
+      aplicables
+      ?
+      (
+        (
+          total.cliente +
+          total.cerrado
+        )
+        /
+        aplicables
+      )
+      * 100
+      :
+      0;
+
+
+      const cerrado =
+      aplicables
+      ?
+      (
+        total.cerrado
+        /
+        aplicables
+      )
+      * 100
+      :
+      0;
+
+
+      const div =
+      document.createElement(
+        "div"
+      );
+
+
+      div.className =
+      "especialidad";
+
+
+      div.innerHTML = `
+
+        <strong>
+          ${escapar(especialidad)}
+        </strong>
+
+        <span>
+          ${filas.length} elementos
+        </span>
+
+        <span>
+          Elaborado:
+          <b>${elaborado.toFixed(1)}%</b>
+        </span>
+
+        <span>
+          Cerrado:
+          <b>${cerrado.toFixed(1)}%</b>
+        </span>
+
+        <div class="progreso">
+          <div
+            style="width:${Math.min(cerrado,100)}%">
+          </div>
+        </div>
+
+      `;
+
+
+      contenedor.appendChild(
+        div
+      );
+
+    }
+  );
+}
+
+
+/* ======================================================
+   PREVIEW
+====================================================== */
+
+function pintarPreview(){
+
+  const tbody =
+  document.getElementById(
+    "tablaPreview"
+  );
+
+
+  tbody.innerHTML =
+  "";
+
+
+  filasMatriz
+  .slice(0,150)
+  .forEach(
+    fila => {
+
+      const total =
+      contarEstados(
+        [fila]
+      );
+
+
+      const tr =
+      document.createElement(
+        "tr"
+      );
+
+
+      tr.innerHTML = `
+
+        <td>
+          ${escapar(fila.especialidad || "")}
+        </td>
+
+        <td>
+          ${escapar(fila.tag || "")}
+        </td>
+
+        <td>
+          ${escapar(fila.descripcion || "")}
+        </td>
+
+        <td>
+          ${escapar(fila.status_index || "")}
+        </td>
+
+        <td>
+          ${escapar(fila.sistema || "")}
+        </td>
+
+        <td>
+          ${escapar(fila.descripcion_sistema || "")}
+        </td>
+
+        <td>
+          ${escapar(fila.subsistema || "")}
+        </td>
+
+        <td>
+          ${escapar(fila.descripcion_subsistema || "")}
+        </td>
+
+        <td>
+          <span class="badge cero">
+            ${total.pendiente}
+          </span>
+        </td>
+
+        <td>
+          <span class="badge unop">
+            ${total.cliente}
+          </span>
+        </td>
+
+        <td>
+          <span class="badge uno">
+            ${total.cerrado}
+          </span>
+        </td>
+
+      `;
+
+
+      tbody.appendChild(
+        tr
+      );
+
+    }
+  );
+}
+
+
+/* ======================================================
+   GUARDAR
+====================================================== */
+
+async function guardarSupabase(){
+
+  if(
+    filasMatriz.length === 0
+  ){
+
+    mostrarEstado(
+      "Primero tenés que leer un Excel.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  const {
+    data:{
+      session
+    }
+  } =
+  await supabaseClient.auth.getSession();
+
+
+  if(!session){
+
+    mostrarEstado(
+      "❌ No hay una sesión iniciada. Ingresá primero desde Administración de Documentación.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  const confirmar =
+  window.confirm(
+    "¿Querés guardar esta matriz como la versión actual?"
+  );
+
+
+  if(!confirmar){
+    return;
+  }
+
+
+  const boton =
+  document.getElementById(
+    "btnGuardar"
+  );
+
+
+  boton.disabled =
+  true;
+
+
+  const fechaCarga =
+  new Date().toISOString();
+
+
+  try{
+
+    mostrarEstado(
+      "⏳ Guardando nueva matriz...",
+      "cargando"
+    );
+
+
+    const filasGuardar =
+    filasMatriz.map(
+      fila => ({
+        ...fila,
+        fecha_carga:
+        fechaCarga
+      })
+    );
+
+
+    const TAMANIO_LOTE =
+    300;
+
+
+    for(
+      let i = 0;
+      i < filasGuardar.length;
+      i += TAMANIO_LOTE
+    ){
+
+      const lote =
+      filasGuardar.slice(
+        i,
+        i + TAMANIO_LOTE
+      );
+
+
+      const {
+        error
+      } =
+      await supabaseClient
+      .from(
+        "matriz_calidad"
+      )
+      .insert(
+        lote
+      );
+
+
+      if(error){
+        throw error;
+      }
+
+
+      mostrarEstado(
+        "⏳ Guardando matriz... " +
+        Math.min(
+          i + TAMANIO_LOTE,
+          filasGuardar.length
+        ) +
+        " / " +
+        filasGuardar.length,
+        "cargando"
+      );
+    }
+
+
+    const {
+      error:
+      errorBorrado
+    } =
+    await supabaseClient
+    .from(
+      "matriz_calidad"
+    )
+    .delete()
+    .lt(
+      "fecha_carga",
+      fechaCarga
+    );
+
+
+    if(errorBorrado){
+      throw errorBorrado;
+    }
+
+
+    mostrarEstado(
+      "✅ Matriz cargada correctamente. " +
+      filasGuardar.length +
+      " elementos guardados y " +
+      columnasRegistrosDetectadas.length +
+      " tipos de registros detectados.",
+      "ok"
+    );
+
+  }
+  catch(error){
+
+    console.error(error);
+
+    try{
+
+      await supabaseClient
+      .from(
+        "matriz_calidad"
+      )
+      .delete()
+      .eq(
+        "fecha_carga",
+        fechaCarga
+      );
+
+    }
+    catch(e){
+      console.error(e);
+    }
+
+
+    mostrarEstado(
+      "❌ No se pudo guardar la matriz: " +
+      error.message,
+      "error"
+    );
+
+  }
+  finally{
+
+    boton.disabled =
+    false;
+
+  }
+}
+
+
+/* ======================================================
+   AUXILIARES
+====================================================== */
+
+function setTexto(
+  id,
+  valor
+){
+
+  const elemento =
+  document.getElementById(
+    id
+  );
+
+  if(elemento){
+    elemento.textContent =
+    valor;
+  }
+}
+
+
+function mostrarEstado(
+  mensaje,
+  tipo
+){
+
+  const estado =
+  document.getElementById(
+    "estado"
+  );
+
+  estado.className =
+  "estado " +
+  (
+    tipo || ""
+  );
+
+  estado.innerHTML =
+  mensaje;
+}
+
+
+function escapar(valor){
+
+  return String(
+    valor ?? ""
+  )
+  .replace(/&/g,"&amp;")
+  .replace(/</g,"&lt;")
+  .replace(/>/g,"&gt;")
+  .replace(/"/g,"&quot;")
+  .replace(/'/g,"&#039;");
+}
+
+</script>
+
+</body>
+</html>
