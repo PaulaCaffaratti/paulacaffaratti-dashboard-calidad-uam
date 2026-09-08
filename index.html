@@ -1526,12 +1526,15 @@ grid-template-columns:1fr;
 .matrizWrap{display:flex;flex-direction:column;gap:18px}
 .matrizHero{background:linear-gradient(135deg,#0b3568,#174f86);color:white;border-radius:16px;padding:24px 26px;display:flex;justify-content:space-between;gap:20px;align-items:flex-start}
 .matrizHero h2{margin:0 0 7px;font-size:24px}.matrizHero p{margin:0;font-size:12px;opacity:.84;line-height:1.5}.matrizActualizacion{text-align:right;min-width:190px}.matrizActualizacion small{display:block;font-size:9px;letter-spacing:.08em;text-transform:uppercase;opacity:.75}.matrizActualizacion strong{display:block;margin-top:5px;font-size:12px}
-.matrizKpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.matrizKpi{background:white;border:1px solid #dfe7ec;border-radius:13px;padding:18px;border-top:4px solid #5ec5e7;box-shadow:0 3px 12px rgba(20,50,80,.04)}.matrizKpi small{display:block;color:#687787;font-size:9px;text-transform:uppercase;font-weight:700;letter-spacing:.03em;margin-bottom:7px}.matrizKpi strong{display:block;color:#0b3568;font-size:27px}.matrizKpi.rojo{border-top-color:#dc3b3b}.matrizKpi.naranja{border-top-color:#f28c28}.matrizKpi.verde{border-top-color:#179447}.matrizKpi.violeta{border-top-color:#6657b8}
-.matrizAvanceGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.matrizCard{background:white;border:1px solid #dfe7ec;border-radius:14px;padding:20px}.matrizCard h3{margin:0 0 16px;color:#0b3568;font-size:16px}.matrizAvanceValor{font-size:34px;font-weight:800;color:#0b3568}.matrizAvanceSub{font-size:10px;color:#687787;margin-top:6px}.matrizBarra{height:10px;background:#e7edf1;border-radius:20px;overflow:hidden;margin-top:14px}.matrizBarra>div{height:100%;border-radius:20px;background:#179447}.matrizBarra.naranja>div{background:#f28c28}
-.matrizEspecialidades{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}.matrizEsp{border:1px solid #dfe7ec;border-radius:12px;padding:15px;background:#fafcfd}.matrizEsp h4{margin:0 0 8px;color:#0b3568;font-size:15px}.matrizEspDato{display:flex;justify-content:space-between;gap:10px;font-size:10px;color:#687787;margin:5px 0}.matrizEspDato b{color:#0b3568}.matrizMiniBarra{height:8px;background:#e5ebef;border-radius:20px;overflow:hidden;margin-top:10px}.matrizMiniBarra>div{height:100%;background:#179447;border-radius:20px}
+.matrizResumenUnificado{background:white;border:1px solid #dfe7ec;border-radius:20px;padding:0;overflow:hidden;box-shadow:0 8px 24px rgba(20,50,80,.06)}
+.matrizResumenCabecera{display:grid;grid-template-columns:1.15fr repeat(3,1fr);background:linear-gradient(180deg,#fff,#fbfdff)}
+.matrizKpi{padding:22px 24px;border-right:1px solid #e8eef2;position:relative}.matrizKpi:last-child{border-right:0}.matrizKpi small{display:flex;align-items:center;gap:8px;color:#687787;font-size:10px;text-transform:uppercase;font-weight:800;letter-spacing:.04em;margin-bottom:8px}.matrizKpi small:before{content:'';width:8px;height:8px;border-radius:50%;background:#5ec5e7;box-shadow:0 0 0 4px rgba(94,197,231,.12)}.matrizKpi strong{display:block;color:#0b3568;font-size:34px;line-height:1;font-weight:800}.matrizKpi .matrizKpiNota{margin-top:7px;font-size:10px;color:#8a98a5}.matrizKpi.rojo small:before{background:#dc3b3b;box-shadow:0 0 0 4px rgba(220,59,59,.10)}.matrizKpi.naranja small:before{background:#f28c28;box-shadow:0 0 0 4px rgba(242,140,40,.12)}.matrizKpi.verde small:before{background:#179447;box-shadow:0 0 0 4px rgba(23,148,71,.11)}.matrizKpi.violeta{background:linear-gradient(135deg,#0b3568,#174f86);color:white}.matrizKpi.violeta small,.matrizKpi.violeta .matrizKpiNota{color:rgba(255,255,255,.78)}.matrizKpi.violeta small:before{background:#69d2f1;box-shadow:0 0 0 4px rgba(255,255,255,.12)}.matrizKpi.violeta strong{color:white}
+.matrizAvanceGrid{display:flex;flex-direction:column;border-top:1px solid #e8eef2}.matrizAvanceItem{padding:18px 24px}.matrizAvanceItem+ .matrizAvanceItem{border-top:1px solid #eef2f5}.matrizAvanceTop{display:flex;justify-content:space-between;align-items:center;gap:18px}.matrizAvanceTexto h3{margin:0 0 8px;color:#0b3568;font-size:15px}.matrizAvanceSub{font-size:10px;color:#687787;line-height:1.45}.matrizAvanceDato{display:flex;align-items:baseline;gap:10px;white-space:nowrap}.matrizAvanceCantidad{font-size:36px;font-weight:800;line-height:1;color:#0b3568}.matrizAvanceCantidad small{font-size:13px;font-weight:700;color:#607386;margin-left:4px}.matrizAvancePct{font-size:18px;font-weight:600;color:#7a8793}.matrizBarra{height:8px;background:#e8edf1;border-radius:20px;overflow:hidden;margin-top:14px}.matrizBarra>div{height:100%;border-radius:20px;background:linear-gradient(90deg,#159447,#1fb661)}.matrizBarra.naranja>div{background:linear-gradient(90deg,#f28c28,#ffad47)}
+.matrizCard{background:white;border:1px solid #dfe7ec;border-radius:14px;padding:20px}.matrizCard h3{margin:0 0 16px;color:#0b3568;font-size:16px}
+.matrizEspecialidades{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}.matrizEsp{border:1px solid #dfe7ec;border-radius:14px;padding:16px;background:#fafcfd}.matrizEsp h4{margin:0 0 12px;color:#0b3568;font-size:16px}.matrizEspRegistros{font-size:10px;color:#687787;margin-bottom:13px}.matrizEspRegistros b{color:#0b3568;font-size:12px}.matrizEspAvance{padding:10px 0}.matrizEspAvance+.matrizEspAvance{border-top:1px solid #e7edf1}.matrizEspEtiqueta{font-size:10px;color:#687787;font-weight:700;margin-bottom:5px}.matrizEspValor{display:flex;align-items:baseline;gap:6px;white-space:nowrap}.matrizEspCantidad{font-size:25px;line-height:1;font-weight:800;color:#0b3568}.matrizEspCantidad small{font-size:10px;font-weight:700;color:#607386;margin-left:3px}.matrizEspPct{font-size:13px;font-weight:500;color:#7a8793}.matrizMiniBarra{height:7px;background:#e5ebef;border-radius:20px;overflow:hidden;margin-top:10px}.matrizMiniBarra>div{height:100%;background:#179447;border-radius:20px}.matrizMiniBarra.naranja>div{background:#f28c28}
 .matrizTablaWrap{overflow:auto;max-height:520px;border:1px solid #dfe7ec;border-radius:10px}.matrizTabla{width:100%;border-collapse:collapse;font-size:10px}.matrizTabla thead{position:sticky;top:0;z-index:2}.matrizTabla th{background:#0b3568;color:white;padding:10px;text-align:left;white-space:nowrap}.matrizTabla td{padding:9px 10px;border-bottom:1px solid #e7edf1;white-space:nowrap}.matrizPct{font-weight:700;color:#0b3568}.matrizEstado{font-size:10px;color:#687787;padding:10px 0}.matrizFiltros{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}.matrizFiltros input,.matrizFiltros select{border:1px solid #ccd7df;border-radius:8px;padding:9px 10px;font-size:11px;background:white;color:#1d2a36}.matrizFiltros input{min-width:260px;flex:1}
-@media(max-width:1100px){.matrizKpis{grid-template-columns:repeat(3,1fr)}.matrizEspecialidades{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:760px){.matrizHero{flex-direction:column}.matrizActualizacion{text-align:left}.matrizKpis{grid-template-columns:repeat(2,1fr)}.matrizAvanceGrid{grid-template-columns:1fr}.matrizEspecialidades{grid-template-columns:1fr 1fr}}
+@media(max-width:1100px){.matrizResumenCabecera{grid-template-columns:1fr 1fr}.matrizKpi:nth-child(2){border-right:0}.matrizKpi:nth-child(-n+2){border-bottom:1px solid #e8eef2}.matrizEspecialidades{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.matrizHero{flex-direction:column}.matrizActualizacion{text-align:left}.matrizResumenCabecera{grid-template-columns:1fr}.matrizKpi{border-right:0;border-bottom:1px solid #e8eef2}.matrizKpi:last-child{border-bottom:0}.matrizAvanceGrid{grid-template-columns:1fr}.matrizAvanceTop{align-items:center}.matrizEspecialidades{grid-template-columns:1fr 1fr}}
 
 </style>
 
@@ -2209,26 +2212,61 @@ class="seccion">
       </div>
     </div>
 
-    <div class="matrizKpis">
-      <div class="matrizKpi violeta"><small>Registros</small><strong id="matrizAplicables">0</strong></div>
-      <div class="matrizKpi rojo"><small>Pendientes · 0</small><strong id="matrizPendientes">0</strong></div>
-      <div class="matrizKpi naranja"><small>En poder del cliente · 1P</small><strong id="matrizCliente">0</strong></div>
-      <div class="matrizKpi verde"><small>Cerrados · 1</small><strong id="matrizCerrados">0</strong></div>
-    </div>
+    <div class="matrizResumenUnificado">
 
-    <div class="matrizAvanceGrid">
-      <div class="matrizCard">
-        <h3>Avance elaborado</h3>
-        <div class="matrizAvanceValor" id="matrizElaborado">0%</div>
-        <div class="matrizAvanceSub"><strong id="matrizElaboradoCantidad">0 registros</strong> elaborados (1 + 1P) sobre el total de registros</div>
-        <div class="matrizBarra naranja"><div id="matrizBarraElaborado" style="width:0%"></div></div>
+      <div class="matrizResumenCabecera">
+        <div class="matrizKpi violeta">
+          <small>Registros</small>
+          <strong id="matrizAplicables">0</strong>
+          <div class="matrizKpiNota">Total de registros requeridos</div>
+        </div>
+        <div class="matrizKpi rojo">
+          <small>Pendientes · 0</small>
+          <strong id="matrizPendientes">0</strong>
+          <div class="matrizKpiNota">Aún no elaborados</div>
+        </div>
+        <div class="matrizKpi naranja">
+          <small>En poder del cliente · 1P</small>
+          <strong id="matrizCliente">0</strong>
+          <div class="matrizKpiNota">Pendientes de firma</div>
+        </div>
+        <div class="matrizKpi verde">
+          <small>Cerrados · 1</small>
+          <strong id="matrizCerrados">0</strong>
+          <div class="matrizKpiNota">Firmados y completos</div>
+        </div>
       </div>
-      <div class="matrizCard">
-        <h3>Avance cerrado</h3>
-        <div class="matrizAvanceValor" id="matrizCerradoPct">0%</div>
-        <div class="matrizAvanceSub"><strong id="matrizCerradoCantidad">0 registros</strong> cerrados / firmados (1) sobre el total de registros</div>
-        <div class="matrizBarra"><div id="matrizBarraCerrado" style="width:0%"></div></div>
+
+      <div class="matrizAvanceGrid">
+        <div class="matrizAvanceItem">
+          <div class="matrizAvanceTop">
+            <div class="matrizAvanceTexto">
+              <h3>Avance elaborado</h3>
+              <div class="matrizAvanceDato">
+                <span class="matrizAvanceCantidad"><span id="matrizElaboradoCantidadNumero">0</span><small>registros</small></span>
+                <span class="matrizAvancePct">(<span id="matrizElaborado">0%</span>)</span>
+              </div>
+              <div class="matrizAvanceSub">Estados 1 + 1P sobre el total de registros</div>
+            </div>
+          </div>
+          <div class="matrizBarra naranja"><div id="matrizBarraElaborado" style="width:0%"></div></div>
+        </div>
+
+        <div class="matrizAvanceItem">
+          <div class="matrizAvanceTop">
+            <div class="matrizAvanceTexto">
+              <h3>Avance cerrado</h3>
+              <div class="matrizAvanceDato">
+                <span class="matrizAvanceCantidad"><span id="matrizCerradoCantidadNumero">0</span><small>registros</small></span>
+                <span class="matrizAvancePct">(<span id="matrizCerradoPct">0%</span>)</span>
+              </div>
+              <div class="matrizAvanceSub">Estado 1 · registros firmados y completos</div>
+            </div>
+          </div>
+          <div class="matrizBarra"><div id="matrizBarraCerrado" style="width:0%"></div></div>
+        </div>
       </div>
+
     </div>
 
     <div class="matrizCard">
@@ -4339,8 +4377,8 @@ async function cargarMatrizCalidad(){
   matrizSet("matrizCerrados",t.cerrado.toLocaleString("es-AR"));
   matrizSet("matrizElaborado",elaborado.toFixed(1)+"%");
   matrizSet("matrizCerradoPct",cerrado.toFixed(1)+"%");
-  matrizSet("matrizElaboradoCantidad",(t.cliente+t.cerrado).toLocaleString("es-AR")+" registros");
-  matrizSet("matrizCerradoCantidad",t.cerrado.toLocaleString("es-AR")+" registros");
+  matrizSet("matrizElaboradoCantidadNumero",(t.cliente+t.cerrado).toLocaleString("es-AR"));
+  matrizSet("matrizCerradoCantidadNumero",t.cerrado.toLocaleString("es-AR"));
 
   const b1=document.getElementById("matrizBarraElaborado");if(b1)b1.style.width=Math.min(elaborado,100)+"%";
   const b2=document.getElementById("matrizBarraCerrado");if(b2)b2.style.width=Math.min(cerrado,100)+"%";
@@ -4364,9 +4402,29 @@ function matrizPintarEspecialidades(){
   cont.innerHTML=nombres.map(nombre=>{
     const filas=matrizFilas.filter(f=>String(f.especialidad||"")===nombre);
     const t=matrizContar(filas);
-    const elab=matrizPct(t.cliente+t.cerrado,t.aplicables);
+    const elaborados=t.cliente+t.cerrado;
+    const elab=matrizPct(elaborados,t.aplicables);
     const cerr=matrizPct(t.cerrado,t.aplicables);
-    return `<div class="matrizEsp"><h4>${matrizEsc(nombre)}</h4><div class="matrizEspDato"><span>Registros</span><b>${t.aplicables.toLocaleString("es-AR")}</b></div><div class="matrizEspDato"><span>Elaborado</span><b>${elab.toFixed(1)}% · ${(t.cliente+t.cerrado).toLocaleString("es-AR")}</b></div><div class="matrizEspDato"><span>Cerrado</span><b>${cerr.toFixed(1)}% · ${t.cerrado.toLocaleString("es-AR")}</b></div><div class="matrizMiniBarra"><div style="width:${Math.min(cerr,100)}%"></div></div></div>`;
+    return `<div class="matrizEsp">
+      <h4>${matrizEsc(nombre)}</h4>
+      <div class="matrizEspRegistros">Registros: <b>${t.aplicables.toLocaleString("es-AR")}</b></div>
+      <div class="matrizEspAvance">
+        <div class="matrizEspEtiqueta">Avance elaborado</div>
+        <div class="matrizEspValor">
+          <span class="matrizEspCantidad">${elaborados.toLocaleString("es-AR")}<small>registros</small></span>
+          <span class="matrizEspPct">(${elab.toFixed(1)}%)</span>
+        </div>
+        <div class="matrizMiniBarra naranja"><div style="width:${Math.min(elab,100)}%"></div></div>
+      </div>
+      <div class="matrizEspAvance">
+        <div class="matrizEspEtiqueta">Avance cerrado</div>
+        <div class="matrizEspValor">
+          <span class="matrizEspCantidad">${t.cerrado.toLocaleString("es-AR")}<small>registros</small></span>
+          <span class="matrizEspPct">(${cerr.toFixed(1)}%)</span>
+        </div>
+        <div class="matrizMiniBarra"><div style="width:${Math.min(cerr,100)}%"></div></div>
+      </div>
+    </div>`;
   }).join("");
 }
 
