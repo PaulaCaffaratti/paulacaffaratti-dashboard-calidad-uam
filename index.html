@@ -13,6 +13,8 @@
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 
@@ -161,6 +163,57 @@ font-size:16px;
 
 }
 
+
+
+/* INFORME PDF */
+.informePdfBtn{
+  border:0;
+  background:var(--azul);
+  color:white;
+  padding:12px 18px;
+  border-radius:10px;
+  font-size:12px;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:0 4px 12px rgba(11,53,104,.16);
+  white-space:nowrap;
+}
+.informePdfBtn:hover{background:var(--azul2);}
+.informePdfBtn:disabled{opacity:.65;cursor:wait;}
+.pdfExportando{
+  position:fixed;
+  inset:0;
+  background:rgba(11,53,104,.72);
+  z-index:99999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.pdfExportando.visible{display:flex;}
+.pdfExportandoCaja{
+  background:white;
+  border-radius:16px;
+  padding:24px 28px;
+  min-width:300px;
+  max-width:500px;
+  text-align:center;
+  box-shadow:0 20px 55px rgba(0,0,0,.25);
+}
+.pdfExportandoCaja strong{
+  display:block;
+  color:var(--azul);
+  font-size:18px;
+  margin-bottom:8px;
+}
+.pdfExportandoCaja span{
+  color:var(--gris);
+  font-size:12px;
+}
+@media(max-width:700px){
+  .topbar{align-items:flex-start;flex-direction:column;}
+  .informePdfBtn{width:100%;}
+}
 
 /* NAV */
 
@@ -1583,9 +1636,12 @@ Dashboard de Indicadores de Calidad
 </div>
 
 </div>
-
+<div>
+  <button id="btnInformePdf" class="informePdfBtn" onclick="descargarInformeCompleto()">
+    📄 Descargar informe completo
+  </button>
 </div>
-
+</div>
 <nav>
 
 <div class="menu">
@@ -2569,6 +2625,14 @@ class="modalBody">
 
 </div>
 
+
+
+<div id="pdfExportando" class="pdfExportando">
+  <div class="pdfExportandoCaja">
+    <strong>Generando informe PDF</strong>
+    <span id="pdfExportandoTexto">Preparando secciones...</span>
+  </div>
+</div>
 
 <script>
 
@@ -5329,6 +5393,400 @@ setInterval(cargarResumenPremoldeados, 60000);
 
 cargarMatrizCalidad();
 setInterval(cargarMatrizCalidad, 60000);
+
+/* =========================================================
+   INFORME PDF EJECUTIVO A4
+========================================================= */
+
+function pdfFechaArchivo(){
+  const d = new Date();
+  const dd = String(d.getDate()).padStart(2,"0");
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const yyyy = d.getFullYear();
+  return `${dd}-${mm}-${yyyy}`;
+}
+
+function pdfFechaLarga(){
+  const d = new Date();
+  return d.toLocaleDateString("es-AR",{
+    day:"2-digit",
+    month:"long",
+    year:"numeric"
+  });
+}
+
+function pdfActualizarEstado(texto){
+  const el = document.getElementById("pdfExportandoTexto");
+  if(el) el.textContent = texto;
+}
+
+function pdfDormir(ms){
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function pdfExpandirContenido(root){
+  const restaurar = [];
+
+  root.querySelectorAll("details").forEach(det => {
+    const estabaAbierto = det.open;
+    restaurar.push(() => { det.open = estabaAbierto; });
+    det.open = true;
+  });
+
+  root.querySelectorAll(".tabla, .matrizTablaWrap").forEach(el => {
+    const prevMaxHeight = el.style.maxHeight;
+    const prevOverflow = el.style.overflow;
+    restaurar.push(() => {
+      el.style.maxHeight = prevMaxHeight;
+      el.style.overflow = prevOverflow;
+    });
+    el.style.maxHeight = "none";
+    el.style.overflow = "visible";
+  });
+
+  return () => restaurar.reverse().forEach(fn => fn());
+}
+
+async function pdfCapturarElemento(elemento){
+  await pdfDormir(250);
+  return await html2canvas(elemento,{
+    scale:1.6,
+    useCORS:true,
+    allowTaint:false,
+    backgroundColor:"#ffffff",
+    logging:false,
+    windowWidth:Math.max(document.documentElement.clientWidth, elemento.scrollWidth, 1400),
+    windowHeight:Math.max(document.documentElement.clientHeight, elemento.scrollHeight)
+  });
+}
+
+async function pdfCapturarBlister(){
+  const iframe = document.getElementById("iframeBlisterDashboard");
+  if(!iframe) return null;
+
+  try{
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    if(!doc || !doc.body) return null;
+
+    const root = doc.body;
+    const detalles = [...root.querySelectorAll("details")];
+    const estados = detalles.map(d => d.open);
+    detalles.forEach(d => d.open = true);
+
+    const scrolls = [...root.querySelectorAll(".tabla, .table-wrap, .tablaWrap")];
+    const prev = scrolls.map(el => ({
+      el,
+      maxHeight:el.style.maxHeight,
+      overflow:el.style.overflow
+    }));
+
+    scrolls.forEach(el => {
+      el.style.maxHeight = "none";
+      el.style.overflow = "visible";
+    });
+
+    await pdfDormir(300);
+
+    const canvas = await html2canvas(root,{
+      scale:1.6,
+      useCORS:true,
+      allowTaint:false,
+      backgroundColor:"#ffffff",
+      logging:false,
+      windowWidth:Math.max(doc.documentElement.clientWidth, root.scrollWidth, 1400),
+      windowHeight:Math.max(doc.documentElement.clientHeight, root.scrollHeight)
+    });
+
+    detalles.forEach((d,i) => d.open = estados[i]);
+    prev.forEach(x => {
+      x.el.style.maxHeight = x.maxHeight;
+      x.el.style.overflow = x.overflow;
+    });
+
+    return canvas;
+  }catch(e){
+    console.warn("No se pudo capturar Observaciones Blister:",e);
+    return null;
+  }
+}
+
+function pdfEncabezadoPie(pdf, titulo, numeroSeccion, paginaActual, totalPaginas){
+  const W = 210;
+  const H = 297;
+
+  pdf.setFillColor(11,53,104);
+  pdf.rect(0,0,W,13,"F");
+
+  pdf.setTextColor(255,255,255);
+  pdf.setFont("helvetica","bold");
+  pdf.setFontSize(8.5);
+  pdf.text("DUPLICAR NORTE UAM · CALIDAD",10,8.5);
+
+  pdf.setFont("helvetica","normal");
+  pdf.setFontSize(7);
+  pdf.text(`${String(numeroSeccion).padStart(2,"0")} · ${titulo.toUpperCase()}`,W-10,8.5,{align:"right"});
+
+  pdf.setDrawColor(220,228,234);
+  pdf.line(10,H-12,W-10,H-12);
+
+  pdf.setTextColor(104,119,135);
+  pdf.setFontSize(7);
+  pdf.text(`Fecha de corte: ${pdfFechaLarga()}`,10,H-6);
+  pdf.text(`Página ${paginaActual} de ${totalPaginas}`,W-10,H-6,{align:"right"});
+}
+
+function pdfAgregarTituloSeccion(pdf,titulo,numeroSeccion){
+  pdf.setTextColor(11,53,104);
+  pdf.setFont("helvetica","bold");
+  pdf.setFontSize(19);
+  pdf.text(`${String(numeroSeccion).padStart(2,"0")} · ${titulo}`,12,27);
+
+  pdf.setDrawColor(96,197,232);
+  pdf.setLineWidth(1.2);
+  pdf.line(12,31,70,31);
+}
+
+function pdfPrepararFragmentos(canvas){
+  const pageWidth = 210;
+  const pageHeight = 297;
+  const margenX = 10;
+  const topY = 36;
+  const bottomY = 18;
+  const anchoUtil = pageWidth - margenX*2;
+  const altoUtil = pageHeight - topY - bottomY;
+
+  const escalaPdf = anchoUtil / canvas.width;
+  const altoPaginaPx = Math.floor(altoUtil / escalaPdf);
+
+  const partes = [];
+  let yPx = 0;
+
+  while(yPx < canvas.height){
+    const sliceHeight = Math.min(altoPaginaPx, canvas.height-yPx);
+    const parte = document.createElement("canvas");
+    parte.width = canvas.width;
+    parte.height = sliceHeight;
+
+    const ctx = parte.getContext("2d");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0,0,parte.width,parte.height);
+    ctx.drawImage(
+      canvas,
+      0,yPx,canvas.width,sliceHeight,
+      0,0,canvas.width,sliceHeight
+    );
+
+    partes.push({
+      data: parte.toDataURL("image/jpeg",0.93),
+      heightPdf: sliceHeight * escalaPdf
+    });
+
+    yPx += sliceHeight;
+  }
+
+  return partes;
+}
+
+async function descargarInformeCompleto(){
+  const boton = document.getElementById("btnInformePdf");
+  const overlay = document.getElementById("pdfExportando");
+
+  if(!window.html2canvas || !window.jspdf){
+    alert("No se pudieron cargar las librerías necesarias para generar el PDF.");
+    return;
+  }
+
+  const secciones = [
+    {id:"resumen", titulo:"Control Documental"},
+    {id:"documentacion", titulo:"Listado de documentos"},
+    {id:"blister", titulo:"Observaciones Blister", especial:"blister"},
+    {id:"hallazgos", titulo:"Hallazgos"},
+    {id:"capacitaciones", titulo:"Capacitaciones"},
+    {id:"matriz", titulo:"Matriz de Calidad"}
+  ];
+
+  const estadoSecciones = secciones.map(s => {
+    const el = document.getElementById(s.id);
+    return el ? {
+      el,
+      display:el.style.display,
+      activa:el.classList.contains("activa")
+    } : null;
+  }).filter(Boolean);
+
+  const detallesEstado = [...document.querySelectorAll("details")].map(d => ({d,open:d.open}));
+  const scrollEstado = [...document.querySelectorAll(".tabla, .matrizTablaWrap")].map(el => ({
+    el,
+    maxHeight:el.style.maxHeight,
+    overflow:el.style.overflow
+  }));
+
+  try{
+    boton.disabled = true;
+    overlay.classList.add("visible");
+    pdfActualizarEstado("Preparando informe ejecutivo...");
+
+    const capturas = [];
+
+    for(let i=0;i<secciones.length;i++){
+      const s = secciones[i];
+
+      pdfActualizarEstado(`Procesando ${s.titulo} (${i+1}/${secciones.length})...`);
+
+      document.querySelectorAll(".seccion").forEach(sec => {
+        sec.classList.remove("activa");
+        sec.style.display = "none";
+      });
+
+      const section = document.getElementById(s.id);
+      if(!section) continue;
+
+      section.style.display = "block";
+      section.classList.add("activa");
+
+      await pdfDormir(350);
+
+      let canvas = null;
+
+      if(s.especial === "blister"){
+        canvas = await pdfCapturarBlister();
+        if(!canvas){
+          canvas = await pdfCapturarElemento(section);
+        }
+      }else{
+        const restaurar = pdfExpandirContenido(section);
+        canvas = await pdfCapturarElemento(section);
+        restaurar();
+      }
+
+      if(canvas){
+        capturas.push({
+          ...s,
+          partes:pdfPrepararFragmentos(canvas)
+        });
+      }
+    }
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+      orientation:"portrait",
+      unit:"mm",
+      format:"a4",
+      compress:true
+    });
+
+    // PORTADA
+    pdf.setFillColor(11,53,104);
+    pdf.rect(0,0,210,82,"F");
+
+    pdf.setFillColor(96,197,232);
+    pdf.rect(0,82,210,5,"F");
+
+    pdf.setTextColor(255,255,255);
+    pdf.setFont("helvetica","bold");
+    pdf.setFontSize(25);
+    pdf.text("DUPLICAR NORTE UAM",16,31);
+
+    pdf.setFontSize(17);
+    pdf.text("INFORME INTEGRAL DE CALIDAD",16,47);
+
+    pdf.setFont("helvetica","normal");
+    pdf.setFontSize(10);
+    pdf.text(`Fecha de corte: ${pdfFechaLarga()}`,16,62);
+
+    pdf.setTextColor(11,53,104);
+    pdf.setFont("helvetica","bold");
+    pdf.setFontSize(13);
+    pdf.text("Contenido",16,110);
+
+    pdf.setFont("helvetica","normal");
+    pdf.setFontSize(10);
+    let y = 124;
+    capturas.forEach((s,i) => {
+      pdf.setTextColor(11,53,104);
+      pdf.setFont("helvetica","bold");
+      pdf.text(String(i+1).padStart(2,"0"),16,y);
+
+      pdf.setFont("helvetica","normal");
+      pdf.setTextColor(45,60,75);
+      pdf.text(s.titulo,29,y);
+      y += 10;
+    });
+
+    pdf.setDrawColor(225,231,236);
+    pdf.line(16,245,194,245);
+
+    pdf.setTextColor(104,119,135);
+    pdf.setFontSize(8);
+    pdf.text("Dashboard de Indicadores de Calidad",16,255);
+    pdf.text("Generado automáticamente desde el tablero web",16,262);
+
+    // Armar lista de páginas para saber total final
+    const paginas = [];
+    capturas.forEach((s,idx) => {
+      s.partes.forEach((parte,pidx) => {
+        paginas.push({
+          titulo:s.titulo,
+          numeroSeccion:idx+1,
+          parte,
+          primera:pidx===0
+        });
+      });
+    });
+
+    const totalPaginas = 1 + paginas.length;
+    let paginaActual = 1;
+
+    paginas.forEach((p) => {
+      pdf.addPage();
+      paginaActual++;
+
+      pdfEncabezadoPie(
+        pdf,
+        p.titulo,
+        p.numeroSeccion,
+        paginaActual,
+        totalPaginas
+      );
+
+      if(p.primera){
+        pdfAgregarTituloSeccion(pdf,p.titulo,p.numeroSeccion);
+      }
+
+      const yImagen = p.primera ? 36 : 20;
+      pdf.addImage(
+        p.parte.data,
+        "JPEG",
+        10,
+        yImagen,
+        190,
+        p.parte.heightPdf
+      );
+    });
+
+    pdf.save(`Informe_Ejecutivo_Calidad_UAM_${pdfFechaArchivo()}.pdf`);
+
+  }catch(error){
+    console.error(error);
+    alert("No se pudo generar el informe completo. Revisá la consola del navegador para ver el detalle.");
+  }finally{
+    estadoSecciones.forEach(x => {
+      x.el.style.display = x.display;
+      x.el.classList.toggle("activa",x.activa);
+    });
+
+    detallesEstado.forEach(x => x.d.open = x.open);
+
+    scrollEstado.forEach(x => {
+      x.el.style.maxHeight = x.maxHeight;
+      x.el.style.overflow = x.overflow;
+    });
+
+    overlay.classList.remove("visible");
+    boton.disabled = false;
+  }
+}
+
 </script>
 
 </body>
