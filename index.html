@@ -5492,6 +5492,21 @@ async function pdfCapturarBlister(){
 
     const root = doc.body;
 
+    // En el PDF de Blister no incluir "Detalle de observaciones".
+    const blisterOcultosTemporales = [];
+    [...root.querySelectorAll("section, .card, details, div")].forEach(el => {
+      const tituloEl = el.querySelector(":scope > h1, :scope > h2, :scope > h3, :scope > summary");
+      const titulo = (tituloEl?.textContent || "").trim().toLowerCase();
+
+      if(titulo.includes("detalle de observaciones")){
+        blisterOcultosTemporales.push({
+          el,
+          display:el.style.display
+        });
+        el.style.display = "none";
+      }
+    });
+
     // En Observaciones Blister tampoco incluir tablas/listados con más de 20 filas.
     const ocultosPorCantidad = [];
     root.querySelectorAll("table").forEach(tabla => {
@@ -5543,6 +5558,11 @@ async function pdfCapturarBlister(){
     });
 
     detalles.forEach((d,i) => d.open = estados[i]);
+
+    blisterOcultosTemporales.forEach(x => {
+      x.el.style.display = x.display;
+    });
+
     ocultosPorCantidad.forEach(x => {
       x.el.style.display = x.display;
     });
@@ -5646,8 +5666,7 @@ async function descargarInformeCompleto(){
 
   const secciones = [
     {id:"resumen", titulo:"Control Documental"},
-    {id:"documentacion", titulo:"Listado de documentos"},
-    {id:"blister", titulo:"Observaciones Blister", especial:"blister"},
+        {id:"blister", titulo:"Observaciones Blister", especial:"blister"},
     {id:"hallazgos", titulo:"Hallazgos"},
     {id:"capacitaciones", titulo:"Capacitaciones"},
     {id:"matriz", titulo:"Matriz de Calidad"}
@@ -5703,7 +5722,43 @@ async function descargarInformeCompleto(){
         }
       }else{
         const restaurar = pdfExpandirContenido(section);
+
+        const ocultosTemporales = [];
+
+        // CONTROL DOCUMENTAL: no incluir "Estado por especialidad" en el PDF.
+        if(s.id === "resumen"){
+          [...section.querySelectorAll(".card")].forEach(card => {
+            const titulo = (card.querySelector("h2,h3")?.textContent || "").trim().toLowerCase();
+            if(titulo === "estado por especialidad"){
+              ocultosTemporales.push({
+                el:card,
+                display:card.style.display
+              });
+              card.style.display = "none";
+            }
+          });
+        }
+
+        // MATRIZ: no incluir "Detalle de elementos" en el PDF.
+        if(s.id === "matriz"){
+          [...section.querySelectorAll("details")].forEach(det => {
+            const titulo = (det.querySelector("summary")?.textContent || "").trim().toLowerCase();
+            if(titulo.includes("detalle de elementos")){
+              ocultosTemporales.push({
+                el:det,
+                display:det.style.display
+              });
+              det.style.display = "none";
+            }
+          });
+        }
+
         canvas = await pdfCapturarElemento(section);
+
+        ocultosTemporales.forEach(x => {
+          x.el.style.display = x.display;
+        });
+
         restaurar();
       }
 
