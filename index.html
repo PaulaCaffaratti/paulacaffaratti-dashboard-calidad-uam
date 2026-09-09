@@ -5427,6 +5427,28 @@ function pdfDormir(ms){
 function pdfExpandirContenido(root){
   const restaurar = [];
 
+  // En el PDF no mostrar listados/tablas con más de 20 filas.
+  root.querySelectorAll("table").forEach(tabla => {
+    const tbody = tabla.querySelector("tbody");
+    if(!tbody) return;
+
+    const filas = [...tbody.querySelectorAll(":scope > tr")]
+      .filter(tr => getComputedStyle(tr).display !== "none");
+
+    if(filas.length > 20){
+      const contenedor =
+        tabla.closest(".card, .matrizCard, details, .tabla, .matrizTablaWrap") ||
+        tabla;
+
+      const displayAnterior = contenedor.style.display;
+      restaurar.push(() => {
+        contenedor.style.display = displayAnterior;
+      });
+
+      contenedor.style.display = "none";
+    }
+  });
+
   root.querySelectorAll("details").forEach(det => {
     const estabaAbierto = det.open;
     restaurar.push(() => { det.open = estabaAbierto; });
@@ -5469,6 +5491,29 @@ async function pdfCapturarBlister(){
     if(!doc || !doc.body) return null;
 
     const root = doc.body;
+
+    // En Observaciones Blister tampoco incluir tablas/listados con más de 20 filas.
+    const ocultosPorCantidad = [];
+    root.querySelectorAll("table").forEach(tabla => {
+      const tbody = tabla.querySelector("tbody");
+      if(!tbody) return;
+
+      const filas = [...tbody.querySelectorAll(":scope > tr")]
+        .filter(tr => getComputedStyle(tr).display !== "none");
+
+      if(filas.length > 20){
+        const contenedor =
+          tabla.closest(".card, details, .tabla, .table-wrap, .tablaWrap") ||
+          tabla;
+
+        ocultosPorCantidad.push({
+          el:contenedor,
+          display:contenedor.style.display
+        });
+        contenedor.style.display = "none";
+      }
+    });
+
     const detalles = [...root.querySelectorAll("details")];
     const estados = detalles.map(d => d.open);
     detalles.forEach(d => d.open = true);
@@ -5498,6 +5543,9 @@ async function pdfCapturarBlister(){
     });
 
     detalles.forEach((d,i) => d.open = estados[i]);
+    ocultosPorCantidad.forEach(x => {
+      x.el.style.display = x.display;
+    });
     prev.forEach(x => {
       x.el.style.maxHeight = x.maxHeight;
       x.el.style.overflow = x.overflow;
