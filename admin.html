@@ -2878,7 +2878,8 @@ nombre
 const match =
 buscarDocumento(
 codigoDetectado,
-descripcion
+descripcion,
+nombre
 );
 
 
@@ -2940,9 +2941,14 @@ BUSCAR DOCUMENTO
 
 function buscarDocumento(
 codigo,
-descripcion
+descripcion,
+nombre
 ){
 
+
+/*
+1) CÓDIGO EXACTO
+*/
 
 if(codigo){
 
@@ -2977,7 +2983,7 @@ metodo:"EXACTO"
 
 
 /*
-EQUIVALENCIA
+2) EQUIVALENCIA GUARDADA
 */
 
 const eq =
@@ -3025,7 +3031,7 @@ metodo:"EQUIVALENCIA"
 
 
 /*
-DQ / DO
+3) NORMALIZACIÓN DQ / DO
 */
 
 const flexible =
@@ -3068,7 +3074,204 @@ metodo:
 }
 
 
+/*
+4) DESCRIPCIÓN DEL DOCUMENTO
+
+Si el código del Excel está equivocado, la descripción pasa a ser
+la referencia válida.
+
+Ejemplo:
+Excel:
+ODV-ALVS-25033-DO-PR-014 - Montaje de Estructura Metálica
+
+Maestro:
+ODV-ALVS-25033-DO-PR-012 - Montaje de Estructura Metálica
+
+Se vincula al PR-012 del Maestro Oficial.
+
+Solo se vincula automáticamente cuando existe UNA ÚNICA descripción
+coincidente en el Maestro. Así evitamos asignaciones ambiguas.
+*/
+
+const descripcionDesdeNombre =
+extraerDescripcionDesdeNombre(
+nombre
+);
+
+const descripcionExcel =
+normalizarDescripcionDocumento(
+descripcion || descripcionDesdeNombre
+);
+
+if(descripcionExcel){
+
+
+const porDescripcion =
+
+maestro.filter(
+
+d =>
+normalizarDescripcionDocumento(
+d.descripcion
+)
+===
+descripcionExcel
+
+);
+
+
+if(
+porDescripcion.length === 1
+){
+
+return {
+
+documento:
+porDescripcion[0],
+
+metodo:
+"DESCRIPCION"
+
+};
+
+}
+
+
+}
+
+
+/*
+Si la columna Descripción del Excel contenía otro dato,
+intentamos además con el texto que viene después del código
+en la columna Nombre.
+*/
+
+const descripcionNombre =
+normalizarDescripcionDocumento(
+descripcionDesdeNombre
+);
+
+if(
+descripcionNombre &&
+descripcionNombre !== descripcionExcel
+){
+
+
+const porNombre =
+
+maestro.filter(
+
+d =>
+normalizarDescripcionDocumento(
+d.descripcion
+)
+===
+descripcionNombre
+
+);
+
+
+if(
+porNombre.length === 1
+){
+
+return {
+
+documento:
+porNombre[0],
+
+metodo:
+"DESCRIPCION"
+
+};
+
+}
+
+
+}
+
+
 return null;
+
+}
+
+
+/* ============================================================
+DESCRIPCIÓN DOCUMENTAL
+============================================================ */
+
+
+function extraerDescripcionDesdeNombre(
+nombre
+){
+
+const texto =
+String(
+nombre || ""
+)
+.trim();
+
+if(!texto){
+
+return "";
+
+}
+
+
+/*
+Quita el código documental inicial y conserva el título.
+*/
+
+return texto
+
+.replace(
+/^\s*ODV-ALVS-25033-[A-Z]{2}-[A-Z]{2}-\d{3}\s*[-–—:]\s*/i,
+""
+)
+
+.trim();
+
+}
+
+
+function normalizarDescripcionDocumento(
+valor
+){
+
+return String(
+valor || ""
+)
+
+.toLowerCase()
+
+.normalize("NFD")
+
+.replace(
+/[\u0300-\u036f]/g,
+""
+)
+
+/*
+Unifica signos y separadores para que diferencias de formato
+no impidan la coincidencia.
+*/
+
+.replace(
+/[_–—-]+/g,
+" "
+)
+
+.replace(
+/[.,;:()[\]{}"'´`]/g,
+" "
+)
+
+.replace(
+/\s+/g,
+" "
+)
+
+.trim();
 
 }
 
@@ -3101,8 +3304,13 @@ const normalizadas =
 
 filasProcesadas.filter(
 x =>
-x.metodo ===
-"NORMALIZADO_DQ_DO"
+[
+"NORMALIZADO_DQ_DO",
+"DESCRIPCION"
+]
+.includes(
+x.metodo
+)
 );
 
 
