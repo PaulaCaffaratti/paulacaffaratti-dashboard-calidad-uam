@@ -401,8 +401,11 @@ input,select{
   background:white;
 }
 .tablaWrap{
-  overflow:auto;
-  max-height:650px;
+  width:100%;
+  overflow-x:auto;
+  overflow-y:visible;
+  max-height:none;
+  height:auto;
   border:1px solid #e1e8ed;
   border-radius:10px;
 }
@@ -1282,9 +1285,231 @@ function escaparAttr(valor){
 
 
 <script>
-if(new URLSearchParams(window.location.search).get("embed")==="1"){
-  document.body.classList.add("embed");
+
+const modoEmbed =
+new URLSearchParams(
+  window.location.search
+)
+.get("embed") === "1";
+
+
+if(modoEmbed){
+
+  document.body
+  .classList
+  .add("embed");
+
 }
+
+
+/* ============================================================
+   UNA SOLA BARRA VERTICAL
+   Cuando blister.html está dentro del dashboard:
+   - elimina el scroll vertical interno;
+   - expande el iframe a la altura real del contenido;
+   - deja como única barra vertical la del navegador.
+============================================================ */
+
+function ajustarAltoEnPadre(){
+
+  try{
+
+    if(
+      !modoEmbed ||
+      window.parent === window ||
+      !window.frameElement
+    ){
+      return;
+    }
+
+
+    const html =
+    document.documentElement;
+
+
+    const body =
+    document.body;
+
+
+    html.style.setProperty(
+      "overflow-y",
+      "visible",
+      "important"
+    );
+
+
+    body.style.setProperty(
+      "overflow-y",
+      "visible",
+      "important"
+    );
+
+
+    const tablaWrap =
+    document.querySelector(
+      ".tablaWrap"
+    );
+
+
+    if(tablaWrap){
+
+      tablaWrap.style.setProperty(
+        "overflow-y",
+        "visible",
+        "important"
+      );
+
+
+      tablaWrap.style.setProperty(
+        "max-height",
+        "none",
+        "important"
+      );
+
+
+      tablaWrap.style.setProperty(
+        "height",
+        "auto",
+        "important"
+      );
+
+    }
+
+
+    const alto =
+    Math.max(
+
+      body.scrollHeight,
+
+      body.offsetHeight,
+
+      html.scrollHeight,
+
+      html.offsetHeight
+
+    );
+
+
+    const iframe =
+    window.frameElement;
+
+
+    iframe.setAttribute(
+      "scrolling",
+      "no"
+    );
+
+
+    iframe.style.overflow =
+    "hidden";
+
+
+    iframe.style.height =
+    Math.ceil(
+      alto + 12
+    )
+    +
+    "px";
+
+
+  }
+  catch(error){
+
+    console.log(
+      "No se pudo ajustar el alto del iframe:",
+      error
+    );
+
+  }
+
+}
+
+
+if(modoEmbed){
+
+
+  window.addEventListener(
+    "load",
+    function(){
+
+
+      ajustarAltoEnPadre();
+
+
+      [
+        150,
+        400,
+        900,
+        1600,
+        2800
+      ]
+      .forEach(
+        tiempo => {
+
+          setTimeout(
+            ajustarAltoEnPadre,
+            tiempo
+          );
+
+        }
+      );
+
+
+      if(
+        window.ResizeObserver
+      ){
+
+        const resizeObserver =
+        new ResizeObserver(
+          function(){
+
+            ajustarAltoEnPadre();
+
+          }
+        );
+
+
+        resizeObserver.observe(
+          document.body
+        );
+
+      }
+
+
+      const mutationObserver =
+      new MutationObserver(
+        function(){
+
+          ajustarAltoEnPadre();
+
+        }
+      );
+
+
+      mutationObserver.observe(
+        document.body,
+        {
+
+          childList:true,
+
+          subtree:true
+
+        }
+      );
+
+
+    }
+  );
+
+
+  window.addEventListener(
+    "resize",
+    ajustarAltoEnPadre
+  );
+
+
+}
+
 </script>
 
 </body>
