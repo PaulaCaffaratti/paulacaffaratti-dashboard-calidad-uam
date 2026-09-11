@@ -1,275 +1,701 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
+>
+
 <title>Gestión de Calidad UAM</title>
 
+
 <style>
-*{box-sizing:border-box}
+
+/* =========================================================
+   CONFIGURACIÓN GENERAL
+========================================================= */
+
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  width:100%;
+  margin:0;
+  padding:0;
+  overflow-x:hidden;
+}
+
 
 :root{
+
   --azul:#0c356a;
+
   --celeste:#60c5e8;
+
   --gris:#687787;
+
   --fondo:#f4f7f9;
+
   --blanco:#ffffff;
+
   --borde:#dfe7ec;
+
 }
+
 
 body{
-  margin:0;
-  font-family:Arial,Helvetica,sans-serif;
-  background:var(--fondo);
-  color:#1d2a36;
+
+  font-family:
+  Arial,
+  Helvetica,
+  sans-serif;
+
+  background:
+  var(--fondo);
+
+  color:
+  #1d2a36;
+
 }
+
+
+/* =========================================================
+   HEADER
+========================================================= */
 
 header{
-  background:var(--blanco);
-  border-bottom:1px solid var(--borde);
+
+  width:100%;
+
+  background:
+  var(--blanco);
+
+  border-bottom:
+  1px solid var(--borde);
+
 }
+
 
 .topbar{
-  max-width:1600px;
-  margin:auto;
-  padding:20px 28px 16px;
+
+  width:100%;
+
+  max-width:none;
+
+  margin:0;
+
+  padding:
+  14px
+  22px
+  12px;
+
   display:flex;
+
   align-items:center;
-  justify-content:space-between;
-  gap:20px;
+
+  justify-content:
+  space-between;
+
+  gap:18px;
+
 }
+
 
 .marca{
+
   display:flex;
-  gap:14px;
+
+  gap:12px;
+
   align-items:center;
+
 }
+
 
 .barra{
-  width:10px;
-  height:68px;
+
+  width:8px;
+
+  height:54px;
+
   border-radius:8px;
-  background:var(--celeste);
+
+  background:
+  var(--celeste);
+
 }
+
 
 .marca h1{
+
   margin:0;
-  color:var(--azul);
-  font-size:28px;
+
+  color:
+  var(--azul);
+
+  font-size:23px;
+
+  font-weight:600;
+
+  letter-spacing:
+  -.3px;
+
 }
+
 
 .marca p{
-  margin:5px 0 0;
-  color:var(--gris);
-  font-size:13px;
+
+  margin:
+  4px
+  0
+  0;
+
+  color:
+  var(--gris);
+
+  font-size:12px;
+
 }
+
+
+/* =========================================================
+   MENÚ
+========================================================= */
 
 .nav{
-  background:var(--azul);
+
+  width:100%;
+
+  background:
+  var(--azul);
+
 }
+
 
 .tabs{
-  max-width:1600px;
-  margin:auto;
+
+  width:100%;
+
+  max-width:none;
+
+  margin:0;
+
+  padding:
+  0
+  10px;
+
   display:flex;
-  gap:0;
-  overflow:auto;
+
+  align-items:center;
+
+  overflow-x:auto;
+
+  overflow-y:hidden;
+
+  scrollbar-width:thin;
+
 }
+
 
 .tab{
+
   appearance:none;
+
   border:0;
-  background:transparent;
+
+  background:
+  transparent;
+
   color:white;
-  padding:18px 26px;
-  font-size:13px;
-  font-weight:bold;
+
+  padding:
+  14px
+  20px;
+
+  font-size:12px;
+
+  font-weight:600;
+
   cursor:pointer;
-  border-bottom:6px solid transparent;
+
+  border-bottom:
+  4px solid transparent;
+
   white-space:nowrap;
+
+  transition:
+  background .15s ease;
+
 }
+
 
 .tab:hover{
-  background:rgba(255,255,255,.06);
+
+  background:
+  rgba(255,255,255,.07);
+
 }
+
 
 .tab.activo{
-  border-bottom-color:var(--celeste);
-  background:rgba(255,255,255,.05);
+
+  border-bottom-color:
+  var(--celeste);
+
+  background:
+  rgba(255,255,255,.05);
+
 }
+
+
+/* =========================================================
+   ÁREA PRINCIPAL
+
+   IMPORTANTE:
+   Ya no tiene max-width de 1600px.
+   Aprovecha todo el monitor.
+========================================================= */
 
 main{
-  max-width:1600px;
-  margin:auto;
-  padding:20px;
+
+  width:100%;
+
+  max-width:none;
+
+  margin:0;
+
+  padding:
+  12px;
+
 }
+
+
+/* =========================================================
+   AVISO SUPERIOR
+========================================================= */
 
 .aviso{
-  background:#eef7fb;
-  border-left:4px solid var(--celeste);
-  border-radius:10px;
-  padding:12px 14px;
-  margin-bottom:15px;
-  color:#31566e;
-  font-size:12px;
+
+  width:100%;
+
+  background:
+  #eef7fb;
+
+  border-left:
+  4px solid var(--celeste);
+
+  border-radius:
+  8px;
+
+  padding:
+  9px
+  12px;
+
+  margin-bottom:
+  10px;
+
+  color:
+  #31566e;
+
+  font-size:
+  11.5px;
+
+  line-height:
+  1.4;
+
 }
+
+
+/* =========================================================
+   CONTENEDOR DEL MÓDULO
+========================================================= */
 
 .contenedor{
+
+  width:100%;
+
+  max-width:100%;
+
   background:white;
-  border:1px solid var(--borde);
-  border-radius:14px;
+
+  border:
+  1px solid var(--borde);
+
+  border-radius:
+  10px;
+
   overflow:hidden;
-  min-height:1150px;
-  box-shadow:0 3px 12px rgba(20,50,80,.05);
+
+  min-height:
+  900px;
+
+  box-shadow:
+  0
+  2px
+  9px
+  rgba(20,50,80,.04);
+
 }
+
+
+/* =========================================================
+   IFRAME
+========================================================= */
 
 iframe{
-  width:100%;
-  min-height:1150px;
-  border:0;
+
   display:block;
+
+  width:100%;
+
+  max-width:100%;
+
+  min-height:
+  900px;
+
+  border:0;
+
+  margin:0;
+
+  padding:0;
+
   background:white;
+
 }
 
-@media(max-width:700px){
+
+/* =========================================================
+   NOTEBOOK / ESCRITORIO MEDIANO
+========================================================= */
+
+@media
+(max-width:1450px){
 
   .topbar{
-    padding:16px;
+
+    padding:
+    11px
+    14px;
+
   }
+
 
   .marca h1{
-    font-size:21px;
+
+    font-size:
+    21px;
+
   }
+
 
   .barra{
-    height:55px;
+
+    height:
+    48px;
+
   }
+
 
   .tab{
-    padding:15px 17px;
+
+    padding:
+    12px
+    15px;
+
+    font-size:
+    11px;
+
   }
 
+
   main{
-    padding:10px;
+
+    padding:
+    8px;
+
+  }
+
+
+  .aviso{
+
+    margin-bottom:
+    8px;
+
   }
 
 }
+
+
+/* =========================================================
+   CELULAR
+========================================================= */
+
+@media
+(max-width:700px){
+
+  body{
+
+    overflow-x:hidden;
+
+  }
+
+
+  .topbar{
+
+    padding:
+    12px;
+
+  }
+
+
+  .marca h1{
+
+    font-size:
+    19px;
+
+  }
+
+
+  .marca p{
+
+    font-size:
+    11px;
+
+  }
+
+
+  .barra{
+
+    width:
+    6px;
+
+    height:
+    44px;
+
+  }
+
+
+  .tabs{
+
+    padding:0;
+
+  }
+
+
+  .tab{
+
+    padding:
+    12px
+    14px;
+
+    font-size:
+    11px;
+
+  }
+
+
+  main{
+
+    padding:
+    5px;
+
+  }
+
+
+  .contenedor{
+
+    border-radius:
+    7px;
+
+  }
+
+}
+
 </style>
+
 </head>
+
 
 <body>
 
+
 <header>
+
 
   <div class="topbar">
 
+
     <div class="marca">
+
 
       <div class="barra"></div>
 
+
       <div>
-        <h1>DUPLICAR NORTE UAM</h1>
-        <p>Gestión de Inputs · Calidad</p>
+
+        <h1>
+          DUPLICAR NORTE UAM
+        </h1>
+
+        <p>
+          Gestión de Inputs · Calidad
+        </p>
+
       </div>
+
 
     </div>
 
+
   </div>
+
+
 
   <div class="nav">
 
+
     <div class="tabs">
 
-      <button
-      id="tabDocumentacion"
-      class="tab activo"
-      onclick="abrirModulo('documentacion',this)">
-      📄 ADMINISTRACIÓN DE DOCUMENTACIÓN
-      </button>
 
       <button
-      id="tabBlister"
-      class="tab"
-      onclick="abrirModulo('blister',this)">
-      ⚠️ OBSERVACIONES BLISTER
+        id="tabDocumentacion"
+        class="tab activo"
+        onclick="abrirModulo('documentacion',this)"
+      >
+        📄 ADMINISTRACIÓN DE DOCUMENTACIÓN
       </button>
 
-      <button
-      id="tabCapacitaciones"
-      class="tab"
-      onclick="abrirModulo('capacitaciones',this)">
-      🎓 CAPACITACIONES
-      </button>
 
       <button
-      id="tabMatriz"
-      class="tab"
-      onclick="abrirModulo('matriz',this)">
-      📊 MATRIZ
+        id="tabBlister"
+        class="tab"
+        onclick="abrirModulo('blister',this)"
+      >
+        ⚠️ OBSERVACIONES BLISTER
       </button>
 
-      <button
-      id="tabPiping"
-      class="tab"
-      onclick="abrirModulo('piping',this)">
-      🔧 PIPING
-      </button>
 
       <button
-      id="tabMaestro"
-      class="tab"
-      onclick="abrirModulo('maestro',this)">
-      📋 LISTADO BASE
+        id="tabCapacitaciones"
+        class="tab"
+        onclick="abrirModulo('capacitaciones',this)"
+      >
+        🎓 CAPACITACIONES
       </button>
+
+
+      <button
+        id="tabMatriz"
+        class="tab"
+        onclick="abrirModulo('matriz',this)"
+      >
+        📊 MATRIZ
+      </button>
+
+
+      <button
+        id="tabPiping"
+        class="tab"
+        onclick="abrirModulo('piping',this)"
+      >
+        🔧 PIPING
+      </button>
+
+
+      <button
+        id="tabMaestro"
+        class="tab"
+        onclick="abrirModulo('maestro',this)"
+      >
+        📋 LISTADO BASE
+      </button>
+
 
     </div>
 
+
   </div>
+
 
 </header>
 
+
+
 <main>
 
+
   <div class="aviso">
+
     Ingresá una sola vez desde Administración de Documentación.
     Después podés cambiar de pestaña para cargar Blister,
     Capacitaciones, Matriz, Piping o modificar el Listado Base.
+
   </div>
+
+
 
   <div class="contenedor">
 
+
     <iframe
-    id="visor"
-    src="admin.html"
-    title="Gestión de Calidad">
+      id="visor"
+      src="admin.html"
+      title="Gestión de Calidad"
+    >
     </iframe>
+
 
   </div>
 
+
 </main>
+
+
 
 <script>
 
+
+/* =========================================================
+   RUTAS
+========================================================= */
+
 const rutas = {
 
-  documentacion:"admin.html",
+  documentacion:
+  "admin.html",
 
-  blister:"blister-admin.html",
+  blister:
+  "blister-admin.html",
 
-  capacitaciones:"capacitaciones-admin.html",
+  capacitaciones:
+  "capacitaciones-admin.html",
 
-  matriz:"matriz-admin.html",
+  matriz:
+  "matriz-admin.html",
 
-  piping:"piping-admin.html",
+  piping:
+  "piping-admin.html",
 
-  maestro:"maestro.html"
+  maestro:
+  "maestro.html"
 
 };
+
 
 
 let moduloActual =
 "documentacion";
 
+
+
+/* =========================================================
+   CAMBIO DE PESTAÑA
+========================================================= */
 
 function abrirModulo(
   modulo,
@@ -282,6 +708,7 @@ function abrirModulo(
     return;
   }
 
+
   document
   .querySelectorAll(
     ".tab"
@@ -293,14 +720,17 @@ function abrirModulo(
     )
   );
 
+
   boton
   .classList
   .add(
     "activo"
   );
 
+
   moduloActual =
   modulo;
+
 
   const visor =
   document
@@ -308,75 +738,509 @@ function abrirModulo(
     "visor"
   );
 
-  /*
-  El iframe se carga recién cuando se toca la pestaña.
-
-  De esta manera la sesión iniciada en Supabase
-  desde Administración de Documentación
-  puede ser utilizada por los demás módulos.
-  */
 
   visor.src =
-  rutas[modulo] +
-  "?v=" +
+  rutas[modulo]
+  +
+  "?v="
+  +
   Date.now();
 
-  window.scrollTo(
-    {
-      top:0,
-      behavior:"smooth"
-    }
-  );
+
+  window.scrollTo({
+
+    top:0,
+
+    behavior:
+    "smooth"
+
+  });
 
 }
 
 
-/*
-Ajusta automáticamente la altura
-según la página cargada.
 
-Si el navegador no permitiera leer
-la altura interna del iframe,
-se mantiene una altura mínima
-de 1150 px.
-*/
+/* =========================================================
+   ADAPTAR CONTENIDO INTERNO DEL IFRAME A COMPUTADORA
 
+   Como todos los archivos están en el mismo GitHub Pages,
+   podemos agregar estilos al módulo cargado.
+========================================================= */
+
+function adaptarContenidoIframe(
+  iframe
+){
+
+  try{
+
+
+    const doc =
+    iframe
+    .contentWindow
+    .document;
+
+
+    if(
+      !doc
+    ){
+      return;
+    }
+
+
+    /* -----------------------------------------------------
+       Evitar duplicar el estilo
+    ----------------------------------------------------- */
+
+    const anterior =
+    doc.getElementById(
+      "gestion-responsive-style"
+    );
+
+
+    if(
+      anterior
+    ){
+      anterior.remove();
+    }
+
+
+
+    const style =
+    doc.createElement(
+      "style"
+    );
+
+
+    style.id =
+    "gestion-responsive-style";
+
+
+    style.innerHTML = `
+
+
+      /* ================================================
+         AJUSTE GLOBAL DEL MÓDULO
+      ================================================= */
+
+      html,
+      body{
+
+        width:100% !important;
+
+        max-width:100% !important;
+
+        min-width:0 !important;
+
+        margin:0 !important;
+
+        overflow-x:hidden !important;
+
+      }
+
+
+      body{
+
+        padding-left:10px !important;
+
+        padding-right:10px !important;
+
+      }
+
+
+
+      /* ================================================
+         CONTENEDORES
+      ================================================= */
+
+      main,
+      .container,
+      .contenedor,
+      .content,
+      .contenido,
+      .page,
+      .wrapper,
+      .panel,
+      .card{
+
+        max-width:100% !important;
+
+      }
+
+
+
+      /* ================================================
+         TABLAS
+      ================================================= */
+
+      table{
+
+        width:100% !important;
+
+        max-width:100% !important;
+
+        table-layout:fixed !important;
+
+        border-collapse:collapse;
+
+      }
+
+
+      th,
+      td{
+
+        padding:
+        9px
+        8px !important;
+
+        font-size:
+        12px !important;
+
+        line-height:
+        1.25 !important;
+
+        vertical-align:
+        middle !important;
+
+        white-space:
+        normal !important;
+
+        overflow-wrap:
+        anywhere !important;
+
+        word-break:
+        normal !important;
+
+      }
+
+
+      th{
+
+        font-size:
+        11px !important;
+
+      }
+
+
+
+      /* ================================================
+         INPUTS Y SELECTORES
+      ================================================= */
+
+      input,
+      select,
+      textarea{
+
+        max-width:
+        100% !important;
+
+        width:
+        100%;
+
+        min-width:
+        0 !important;
+
+        font-size:
+        12px !important;
+
+      }
+
+
+      input,
+      select{
+
+        min-height:
+        38px !important;
+
+        padding:
+        7px
+        9px !important;
+
+      }
+
+
+      textarea{
+
+        padding:
+        7px
+        9px !important;
+
+      }
+
+
+
+      /* ================================================
+         BOTONES
+      ================================================= */
+
+      button{
+
+        max-width:
+        100%;
+
+      }
+
+
+
+      /* ================================================
+         CONTENEDORES DE TABLAS
+      ================================================= */
+
+      .table-container,
+      .table-wrapper,
+      .table-responsive,
+      .tabla-container,
+      .tabla-wrapper{
+
+        width:
+        100% !important;
+
+        max-width:
+        100% !important;
+
+        overflow-x:
+        visible !important;
+
+      }
+
+
+
+      /* ================================================
+         NOTEBOOK 14"
+      ================================================= */
+
+      @media
+      (max-width:1450px){
+
+        body{
+
+          padding-left:
+          5px !important;
+
+          padding-right:
+          5px !important;
+
+        }
+
+
+        th,
+        td{
+
+          padding:
+          7px
+          6px !important;
+
+          font-size:
+          11px !important;
+
+        }
+
+
+        th{
+
+          font-size:
+          10px !important;
+
+        }
+
+
+        input,
+        select,
+        textarea{
+
+          font-size:
+          11px !important;
+
+        }
+
+
+        input,
+        select{
+
+          min-height:
+          34px !important;
+
+          padding:
+          5px
+          7px !important;
+
+        }
+
+      }
+
+
+
+      /* ================================================
+         CELULAR
+      ================================================= */
+
+      @media
+      (max-width:700px){
+
+        body{
+
+          overflow-x:
+          auto !important;
+
+        }
+
+
+        table{
+
+          table-layout:
+          auto !important;
+
+        }
+
+
+        .table-container,
+        .table-wrapper,
+        .table-responsive,
+        .tabla-container,
+        .tabla-wrapper{
+
+          overflow-x:
+          auto !important;
+
+        }
+
+      }
+
+
+    `;
+
+
+    doc.head.appendChild(
+      style
+    );
+
+
+  }
+  catch(error){
+
+    console.log(
+      "No se pudo aplicar el ajuste responsive:",
+      error
+    );
+
+  }
+
+}
+
+
+
+/* =========================================================
+   AJUSTAR ALTURA DEL IFRAME
+========================================================= */
+
+const visor =
 document
 .getElementById(
   "visor"
-)
+);
+
+
+visor
 .addEventListener(
   "load",
   function(){
 
-    try{
 
-      const doc =
-      this.contentWindow.document;
+    const iframe =
+    this;
 
-      const alto =
-      Math.max(
-        doc.body.scrollHeight,
-        doc.documentElement.scrollHeight,
-        1150
-      );
 
-      this.style.height =
-      alto +
-      "px";
+    /* Aplicar ajuste visual */
 
-    }
-    catch(e){
+    adaptarContenidoIframe(
+      iframe
+    );
 
-      this.style.height =
-      "1150px";
 
-    }
+
+    /* Dar un pequeño tiempo
+       para que termine de renderizar
+       tablas y datos
+    */
+
+    setTimeout(
+      function(){
+
+        try{
+
+
+          const doc =
+          iframe
+          .contentWindow
+          .document;
+
+
+          const alto =
+          Math.max(
+
+            doc.body.scrollHeight,
+
+            doc.documentElement.scrollHeight,
+
+            900
+
+          );
+
+
+          iframe.style.height =
+          alto
+          +
+          "px";
+
+
+        }
+        catch(e){
+
+
+          iframe.style.height =
+          "900px";
+
+
+        }
+
+      },
+      300
+    );
+
 
   }
 );
 
+
+
+/* =========================================================
+   REAJUSTAR SI CAMBIA EL TAMAÑO DE LA VENTANA
+========================================================= */
+
+window
+.addEventListener(
+  "resize",
+  function(){
+
+
+    const iframe =
+    document
+    .getElementById(
+      "visor"
+    );
+
+
+    adaptarContenidoIframe(
+      iframe
+    );
+
+
+  }
+);
+
+
 </script>
 
+
 </body>
+
 </html>
