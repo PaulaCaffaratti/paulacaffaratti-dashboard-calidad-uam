@@ -745,57 +745,6 @@ color:var(--azul);
 
 }
 
-.cumplimientoCard{
-  display:flex;
-  flex-direction:column;
-}
-
-.cumplimientoBloque{
-  padding:2px 0 4px;
-}
-
-.cumplimientoTituloFila{
-  display:flex;
-  align-items:flex-end;
-  justify-content:space-between;
-  gap:12px;
-  margin-top:2px;
-}
-
-.cumplimientoTituloFila strong{
-  color:var(--azul);
-  font-size:15px;
-}
-
-.cumplimientoTituloFila span{
-  color:var(--gris);
-  font-size:10px;
-  text-align:right;
-}
-
-.cumplimientoCard .cumplimientoNumero{
-  margin:16px 0 12px;
-  font-size:39px;
-}
-
-.cumplimientoCard .miniGrid{
-  margin-top:18px;
-}
-
-.cumplimientoCard .mini{
-  padding:13px 10px;
-}
-
-.cumplimientoCard .mini strong{
-  font-size:23px;
-}
-
-.cumplimientoSeparador{
-  height:1px;
-  background:#e7edf1;
-  margin:22px 0;
-}
-
 
 /* TABLA */
 
@@ -830,9 +779,15 @@ background:white;
 
 .tabla{
 
-overflow:auto;
+width:100%;
 
-max-height:650px;
+overflow-x:auto;
+
+overflow-y:visible;
+
+max-height:none;
+
+height:auto;
 
 border:
 1px solid #e0e7ec;
@@ -1971,7 +1926,7 @@ Planificado · Presentado · Liberado
 </div>
 
 
-<div class="card cumplimientoCard">
+<div class="card">
 
 <div class="cardHeader">
 
@@ -1980,67 +1935,71 @@ Cumplimiento a la fecha
 </h3>
 
 <span class="tag">
-Real vs. Planificado
+Presentaciones
 </span>
 
 </div>
 
-<div class="cumplimientoBloque">
-  <div class="cumplimientoTituloFila">
-    <strong>Presentaciones</strong>
-    <span>Curva Presentado vs. Curva Planificado</span>
-  </div>
 
-  <div id="porcentajeCumplimientoPresentado" class="cumplimientoNumero">0 %</div>
+<div
+id="porcentajeCumplimiento"
+class="cumplimientoNumero">
 
-  <div class="barra">
-    <div id="barraCumplimientoPresentado" style="width:0%"></div>
-  </div>
+0 %
 
-  <div class="miniGrid">
-    <div class="mini">
-      <small>Planificados</small>
-      <strong id="mPlanPresentado">0</strong>
-    </div>
-    <div class="mini">
-      <small>Presentados</small>
-      <strong id="mPresentado">0</strong>
-    </div>
-    <div class="mini">
-      <small>Diferencia</small>
-      <strong id="mDesvioPresentado">0</strong>
-    </div>
-  </div>
 </div>
 
-<div class="cumplimientoSeparador"></div>
 
-<div class="cumplimientoBloque">
-  <div class="cumplimientoTituloFila">
-    <strong>Liberaciones</strong>
-    <span>Curva Liberado vs. Curva Planificado</span>
-  </div>
+<div class="barra">
 
-  <div id="porcentajeCumplimientoLiberado" class="cumplimientoNumero">0 %</div>
+<div
+id="barraCumplimiento"
+style="width:0%">
+</div>
 
-  <div class="barra">
-    <div id="barraCumplimientoLiberado" style="width:0%"></div>
-  </div>
+</div>
 
-  <div class="miniGrid">
-    <div class="mini">
-      <small>Planificados</small>
-      <strong id="mPlanLiberado">0</strong>
-    </div>
-    <div class="mini">
-      <small>Liberados</small>
-      <strong id="mLiberado">0</strong>
-    </div>
-    <div class="mini">
-      <small>Diferencia</small>
-      <strong id="mDesvioLiberado">0</strong>
-    </div>
-  </div>
+
+<div class="miniGrid">
+
+<div class="mini">
+
+<small>
+Planificados
+</small>
+
+<strong id="mPlan">
+0
+</strong>
+
+</div>
+
+
+<div class="mini">
+
+<small>
+Presentados
+</small>
+
+<strong id="mReal">
+0
+</strong>
+
+</div>
+
+
+<div class="mini">
+
+<small>
+Atrasados
+</small>
+
+<strong id="mAtraso">
+0
+</strong>
+
+</div>
+
 </div>
 
 </div>
@@ -2943,35 +2902,42 @@ setTexto(
 universo
 );
 
+
 setTexto(
 "kPresentados",
 presentados.length
 );
+
 
 setTexto(
 "kPendientes",
 pendientes.length
 );
 
+
 setTexto(
 "kLiberados",
 liberados.length
 );
+
 
 setTexto(
 "kVencidos",
 vencidos.length
 );
 
+
 setTexto(
 "kFuturos",
 futuros.length
 );
 
+
 setTexto(
 "kCliente",
 cliente.length
 );
+
 
 setTexto(
 "kNuestro",
@@ -2979,107 +2945,95 @@ nuestro.length
 );
 
 
-/* =========================================================
-   CUMPLIMIENTO A LA FECHA
-   Se calcula exactamente con la misma lógica de las curvas S:
-   - Presentado acumulado a hoy / Planificado acumulado a hoy
-   - Liberado acumulado a hoy / Planificado acumulado a hoy
-   IMPORTANTE: no se filtra el real por los documentos del plan
-   vencido, porque eso excluía presentaciones adelantadas.
-========================================================= */
 
-const hoy = hoyISO();
 
-function fechaPresentacionCumplimiento(doc){
-  if(!doc._presentado) return null;
+/* Cumplimiento */
 
-  if(doc.fecha_primera_presentacion){
-    return String(doc.fecha_primera_presentacion).slice(0,10);
-  }
+const hoy =
+hoyISO();
 
-  if(doc.fecha_ultima_emision){
-    return String(doc.fecha_ultima_emision).slice(0,10);
-  }
 
-  return hoy;
-}
+const plan =
+documentos.filter(
 
-function fechaLiberacionCumplimiento(doc){
-  if(!doc._liberado) return null;
+d =>
 
-  if(
-    doc.estado_manual === "LIBERADO" &&
-    doc.estado_manual_fecha
-  ){
-    return String(doc.estado_manual_fecha).slice(0,10);
-  }
+d.fecha_prevista_presentacion &&
 
-  if(doc.fecha_ultima_emision){
-    return String(doc.fecha_ultima_emision).slice(0,10);
-  }
+d.fecha_prevista_presentacion <= hoy
 
-  return hoy;
-}
-
-const planHoy = documentos.filter(d =>
-  d.fecha_prevista_presentacion &&
-  String(d.fecha_prevista_presentacion).slice(0,10) <= hoy
-).length;
-
-const presentadosHoy = documentos.filter(d => {
-  const fecha = fechaPresentacionCumplimiento(d);
-  return fecha && fecha <= hoy;
-}).length;
-
-const liberadosHoy = documentos.filter(d => {
-  const fecha = fechaLiberacionCumplimiento(d);
-  return fecha && fecha <= hoy;
-}).length;
-
-const pctPresentado = planHoy
-  ? presentadosHoy / planHoy * 100
-  : 100;
-
-const pctLiberado = planHoy
-  ? liberadosHoy / planHoy * 100
-  : 100;
-
-const desvioPresentado = presentadosHoy - planHoy;
-const desvioLiberado = liberadosHoy - planHoy;
-
-setTexto("mPlanPresentado", planHoy);
-setTexto("mPresentado", presentadosHoy);
-setTexto(
-  "mDesvioPresentado",
-  (desvioPresentado > 0 ? "+" : "") + desvioPresentado
 );
 
-setTexto("mPlanLiberado", planHoy);
-setTexto("mLiberado", liberadosHoy);
-setTexto(
-  "mDesvioLiberado",
-  (desvioLiberado > 0 ? "+" : "") + desvioLiberado
+
+const real =
+plan.filter(
+d => d._presentado
 );
 
-setTexto(
-  "porcentajeCumplimientoPresentado",
-  pctPresentado.toFixed(1).replace(".",",") + " %"
-);
+
+const atraso =
+plan.length -
+real.length;
+
+
+const porcentaje =
+
+plan.length
+
+?
+
+real.length /
+plan.length *
+100
+
+:
+
+100;
+
 
 setTexto(
-  "porcentajeCumplimientoLiberado",
-  pctLiberado.toFixed(1).replace(".",",") + " %"
+"mPlan",
+plan.length
 );
 
-const barraPresentado = document.getElementById("barraCumplimientoPresentado");
-if(barraPresentado){
-  barraPresentado.style.width = Math.min(100,pctPresentado) + "%";
-}
 
-const barraLiberado = document.getElementById("barraCumplimientoLiberado");
-if(barraLiberado){
-  barraLiberado.style.width = Math.min(100,pctLiberado) + "%";
-}
+setTexto(
+"mReal",
+real.length
+);
+
+
+setTexto(
+"mAtraso",
+atraso
+);
+
+
+setTexto(
+
+"porcentajeCumplimiento",
+
+porcentaje
+.toFixed(1)
+.replace(".",",")
++
+" %"
+
+);
+
+
+document
+.getElementById(
+"barraCumplimiento"
+)
+.style.width =
+
+Math.min(
+100,
+porcentaje
+)
++
+"%";
 
 }
 
