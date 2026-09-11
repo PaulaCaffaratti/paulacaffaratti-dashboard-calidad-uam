@@ -661,6 +661,37 @@ height:390px;
 
 /* RESUMEN PLAN */
 
+.cumplimientoBloque{
+  padding:18px 0 22px;
+}
+
+.cumplimientoBloque + .cumplimientoBloque{
+  border-top:1px solid #e5ebef;
+  margin-top:4px;
+  padding-top:24px;
+}
+
+.cumplimientoSubtitulo{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:4px;
+}
+
+.cumplimientoSubtitulo strong{
+  color:var(--azul);
+  font-size:15px;
+}
+
+.cumplimientoSubtitulo span{
+  color:var(--gris);
+  font-size:10px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
+
 .cumplimientoNumero{
 
 font-size:45px;
@@ -670,7 +701,7 @@ font-weight:bold;
 color:var(--azul);
 
 margin:
-25px 0 15px;
+12px 0 15px;
 
 }
 
@@ -1935,68 +1966,90 @@ Cumplimiento a la fecha
 </h3>
 
 <span class="tag">
-Presentaciones
+Planificado vs. real
 </span>
 
 </div>
 
 
-<div
-id="porcentajeCumplimiento"
-class="cumplimientoNumero">
+<div class="cumplimientoBloque">
 
-0 %
-
+<div class="cumplimientoSubtitulo">
+<strong>Presentaciones</strong>
+<span>Presentado / Planificado</span>
 </div>
 
+<div
+id="porcentajePresentaciones"
+class="cumplimientoNumero">
+0 %
+</div>
 
 <div class="barra">
-
 <div
-id="barraCumplimiento"
+id="barraPresentaciones"
 style="width:0%">
 </div>
-
 </div>
-
 
 <div class="miniGrid">
 
 <div class="mini">
+<small>Planificados</small>
+<strong id="mPlanPresentaciones">0</strong>
+</div>
 
-<small>
-Planificados
-</small>
+<div class="mini">
+<small>Presentados</small>
+<strong id="mPresentadosFecha">0</strong>
+</div>
 
-<strong id="mPlan">
-0
-</strong>
+<div class="mini">
+<small>Diferencia</small>
+<strong id="mAtrasoPresentaciones">0</strong>
+</div>
+
+</div>
 
 </div>
 
 
-<div class="mini">
+<div class="cumplimientoBloque">
 
-<small>
-Presentados
-</small>
-
-<strong id="mReal">
-0
-</strong>
-
+<div class="cumplimientoSubtitulo">
+<strong>Liberaciones</strong>
+<span>Liberado / Planificado</span>
 </div>
 
+<div
+id="porcentajeLiberaciones"
+class="cumplimientoNumero">
+0 %
+</div>
+
+<div class="barra">
+<div
+id="barraLiberaciones"
+style="width:0%">
+</div>
+</div>
+
+<div class="miniGrid">
 
 <div class="mini">
+<small>Planificados</small>
+<strong id="mPlanLiberaciones">0</strong>
+</div>
 
-<small>
-Atrasados
-</small>
+<div class="mini">
+<small>Liberados</small>
+<strong id="mLiberadosFecha">0</strong>
+</div>
 
-<strong id="mAtraso">
-0
-</strong>
+<div class="mini">
+<small>Diferencia</small>
+<strong id="mAtrasoLiberaciones">0</strong>
+</div>
 
 </div>
 
@@ -2947,93 +3000,104 @@ nuestro.length
 
 
 
-/* Cumplimiento */
+/* Cumplimiento a la fecha
+   1) Presentados / Planificados
+   2) Liberados / Planificados
+*/
 
 const hoy =
 hoyISO();
 
-
 const plan =
 documentos.filter(
-
-d =>
-
-d.fecha_prevista_presentacion &&
-
-d.fecha_prevista_presentacion <= hoy
-
+  d =>
+    d.fecha_prevista_presentacion &&
+    d.fecha_prevista_presentacion <= hoy
 );
 
+/* El real a la fecha toma TODOS los documentos ya presentados/liberados,
+   aunque hayan sido adelantados respecto de la fecha planificada. */
+const presentadosFecha =
+presentados;
 
-const real =
-plan.filter(
-d => d._presentado
-);
+const liberadosFecha =
+liberados;
 
+const atrasoPresentaciones =
+presentadosFecha.length - plan.length;
 
-const atraso =
-plan.length -
-real.length;
+const atrasoLiberaciones =
+liberadosFecha.length - plan.length;
 
-
-const porcentaje =
-
+const porcentajePresentaciones =
 plan.length
+  ? presentadosFecha.length / plan.length * 100
+  : 100;
 
-?
-
-real.length /
-plan.length *
-100
-
-:
-
-100;
-
-
-setTexto(
-"mPlan",
+const porcentajeLiberaciones =
 plan.length
-);
-
-
-setTexto(
-"mReal",
-real.length
-);
-
+  ? liberadosFecha.length / plan.length * 100
+  : 100;
 
 setTexto(
-"mAtraso",
-atraso
+  "mPlanPresentaciones",
+  plan.length
 );
-
 
 setTexto(
-
-"porcentajeCumplimiento",
-
-porcentaje
-.toFixed(1)
-.replace(".",",")
-+
-" %"
-
+  "mPresentadosFecha",
+  presentadosFecha.length
 );
 
+setTexto(
+  "mAtrasoPresentaciones",
+  (atrasoPresentaciones > 0 ? "+" : "") + atrasoPresentaciones
+);
 
-document
-.getElementById(
-"barraCumplimiento"
-)
-.style.width =
+setTexto(
+  "porcentajePresentaciones",
+  porcentajePresentaciones
+    .toFixed(1)
+    .replace(".",",") + " %"
+);
 
-Math.min(
-100,
-porcentaje
-)
-+
-"%";
+const barraPresentaciones =
+document.getElementById("barraPresentaciones");
+
+if(barraPresentaciones){
+  barraPresentaciones.style.width =
+    Math.min(100, porcentajePresentaciones) + "%";
+}
+
+setTexto(
+  "mPlanLiberaciones",
+  plan.length
+);
+
+setTexto(
+  "mLiberadosFecha",
+  liberadosFecha.length
+);
+
+setTexto(
+  "mAtrasoLiberaciones",
+  (atrasoLiberaciones > 0 ? "+" : "") + atrasoLiberaciones
+);
+
+setTexto(
+  "porcentajeLiberaciones",
+  porcentajeLiberaciones
+    .toFixed(1)
+    .replace(".",",") + " %"
+);
+
+const barraLiberaciones =
+document.getElementById("barraLiberaciones");
+
+if(barraLiberaciones){
+  barraLiberaciones.style.width =
+    Math.min(100, porcentajeLiberaciones) + "%";
+}
 
 }
 
