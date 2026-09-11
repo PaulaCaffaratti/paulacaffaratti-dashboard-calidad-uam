@@ -999,6 +999,9 @@ async function procesarArchivo(){
     {};
 
 
+    window.matrizDuplicadosDetectados = 0;
+
+
     filasMatriz =
     leerMatriz(
       workbook.Sheets[
@@ -1062,14 +1065,41 @@ async function procesarArchivo(){
     );
 
 
-    mostrarEstado(
-      "✅ Excel leído correctamente. " +
-      filasMatriz.length +
-      " elementos encontrados y " +
-      columnasRegistrosDetectadas.length +
-      " columnas de registros detectadas.",
-      "ok"
+    const duplicados =
+    Number(
+      window.matrizDuplicadosDetectados || 0
     );
+
+
+    if(
+      duplicados > 0
+    ){
+
+      mostrarEstado(
+        "⚠️ Excel leído correctamente. " +
+        filasMatriz.length +
+        " elementos únicos encontrados. " +
+        duplicados +
+        " filas duplicadas fueron ignoradas automáticamente. " +
+        columnasRegistrosDetectadas.length +
+        " columnas de registros detectadas.",
+        "ok"
+      );
+
+    }
+
+    else{
+
+      mostrarEstado(
+        "✅ Excel leído correctamente. " +
+        filasMatriz.length +
+        " elementos encontrados. No se detectaron filas duplicadas. " +
+        columnasRegistrosDetectadas.length +
+        " columnas de registros detectadas.",
+        "ok"
+      );
+
+    }
 
   }
 
@@ -1608,12 +1638,6 @@ function leerMatriz(
       }
 
 
-      /*
-      IMPORTANTE:
-      OBSERVACIONES y otras columnas auxiliares
-      NO se cuentan como registros.
-      */
-
       if(
         esColumnaAuxiliar(
           nombre
@@ -1641,8 +1665,10 @@ function leerMatriz(
   );
 
 
-  const resultado =
-  [];
+  const resultado = [];
+  const clavesVistas = new Set();
+
+  let duplicadas = 0;
 
 
   for(
@@ -1700,13 +1726,6 @@ function leerMatriz(
     }
 
 
-    /*
-    Preferimos calcular Sistema/Subsistema
-    desde Status Index porque es la referencia
-    más estable para el dashboard.
-    */
-
-
     const infoStatus =
     obtenerSistemaDesdeStatus(
       statusIndex,
@@ -1728,12 +1747,6 @@ function leerMatriz(
 
     let descripcionSubsistema =
     infoStatus.descripcionSubsistema;
-
-
-    /*
-    Si no pudimos obtenerlo desde Status Index,
-    usamos las columnas que ya tenga el Excel.
-    */
 
 
     if(
@@ -1796,8 +1809,7 @@ function leerMatriz(
     }
 
 
-    const registros =
-    {};
+    const registros = {};
 
 
     columnasRegistros.forEach(
@@ -1816,53 +1828,113 @@ function leerMatriz(
     );
 
 
-    resultado.push(
-      {
+    const filaNormalizada = {
 
+      especialidad:
+      normalizarEspecialidad(
+        especialidadOriginal
+      ),
+
+      tag:
+      tag || null,
+
+      descripcion:
+      descripcion || null,
+
+      pid_listado:
+      idxPid >= 0
+      ?
+      texto(
+        fila[
+          idxPid
+        ]
+      ) || null
+      :
+      null,
+
+      status_index:
+      statusIndex || null,
+
+      sistema:
+      sistema || null,
+
+      descripcion_sistema:
+      descripcionSistema || null,
+
+      subsistema:
+      subsistema || null,
+
+      descripcion_subsistema:
+      descripcionSubsistema || null,
+
+      registros:
+      registros
+
+    };
+
+
+    const claveFila =
+    JSON.stringify(
+      {
         especialidad:
-        normalizarEspecialidad(
-          especialidadOriginal
-        ),
+        filaNormalizada.especialidad,
 
         tag:
-        tag || null,
+        filaNormalizada.tag,
 
         descripcion:
-        descripcion || null,
+        filaNormalizada.descripcion,
 
         pid_listado:
-        idxPid >= 0
-        ?
-        texto(
-          fila[
-            idxPid
-          ]
-        ) || null
-        :
-        null,
+        filaNormalizada.pid_listado,
 
         status_index:
-        statusIndex || null,
+        filaNormalizada.status_index,
 
         sistema:
-        sistema || null,
+        filaNormalizada.sistema,
 
         descripcion_sistema:
-        descripcionSistema || null,
+        filaNormalizada.descripcion_sistema,
 
         subsistema:
-        subsistema || null,
+        filaNormalizada.subsistema,
 
         descripcion_subsistema:
-        descripcionSubsistema || null,
+        filaNormalizada.descripcion_subsistema,
 
         registros:
-        registros
-
+        filaNormalizada.registros
       }
     );
 
+
+    if(
+      clavesVistas.has(
+        claveFila
+      )
+    ){
+
+      duplicadas++;
+      continue;
+
+    }
+
+
+    clavesVistas.add(
+      claveFila
+    );
+
+
+    resultado.push(
+      filaNormalizada
+    );
+
   }
+
+
+  window.matrizDuplicadosDetectados =
+  duplicadas;
 
 
   return resultado;
