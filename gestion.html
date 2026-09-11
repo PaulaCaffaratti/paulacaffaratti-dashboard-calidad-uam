@@ -3,823 +3,454 @@
 <head>
 
 <meta charset="UTF-8">
-
-<meta
-name="viewport"
-content="width=device-width, initial-scale=1.0"
->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Gestión de Calidad UAM</title>
 
-
 <style>
-
-/* =========================================================
-   CONFIGURACIÓN GENERAL
-========================================================= */
 
 *{
   box-sizing:border-box;
 }
 
-html,
-body{
+:root{
+  --azul:#0c356a;
+  --celeste:#60c5e8;
+  --gris:#687787;
+  --fondo:#f4f7f9;
+  --blanco:#ffffff;
+  --borde:#dfe7ec;
+}
+
+html{
   width:100%;
-  margin:0;
-  padding:0;
   overflow-x:hidden;
 }
 
-
-:root{
-
-  --azul:#0c356a;
-
-  --celeste:#60c5e8;
-
-  --gris:#687787;
-
-  --fondo:#f4f7f9;
-
-  --blanco:#ffffff;
-
-  --borde:#dfe7ec;
-
-}
-
-
 body{
+  width:100%;
+  margin:0;
+  padding:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:var(--fondo);
+  color:#1d2a36;
 
-  font-family:
-  Arial,
-  Helvetica,
-  sans-serif;
-
-  background:
-  var(--fondo);
-
-  color:
-  #1d2a36;
-
+  /* ÚNICO SCROLL VERTICAL */
+  overflow-x:hidden;
+  overflow-y:auto;
 }
 
-
-/* =========================================================
+/* =====================================================
    HEADER
-========================================================= */
+===================================================== */
 
 header{
-
   width:100%;
-
-  background:
-  var(--blanco);
-
-  border-bottom:
-  1px solid var(--borde);
-
+  background:var(--blanco);
+  border-bottom:1px solid var(--borde);
 }
-
 
 .topbar{
-
   width:100%;
-
-  max-width:none;
-
   margin:0;
-
-  padding:
-  14px
-  22px
-  12px;
-
+  padding:14px 22px 12px;
   display:flex;
-
   align-items:center;
-
-  justify-content:
-  space-between;
-
-  gap:18px;
-
+  justify-content:space-between;
+  gap:20px;
 }
-
 
 .marca{
-
   display:flex;
-
   gap:12px;
-
   align-items:center;
-
 }
-
 
 .barra{
-
   width:8px;
-
   height:54px;
-
   border-radius:8px;
-
-  background:
-  var(--celeste);
-
+  background:var(--celeste);
 }
-
 
 .marca h1{
-
   margin:0;
-
-  color:
-  var(--azul);
-
+  color:var(--azul);
   font-size:23px;
-
   font-weight:600;
-
-  letter-spacing:
-  -.3px;
-
+  letter-spacing:-.3px;
 }
-
 
 .marca p{
-
-  margin:
-  4px
-  0
-  0;
-
-  color:
-  var(--gris);
-
+  margin:4px 0 0;
+  color:var(--gris);
   font-size:12px;
-
 }
 
-
-/* =========================================================
+/* =====================================================
    MENÚ
-========================================================= */
+===================================================== */
 
 .nav{
-
   width:100%;
-
-  background:
-  var(--azul);
-
+  background:var(--azul);
 }
-
 
 .tabs{
-
   width:100%;
-
-  max-width:none;
-
   margin:0;
-
-  padding:
-  0
-  10px;
-
+  padding:0 10px;
   display:flex;
-
-  align-items:center;
-
   overflow-x:auto;
-
   overflow-y:hidden;
-
-  scrollbar-width:thin;
-
 }
-
 
 .tab{
-
   appearance:none;
-
   border:0;
-
-  background:
-  transparent;
-
+  background:transparent;
   color:white;
-
-  padding:
-  14px
-  20px;
-
+  padding:14px 20px;
   font-size:12px;
-
   font-weight:600;
-
   cursor:pointer;
-
-  border-bottom:
-  4px solid transparent;
-
+  border-bottom:4px solid transparent;
   white-space:nowrap;
-
-  transition:
-  background .15s ease;
-
 }
-
 
 .tab:hover{
-
-  background:
-  rgba(255,255,255,.07);
-
+  background:rgba(255,255,255,.07);
 }
-
 
 .tab.activo{
-
-  border-bottom-color:
-  var(--celeste);
-
-  background:
-  rgba(255,255,255,.05);
-
+  border-bottom-color:var(--celeste);
+  background:rgba(255,255,255,.05);
 }
 
-
-/* =========================================================
-   ÁREA PRINCIPAL
-
-   IMPORTANTE:
-   Ya no tiene max-width de 1600px.
-   Aprovecha todo el monitor.
-========================================================= */
+/* =====================================================
+   CONTENIDO
+===================================================== */
 
 main{
-
   width:100%;
-
-  max-width:none;
-
   margin:0;
-
-  padding:
-  12px;
-
+  padding:12px;
 }
-
-
-/* =========================================================
-   AVISO SUPERIOR
-========================================================= */
 
 .aviso{
-
   width:100%;
-
-  background:
-  #eef7fb;
-
-  border-left:
-  4px solid var(--celeste);
-
-  border-radius:
-  8px;
-
-  padding:
-  9px
-  12px;
-
-  margin-bottom:
-  10px;
-
-  color:
-  #31566e;
-
-  font-size:
-  11.5px;
-
-  line-height:
-  1.4;
-
+  background:#eef7fb;
+  border-left:4px solid var(--celeste);
+  border-radius:8px;
+  padding:9px 12px;
+  margin-bottom:10px;
+  color:#31566e;
+  font-size:11.5px;
+  line-height:1.4;
 }
-
-
-/* =========================================================
-   CONTENEDOR DEL MÓDULO
-========================================================= */
 
 .contenedor{
-
   width:100%;
-
   max-width:100%;
-
   background:white;
+  border:1px solid var(--borde);
+  border-radius:10px;
 
-  border:
-  1px solid var(--borde);
+  /*
+  IMPORTANTE:
+  No tiene scroll vertical propio.
+  */
+  overflow:visible;
 
-  border-radius:
-  10px;
-
-  overflow:hidden;
-
-  min-height:
-  900px;
-
-  box-shadow:
-  0
-  2px
-  9px
-  rgba(20,50,80,.04);
-
+  box-shadow:0 2px 9px rgba(20,50,80,.04);
 }
 
-
-/* =========================================================
+/* =====================================================
    IFRAME
-========================================================= */
+===================================================== */
 
 iframe{
-
   display:block;
-
   width:100%;
-
   max-width:100%;
-
-  min-height:
-  900px;
 
   border:0;
 
   margin:0;
-
   padding:0;
 
   background:white;
 
+  /*
+  El iframe NO hace scroll.
+  Su altura se adapta con JavaScript.
+  */
+  overflow:hidden;
+
+  min-height:900px;
 }
 
+/* =====================================================
+   NOTEBOOK
+===================================================== */
 
-/* =========================================================
-   NOTEBOOK / ESCRITORIO MEDIANO
-========================================================= */
-
-@media
-(max-width:1450px){
+@media(max-width:1450px){
 
   .topbar{
-
-    padding:
-    11px
-    14px;
-
+    padding:11px 14px;
   }
-
 
   .marca h1{
-
-    font-size:
-    21px;
-
+    font-size:21px;
   }
-
 
   .barra{
-
-    height:
-    48px;
-
+    height:48px;
   }
-
 
   .tab{
-
-    padding:
-    12px
-    15px;
-
-    font-size:
-    11px;
-
+    padding:12px 15px;
+    font-size:11px;
   }
-
 
   main{
-
-    padding:
-    8px;
-
-  }
-
-
-  .aviso{
-
-    margin-bottom:
-    8px;
-
+    padding:8px;
   }
 
 }
 
-
-/* =========================================================
+/* =====================================================
    CELULAR
-========================================================= */
+===================================================== */
 
-@media
-(max-width:700px){
-
-  body{
-
-    overflow-x:hidden;
-
-  }
-
+@media(max-width:700px){
 
   .topbar{
-
-    padding:
-    12px;
-
+    padding:12px;
   }
-
 
   .marca h1{
-
-    font-size:
-    19px;
-
+    font-size:19px;
   }
-
 
   .marca p{
-
-    font-size:
-    11px;
-
+    font-size:11px;
   }
-
 
   .barra{
-
-    width:
-    6px;
-
-    height:
-    44px;
-
+    width:6px;
+    height:44px;
   }
-
 
   .tabs{
-
     padding:0;
-
   }
-
 
   .tab{
-
-    padding:
-    12px
-    14px;
-
-    font-size:
-    11px;
-
+    padding:12px 14px;
+    font-size:11px;
   }
-
 
   main{
-
-    padding:
-    5px;
-
+    padding:5px;
   }
 
-
   .contenedor{
-
-    border-radius:
-    7px;
-
+    border-radius:7px;
   }
 
 }
 
 </style>
-
 </head>
-
 
 <body>
 
-
 <header>
-
 
   <div class="topbar">
 
-
     <div class="marca">
-
 
       <div class="barra"></div>
 
-
       <div>
-
-        <h1>
-          DUPLICAR NORTE UAM
-        </h1>
-
-        <p>
-          Gestión de Inputs · Calidad
-        </p>
-
+        <h1>DUPLICAR NORTE UAM</h1>
+        <p>Gestión de Inputs · Calidad</p>
       </div>
-
 
     </div>
 
-
   </div>
-
-
 
   <div class="nav">
 
-
     <div class="tabs">
-
 
       <button
         id="tabDocumentacion"
         class="tab activo"
-        onclick="abrirModulo('documentacion',this)"
-      >
+        onclick="abrirModulo('documentacion',this)">
         📄 ADMINISTRACIÓN DE DOCUMENTACIÓN
       </button>
-
 
       <button
         id="tabBlister"
         class="tab"
-        onclick="abrirModulo('blister',this)"
-      >
+        onclick="abrirModulo('blister',this)">
         ⚠️ OBSERVACIONES BLISTER
       </button>
-
 
       <button
         id="tabCapacitaciones"
         class="tab"
-        onclick="abrirModulo('capacitaciones',this)"
-      >
+        onclick="abrirModulo('capacitaciones',this)">
         🎓 CAPACITACIONES
       </button>
-
 
       <button
         id="tabMatriz"
         class="tab"
-        onclick="abrirModulo('matriz',this)"
-      >
+        onclick="abrirModulo('matriz',this)">
         📊 MATRIZ
       </button>
-
 
       <button
         id="tabPiping"
         class="tab"
-        onclick="abrirModulo('piping',this)"
-      >
+        onclick="abrirModulo('piping',this)">
         🔧 PIPING
       </button>
-
 
       <button
         id="tabMaestro"
         class="tab"
-        onclick="abrirModulo('maestro',this)"
-      >
+        onclick="abrirModulo('maestro',this)">
         📋 LISTADO BASE
       </button>
 
-
     </div>
 
-
   </div>
-
 
 </header>
 
-
-
 <main>
 
-
   <div class="aviso">
-
     Ingresá una sola vez desde Administración de Documentación.
     Después podés cambiar de pestaña para cargar Blister,
     Capacitaciones, Matriz, Piping o modificar el Listado Base.
-
   </div>
 
-
-
   <div class="contenedor">
-
 
     <iframe
       id="visor"
       src="admin.html"
       title="Gestión de Calidad"
-    >
+      scrolling="no">
     </iframe>
-
 
   </div>
 
-
 </main>
-
-
 
 <script>
 
-
-/* =========================================================
+/* =====================================================
    RUTAS
-========================================================= */
+===================================================== */
 
 const rutas = {
 
-  documentacion:
-  "admin.html",
+  documentacion:"admin.html",
 
-  blister:
-  "blister-admin.html",
+  blister:"blister-admin.html",
 
-  capacitaciones:
-  "capacitaciones-admin.html",
+  capacitaciones:"capacitaciones-admin.html",
 
-  matriz:
-  "matriz-admin.html",
+  matriz:"matriz-admin.html",
 
-  piping:
-  "piping-admin.html",
+  piping:"piping-admin.html",
 
-  maestro:
-  "maestro.html"
+  maestro:"maestro.html"
 
 };
 
+let moduloActual = "documentacion";
 
 
-let moduloActual =
-"documentacion";
+/* =====================================================
+   CAMBIAR PESTAÑA
+===================================================== */
 
+function abrirModulo(modulo,boton){
 
-
-/* =========================================================
-   CAMBIO DE PESTAÑA
-========================================================= */
-
-function abrirModulo(
-  modulo,
-  boton
-){
-
-  if(
-    !rutas[modulo]
-  ){
+  if(!rutas[modulo]){
     return;
   }
 
-
   document
-  .querySelectorAll(
-    ".tab"
-  )
-  .forEach(
-    x =>
-    x.classList.remove(
-      "activo"
-    )
-  );
+    .querySelectorAll(".tab")
+    .forEach(x=>{
+      x.classList.remove("activo");
+    });
 
+  boton.classList.add("activo");
 
-  boton
-  .classList
-  .add(
-    "activo"
-  );
-
-
-  moduloActual =
-  modulo;
-
+  moduloActual = modulo;
 
   const visor =
-  document
-  .getElementById(
-    "visor"
-  );
-
+    document.getElementById("visor");
 
   visor.src =
-  rutas[modulo]
-  +
-  "?v="
-  +
-  Date.now();
-
+    rutas[modulo] +
+    "?v=" +
+    Date.now();
 
   window.scrollTo({
-
     top:0,
-
-    behavior:
-    "smooth"
-
+    behavior:"smooth"
   });
 
 }
 
 
+/* =====================================================
+   ELIMINAR SCROLL VERTICAL INTERNO
+===================================================== */
 
-/* =========================================================
-   ADAPTAR CONTENIDO INTERNO DEL IFRAME A COMPUTADORA
-
-   Como todos los archivos están en el mismo GitHub Pages,
-   podemos agregar estilos al módulo cargado.
-========================================================= */
-
-function adaptarContenidoIframe(
-  iframe
-){
+function prepararIframe(iframe){
 
   try{
 
-
     const doc =
-    iframe
-    .contentWindow
-    .document;
+      iframe.contentWindow.document;
 
-
-    if(
-      !doc
-    ){
+    if(!doc){
       return;
     }
 
+    let estilo =
+      doc.getElementById(
+        "gestion-un-scroll"
+      );
 
-    /* -----------------------------------------------------
-       Evitar duplicar el estilo
-    ----------------------------------------------------- */
-
-    const anterior =
-    doc.getElementById(
-      "gestion-responsive-style"
-    );
-
-
-    if(
-      anterior
-    ){
-      anterior.remove();
+    if(estilo){
+      estilo.remove();
     }
 
+    estilo =
+      doc.createElement("style");
 
+    estilo.id =
+      "gestion-un-scroll";
 
-    const style =
-    doc.createElement(
-      "style"
-    );
+    estilo.innerHTML = `
 
-
-    style.id =
-    "gestion-responsive-style";
-
-
-    style.innerHTML = `
-
-
-      /* ================================================
-         AJUSTE GLOBAL DEL MÓDULO
+      /* =================================================
+         SOLO SCROLL EN GESTION.HTML
       ================================================= */
 
       html,
@@ -829,46 +460,74 @@ function adaptarContenidoIframe(
 
         max-width:100% !important;
 
-        min-width:0 !important;
+        height:auto !important;
 
-        margin:0 !important;
+        min-height:0 !important;
+
+        overflow-y:visible !important;
 
         overflow-x:hidden !important;
 
-      }
-
-
-      body{
-
-        padding-left:10px !important;
-
-        padding-right:10px !important;
+        margin:0 !important;
 
       }
 
 
-
-      /* ================================================
-         CONTENEDORES
+      /* =================================================
+         QUITAR ALTURAS FIJAS Y SCROLLS INTERNOS
       ================================================= */
 
       main,
+      section,
       .container,
       .contenedor,
       .content,
       .contenido,
-      .page,
       .wrapper,
+      .page,
       .panel,
       .card{
 
-        max-width:100% !important;
+        max-height:none !important;
+
+        height:auto;
+
+        overflow-y:visible !important;
 
       }
 
 
+      /* =================================================
+         CONTENEDORES DE TABLAS
 
-      /* ================================================
+         NO scroll vertical.
+         Horizontal solamente si realmente fuera necesario.
+      ================================================= */
+
+      .table-container,
+      .table-wrapper,
+      .table-responsive,
+      .tabla-container,
+      .tabla-wrapper,
+      .tabla-scroll,
+      .table-scroll{
+
+        width:100% !important;
+
+        max-width:100% !important;
+
+        height:auto !important;
+
+        max-height:none !important;
+
+        overflow-y:visible !important;
+
+        overflow-x:auto !important;
+
+      }
+
+
+      /* =================================================
          TABLAS
       ================================================= */
 
@@ -888,59 +547,43 @@ function adaptarContenidoIframe(
       th,
       td{
 
-        padding:
-        9px
-        8px !important;
+        padding:9px 8px !important;
 
-        font-size:
-        12px !important;
+        font-size:12px !important;
 
-        line-height:
-        1.25 !important;
+        line-height:1.25 !important;
 
-        vertical-align:
-        middle !important;
+        vertical-align:middle !important;
 
-        white-space:
-        normal !important;
+        white-space:normal !important;
 
-        overflow-wrap:
-        anywhere !important;
-
-        word-break:
-        normal !important;
+        overflow-wrap:anywhere !important;
 
       }
 
 
       th{
 
-        font-size:
-        11px !important;
+        font-size:11px !important;
 
       }
 
 
-
-      /* ================================================
-         INPUTS Y SELECTORES
+      /* =================================================
+         INPUTS
       ================================================= */
 
       input,
       select,
       textarea{
 
-        max-width:
-        100% !important;
+        width:100%;
 
-        width:
-        100%;
+        max-width:100% !important;
 
-        min-width:
-        0 !important;
+        min-width:0 !important;
 
-        font-size:
-        12px !important;
+        font-size:12px !important;
 
       }
 
@@ -948,177 +591,67 @@ function adaptarContenidoIframe(
       input,
       select{
 
-        min-height:
-        38px !important;
+        min-height:38px !important;
 
-        padding:
-        7px
-        9px !important;
+        padding:7px 9px !important;
 
       }
 
 
       textarea{
 
-        padding:
-        7px
-        9px !important;
+        padding:7px 9px !important;
 
       }
 
 
-
-      /* ================================================
-         BOTONES
+      /* =================================================
+         NOTEBOOK
       ================================================= */
 
-      button{
-
-        max-width:
-        100%;
-
-      }
-
-
-
-      /* ================================================
-         CONTENEDORES DE TABLAS
-      ================================================= */
-
-      .table-container,
-      .table-wrapper,
-      .table-responsive,
-      .tabla-container,
-      .tabla-wrapper{
-
-        width:
-        100% !important;
-
-        max-width:
-        100% !important;
-
-        overflow-x:
-        visible !important;
-
-      }
-
-
-
-      /* ================================================
-         NOTEBOOK 14"
-      ================================================= */
-
-      @media
-      (max-width:1450px){
-
-        body{
-
-          padding-left:
-          5px !important;
-
-          padding-right:
-          5px !important;
-
-        }
-
+      @media(max-width:1450px){
 
         th,
         td{
 
-          padding:
-          7px
-          6px !important;
+          padding:7px 6px !important;
 
-          font-size:
-          11px !important;
+          font-size:11px !important;
 
         }
-
 
         th{
 
-          font-size:
-          10px !important;
+          font-size:10px !important;
 
         }
-
 
         input,
         select,
         textarea{
 
-          font-size:
-          11px !important;
+          font-size:11px !important;
 
         }
-
 
         input,
         select{
 
-          min-height:
-          34px !important;
-
-          padding:
-          5px
-          7px !important;
+          min-height:34px !important;
 
         }
 
       }
-
-
-
-      /* ================================================
-         CELULAR
-      ================================================= */
-
-      @media
-      (max-width:700px){
-
-        body{
-
-          overflow-x:
-          auto !important;
-
-        }
-
-
-        table{
-
-          table-layout:
-          auto !important;
-
-        }
-
-
-        .table-container,
-        .table-wrapper,
-        .table-responsive,
-        .tabla-container,
-        .tabla-wrapper{
-
-          overflow-x:
-          auto !important;
-
-        }
-
-      }
-
 
     `;
 
-
-    doc.head.appendChild(
-      style
-    );
-
+    doc.head.appendChild(estilo);
 
   }
   catch(error){
 
     console.log(
-      "No se pudo aplicar el ajuste responsive:",
+      "No se pudo preparar iframe",
       error
     );
 
@@ -1127,120 +660,166 @@ function adaptarContenidoIframe(
 }
 
 
+/* =====================================================
+   AJUSTAR ALTURA
+===================================================== */
 
-/* =========================================================
-   AJUSTAR ALTURA DEL IFRAME
-========================================================= */
+function ajustarAlturaIframe(iframe){
+
+  try{
+
+    const doc =
+      iframe.contentWindow.document;
+
+    const body =
+      doc.body;
+
+    const html =
+      doc.documentElement;
+
+    const alto =
+      Math.max(
+
+        body.scrollHeight,
+
+        body.offsetHeight,
+
+        html.scrollHeight,
+
+        html.offsetHeight,
+
+        900
+
+      );
+
+    iframe.style.height =
+      alto + "px";
+
+  }
+  catch(error){
+
+    iframe.style.height =
+      "900px";
+
+  }
+
+}
+
+
+/* =====================================================
+   IFRAME
+===================================================== */
 
 const visor =
-document
-.getElementById(
-  "visor"
-);
+  document.getElementById("visor");
 
 
-visor
-.addEventListener(
+visor.addEventListener(
   "load",
   function(){
 
+    const iframe = this;
 
-    const iframe =
-    this;
+    prepararIframe(iframe);
 
+    /* Primer ajuste */
 
-    /* Aplicar ajuste visual */
-
-    adaptarContenidoIframe(
-      iframe
-    );
-
+    setTimeout(()=>{
+      ajustarAlturaIframe(iframe);
+    },100);
 
 
-    /* Dar un pequeño tiempo
-       para que termine de renderizar
-       tablas y datos
+    /* Segundo ajuste cuando terminaron de aparecer datos */
+
+    setTimeout(()=>{
+      ajustarAlturaIframe(iframe);
+    },500);
+
+
+    setTimeout(()=>{
+      ajustarAlturaIframe(iframe);
+    },1200);
+
+
+    /*
+    Observa modificaciones dentro de admin.html:
+    filtros, búsqueda, filas, desplegables, etc.
     */
 
-    setTimeout(
-      function(){
+    try{
 
-        try{
+      const doc =
+        iframe.contentWindow.document;
 
+      const observer =
+        new MutationObserver(()=>{
 
-          const doc =
-          iframe
-          .contentWindow
-          .document;
-
-
-          const alto =
-          Math.max(
-
-            doc.body.scrollHeight,
-
-            doc.documentElement.scrollHeight,
-
-            900
-
+          ajustarAlturaIframe(
+            iframe
           );
 
+      });
 
-          iframe.style.height =
-          alto
-          +
-          "px";
-
-
+      observer.observe(
+        doc.body,
+        {
+          childList:true,
+          subtree:true,
+          attributes:true
         }
-        catch(e){
+      );
 
 
-          iframe.style.height =
-          "900px";
+      /*
+      También observa cambios de tamaño.
+      */
 
+      if(
+        window.ResizeObserver
+      ){
 
-        }
+        const resizeObserver =
+          new ResizeObserver(()=>{
 
-      },
-      300
-    );
+            ajustarAlturaIframe(
+              iframe
+            );
 
+          });
+
+        resizeObserver.observe(
+          doc.body
+        );
+
+      }
+
+    }
+    catch(error){
+
+      console.log(error);
+
+    }
 
   }
 );
 
 
+/* =====================================================
+   REDIMENSIONAR VENTANA
+===================================================== */
 
-/* =========================================================
-   REAJUSTAR SI CAMBIA EL TAMAÑO DE LA VENTANA
-========================================================= */
-
-window
-.addEventListener(
+window.addEventListener(
   "resize",
   function(){
 
-
-    const iframe =
-    document
-    .getElementById(
-      "visor"
+    ajustarAlturaIframe(
+      document.getElementById("visor")
     );
-
-
-    adaptarContenidoIframe(
-      iframe
-    );
-
 
   }
 );
 
-
 </script>
 
-
 </body>
-
 </html>
