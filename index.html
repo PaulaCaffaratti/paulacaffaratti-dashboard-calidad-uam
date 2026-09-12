@@ -5562,6 +5562,18 @@ async function pdfCapturarBlister(){
 
     const root = doc.body;
 
+    // PDF: forzar fondo blanco en Observaciones Blister.
+    // html2canvas respeta el fondo real del iframe; por eso guardamos
+    // los estilos actuales, los ponemos en blanco sólo durante la captura
+    // y luego los restauramos.
+    const htmlPrevBackground = doc.documentElement.style.background;
+    const bodyPrevBackground = doc.body.style.background;
+    const bodyPrevBackgroundColor = doc.body.style.backgroundColor;
+
+    doc.documentElement.style.background = "#ffffff";
+    doc.body.style.background = "#ffffff";
+    doc.body.style.backgroundColor = "#ffffff";
+
     // En el PDF de Blister no incluir "Detalle de observaciones".
     const blisterOcultosTemporales = [];
     [...root.querySelectorAll("section, .card, details, div")].forEach(el => {
@@ -5641,6 +5653,10 @@ async function pdfCapturarBlister(){
       x.el.style.overflow = x.overflow;
     });
 
+    doc.documentElement.style.background = htmlPrevBackground;
+    doc.body.style.background = bodyPrevBackground;
+    doc.body.style.backgroundColor = bodyPrevBackgroundColor;
+
     return canvas;
   }catch(e){
     console.warn("No se pudo capturar Observaciones Blister:",e);
@@ -5684,6 +5700,48 @@ function pdfAgregarTituloSeccion(pdf,titulo,numeroSeccion){
   pdf.line(12,31,70,31);
 }
 
+function pdfFragmentoTieneContenido(canvas){
+  // Detecta si el fragmento tiene contenido visual real.
+  // Ignora fondos blancos o grises muy claros para evitar páginas vacías.
+  const ctx = canvas.getContext("2d", {willReadFrequently:true});
+  if(!ctx) return true;
+
+  const paso = 6;
+  const data = ctx.getImageData(0,0,canvas.width,canvas.height).data;
+
+  let muestras = 0;
+  let contenido = 0;
+
+  for(let y=0; y<canvas.height; y+=paso){
+    for(let x=0; x<canvas.width; x+=paso){
+      const i = (y * canvas.width + x) * 4;
+      const r = data[i];
+      const g = data[i+1];
+      const b = data[i+2];
+      const a = data[i+3];
+
+      if(a < 20) continue;
+
+      muestras++;
+
+      // Consideramos contenido los textos, líneas, gráficos y colores.
+      // Los fondos #fff y #f4f7f9 quedan fuera.
+      const oscuro = Math.min(r,g,b) < 235;
+      const colorido = (Math.max(r,g,b) - Math.min(r,g,b)) > 24 && Math.min(r,g,b) < 248;
+
+      if(oscuro || colorido){
+        contenido++;
+      }
+    }
+  }
+
+  if(muestras === 0) return false;
+
+  // Umbral muy bajo para no eliminar páginas con poco texto,
+  // pero suficiente para descartar páginas uniformes/vacías.
+  return (contenido / muestras) > 0.00025;
+}
+
 function pdfPrepararFragmentos(canvas){
   const pageWidth = 210;
   const pageHeight = 297;
@@ -5701,6 +5759,7 @@ function pdfPrepararFragmentos(canvas){
 
   while(yPx < canvas.height){
     const sliceHeight = Math.min(altoPaginaPx, canvas.height-yPx);
+
     const parte = document.createElement("canvas");
     parte.width = canvas.width;
     parte.height = sliceHeight;
@@ -5708,16 +5767,20 @@ function pdfPrepararFragmentos(canvas){
     const ctx = parte.getContext("2d");
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0,0,parte.width,parte.height);
+
     ctx.drawImage(
       canvas,
       0,yPx,canvas.width,sliceHeight,
       0,0,canvas.width,sliceHeight
     );
 
-    partes.push({
-      data: parte.toDataURL("image/jpeg",0.93),
-      heightPdf: sliceHeight * escalaPdf
-    });
+    // Sólo agregar al PDF si esta porción tiene contenido real.
+    if(pdfFragmentoTieneContenido(parte)){
+      partes.push({
+        data: parte.toDataURL("image/jpeg",0.93),
+        heightPdf: sliceHeight * escalaPdf
+      });
+    }
 
     yPx += sliceHeight;
   }
@@ -5833,10 +5896,16 @@ async function descargarInformeCompleto(){
       }
 
       if(canvas){
-        capturas.push({
-          ...s,
-          partes:pdfPrepararFragmentos(canvas)
-        });
+        const partes = pdfPrepararFragmentos(canvas);
+
+        // Si una sección quedó completamente vacía luego de aplicar
+        // los filtros del informe, no la agregamos ni al índice ni al PDF.
+        if(partes.length > 0){
+          capturas.push({
+            ...s,
+            partes
+          });
+        }
       }
     }
 
