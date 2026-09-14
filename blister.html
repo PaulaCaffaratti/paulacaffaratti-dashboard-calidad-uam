@@ -619,6 +619,7 @@ body.embed .titulo{margin-top:0!important;}
       <select id="fEstado" onchange="aplicarFiltros()">
         <option value="">Todos los estados</option>
         <option value="ABIERTO">Abierto</option>
+        <option value="PENDIENTE">Pendiente</option>
         <option value="RESPONDIDO">Respondido</option>
         <option value="CERRADO">Cerrado</option>
       </select>
@@ -747,7 +748,7 @@ function pintarKPIs(){
 
   const abiertas =
   datos.filter(
-    x => estado(x)==="ABIERTO"
+    x => ["ABIERTO", "PENDIENTE"].includes(estado(x))
   ).length;
 
   const respondidas =
@@ -884,7 +885,7 @@ function aplicarFiltros(){
 
       if(
         filtroKPIActual==="ABIERTO" &&
-        estado(x)!=="ABIERTO"
+        !["ABIERTO", "PENDIENTE"].includes(estado(x))
       ){
         return false;
       }
@@ -1216,6 +1217,10 @@ function badgeEstado(e){
 
   if(e==="RESPONDIDO"){
     return '<span class="badge alerta">RESPONDIDO</span>';
+  }
+
+  if(e==="PENDIENTE"){
+    return '<span class="badge error">PENDIENTE</span>';
   }
 
   return '<span class="badge error">ABIERTO</span>';
