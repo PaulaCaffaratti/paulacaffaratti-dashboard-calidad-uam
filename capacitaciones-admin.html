@@ -89,8 +89,9 @@ td{padding:9px 10px;border-bottom:1px solid #e8edf1;vertical-align:top}
     <button id="btnCargar" class="btnCargar" onclick="subirDatos()" disabled>Cargar a Supabase</button>
   </div>
   <div class="nota">
-    El lector toma como referencia oficial el resumen mensual del archivo:
-    <b>Planificadas</b> y <b>Realizadas</b>. Las capacitaciones <b>RNP</b> se muestran aparte y no aumentan el cumplimiento del programa.
+    El lector calcula el resumen mensual directamente desde las marcas del programa:
+    <b>P</b> = planificada, <b>R</b> = realizada, <b>RFF</b> = realizada fuera de fecha y
+    <b>RNP</b> = no programada. Las <b>RNP</b> se muestran aparte y no aumentan el cumplimiento del programa.
   </div>
 </div>
 
@@ -124,7 +125,7 @@ td{padding:9px 10px;border-bottom:1px solid #e8edf1;vertical-align:top}
   <h2>Detalle detectado</h2>
   <div class="nota" style="margin-bottom:12px">
     Este detalle conserva las marcas P / R / RFF / RNP del cuerpo del programa.
-    Los indicadores de cumplimiento se calculan con el resumen mensual oficial del Excel.
+    Los indicadores se calculan directamente desde esas marcas, incluyendo las R de julio, agosto y septiembre.
   </div>
   <div class="tablaWrap">
     <table>
@@ -230,6 +231,7 @@ function buscarHojaPrograma(wb){
 
 async function analizarExcel(){
   const input=document.getElementById("archivo");
+
   if(!input.files.length){
     setEstado("Seleccioná primero el archivo Excel.","error");
     return;
@@ -248,25 +250,17 @@ async function analizarExcel(){
       anioPrograma=new Date().getFullYear();
     }
 
-    // 1) RESUMEN MENSUAL OFICIAL DEL ARCHIVO
-    // Fila 20 = Planificadas
-    // Fila 21 = Realizadas
-    // Columnas Q:AB = enero:diciembre (17:28)
-    resumenMensual=[];
-    for(let mes=1;mes<=12;mes++){
-      const col=16+mes;
-      resumenMensual.push({
-        anio:anioPrograma,
-        mes,
-        planificadas:numero(valorHoja(ws,20,col)),
-        realizadas:numero(valorHoja(ws,21,col))
-      });
-    }
-
-    const totalPlan=resumenMensual.reduce((a,x)=>a+x.planificadas,0);
-    const totalReal=resumenMensual.reduce((a,x)=>a+x.realizadas,0);
-
-    // 2) DETALLE DEL CUERPO DEL PROGRAMA
+    // =========================================================
+    // 1) DETALLE DEL CUERPO DEL PROGRAMA
+    //
+    // P   = planificada pendiente
+    // R   = planificada y realizada
+    // RFF = planificada y realizada fuera de fecha
+    // RNP = realizada no programada
+    //
+    // El resumen mensual se construye DIRECTAMENTE con estas
+    // marcas. Así, una R verde en julio/agosto/septiembre cuenta.
+    // =========================================================
     eventos=[];
     temasDetectados=0;
     let vacias=0;
@@ -280,19 +274,24 @@ async function analizarExcel(){
         if(vacias>=4) break;
         continue;
       }
+
       vacias=0;
+
       if(!Number.isFinite(Number(item))) continue;
 
       temasDetectados++;
 
       const especialidades=[];
       for(let c=10;c<=16;c++){
-        if(texto(valorHoja(ws,r,c)).toUpperCase()==="X" && ESP[c]) especialidades.push(ESP[c]);
+        if(texto(valorHoja(ws,r,c)).toUpperCase()==="X" && ESP[c]){
+          especialidades.push(ESP[c]);
+        }
       }
 
       for(let mes=1;mes<=12;mes++){
         const col=16+mes;
         const estado=normalizarEstado(valorHoja(ws,r,col));
+
         if(!estado) continue;
 
         eventos.push({
@@ -306,14 +305,51 @@ async function analizarExcel(){
       }
     }
 
+    // =========================================================
+    // 2) RESUMEN MENSUAL CALCULADO DESDE LAS MARCAS
+    //
+    // Planificadas = P + R + RFF
+    // Realizadas   = R + RFF
+    // RNP          = se muestra aparte y NO suma cumplimiento
+    // =========================================================
+    resumenMensual=[];
+
+    for(let mes=1;mes<=12;mes++){
+      const eventosMes=eventos.filter(x=>x.mes===mes);
+
+      const planificadas=eventosMes.filter(x=>
+        x.estado==="P" ||
+        x.estado==="R" ||
+        x.estado==="RFF"
+      ).length;
+
+      const realizadas=eventosMes.filter(x=>
+        x.estado==="R" ||
+        x.estado==="RFF"
+      ).length;
+
+      resumenMensual.push({
+        anio:anioPrograma,
+        mes,
+        planificadas,
+        realizadas
+      });
+    }
+
+    const totalPlan=resumenMensual.reduce((a,x)=>a+x.planificadas,0);
+    const totalReal=resumenMensual.reduce((a,x)=>a+x.realizadas,0);
+
     if(totalPlan===0 && totalReal===0){
-      throw new Error("No se encontró el resumen mensual oficial de Planificadas / Realizadas.");
+      throw new Error("No se encontraron marcas P / R / RFF en el programa de capacitación.");
     }
 
     pintarPreview(totalPlan,totalReal);
     document.getElementById("btnCargar").disabled=!sesionOk;
 
-    setEstado(`✓ Excel analizado correctamente: ${totalPlan} capacitaciones planificadas y ${totalReal} realizadas según el resumen oficial.`, "ok");
+    setEstado(
+      `✓ Excel analizado correctamente: ${totalPlan} capacitaciones planificadas y ${totalReal} realizadas detectadas desde las marcas P / R / RFF del programa.`,
+      "ok"
+    );
 
   }catch(err){
     console.error(err);
@@ -451,7 +487,7 @@ async function subirDatos(){
       rffPorMes[x.mes]=(rffPorMes[x.mes]||0)+1;
     });
 
-    // Normalizamos el resumen mensual para que la vista existente calcule bien:
+    // Normalizamos el resumen mensual calculado desde las marcas para que la vista existente calcule bien:
     // Planificadas = P + R + RFF
     // Realizadas   = R + RFF
     // RNP          = aparte
@@ -533,7 +569,7 @@ async function subirDatos(){
       if(error) throw error;
     }
 
-    setEstado(`✓ Carga completada: ${totalPlan} planificadas y ${totalReal} realizadas según el resumen mensual oficial.`, "ok");
+    setEstado(`✓ Carga completada: ${totalPlan} planificadas y ${totalReal} realizadas según las marcas P / R / RFF del programa.`, "ok");
 
   }catch(err){
     console.error(err);
