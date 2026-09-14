@@ -166,15 +166,41 @@ function setEstado(texto,tipo=""){
   e.className="estado"+(tipo?" "+tipo:"");
 }
 
+async function validarPermisoCarga(session){
+  if(!session || !session.user){
+    return false;
+  }
+
+  const {data,error} = await db
+    .from("usuarios_admin")
+    .select("email,activo,puede_cargar")
+    .eq("user_id", session.user.id)
+    .maybeSingle();
+
+  return !error && !!data && data.activo === true && data.puede_cargar === true;
+}
+
 async function verificarSesion(){
   const {data:{session}} = await db.auth.getSession();
+
   if(!session){
     setEstado("⚠️ No hay sesión iniciada. Ingresá primero desde Administración de Documentación.","error");
     sesionOk=false;
+    document.getElementById("btnCargar").disabled=true;
     return;
   }
+
+  const autorizado = await validarPermisoCarga(session);
+
+  if(!autorizado){
+    sesionOk=false;
+    document.getElementById("btnCargar").disabled=true;
+    setEstado("⛔ Tu usuario no está autorizado para cargar Capacitaciones.","error");
+    return;
+  }
+
   sesionOk=true;
-  setEstado("● Sesión activa · listo para cargar Capacitaciones","ok");
+  setEstado("● Usuario autorizado · listo para cargar Capacitaciones","ok");
 }
 
 function valorHoja(ws,r,c){
@@ -394,8 +420,18 @@ async function subirDatos(){
   }
 
   const {data:{session}}=await db.auth.getSession();
+
   if(!session){
     setEstado("❌ La sesión venció. Volvé a iniciar sesión desde Administración de Documentación.","error");
+    return;
+  }
+
+  const autorizado = await validarPermisoCarga(session);
+
+  if(!autorizado){
+    sesionOk=false;
+    document.getElementById("btnCargar").disabled=true;
+    setEstado("⛔ Tu usuario no está autorizado para cargar Capacitaciones.","error");
     return;
   }
 
