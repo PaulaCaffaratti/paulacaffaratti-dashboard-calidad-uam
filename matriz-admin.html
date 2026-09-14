@@ -579,6 +579,8 @@ let filasMatriz = [];
 
 let usuarioActual = null;
 
+let usuarioPuedeCargar = false;
+
 let columnasRegistrosDetectadas = [];
 
 
@@ -600,41 +602,71 @@ async function verificarSesion(){
   } =
   await supabaseClient.auth.getSession();
 
-
   const usuario =
   data?.session?.user || null;
-
 
   usuarioActual =
   usuario;
 
+  usuarioPuedeCargar = false;
 
   const caja =
   document.getElementById("usuario");
-
 
   if(error){
 
     caja.innerHTML =
     "⚠️ No se pudo verificar la sesión.";
 
+    document.getElementById("btnGuardar").disabled = true;
+
     return;
 
   }
-
 
   if(!usuario){
 
     caja.innerHTML =
     "⚠️ No hay sesión iniciada. Ingresá primero desde Administración de Documentación.";
 
+    document.getElementById("btnGuardar").disabled = true;
+
     return;
 
   }
 
+  const {
+    data:permiso,
+    error:errorPermiso
+  } =
+  await supabaseClient
+  .from("usuarios_admin")
+  .select("email,activo,puede_cargar")
+  .eq("user_id", usuario.id)
+  .maybeSingle();
+
+  if(
+    errorPermiso ||
+    !permiso ||
+    !permiso.activo ||
+    !permiso.puede_cargar
+  ){
+
+    caja.innerHTML =
+    "⛔ Usuario sin autorización para modificar la Matriz de Calidad: <strong>" +
+    escapar(usuario.email || "") +
+    "</strong>";
+
+    document.getElementById("btnGuardar").disabled = true;
+
+    return;
+
+  }
+
+  usuarioPuedeCargar = true;
 
   caja.innerHTML =
-  "✅ Usuario conectado: <strong>" +
+  "✅ Usuario autorizado: <strong>" +
   escapar(usuario.email || "") +
   "</strong>";
 
@@ -2539,6 +2571,41 @@ async function guardarSupabase(){
     return;
 
   }
+
+
+  const {
+    data:permiso,
+    error:errorPermiso
+  } =
+  await supabaseClient
+  .from("usuarios_admin")
+  .select("email,activo,puede_cargar")
+  .eq("user_id", session.user.id)
+  .maybeSingle();
+
+
+  if(
+    errorPermiso ||
+    !permiso ||
+    !permiso.activo ||
+    !permiso.puede_cargar
+  ){
+
+    usuarioPuedeCargar = false;
+
+    document.getElementById("btnGuardar").disabled = true;
+
+    mostrarEstado(
+      "⛔ Tu usuario no está autorizado para modificar la Matriz de Calidad.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  usuarioPuedeCargar = true;
 
 
   const confirmar =
