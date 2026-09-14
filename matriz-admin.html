@@ -1643,51 +1643,36 @@ function leerMatriz(
   );
 
 
-  const columnasRegistros =
-  [];
+  /* ======================================================
+     COLUMNAS DE REGISTROS
+     REGLA OFICIAL DE ESTA MATRIZ:
+     TODO LO QUE ESTÁ DESDE LA COLUMNA J EN ADELANTE
+     ES UN REGISTRO DE CALIDAD.
 
+     En JavaScript los índices empiezan en 0:
+     A=0, B=1, ... I=8, J=9.
+  ====================================================== */
 
-  encabezados.forEach(
-    (
-      nombre,
-      indice
-    ) => {
+  const columnasRegistros = [];
 
+  encabezados.forEach((nombre, indice) => {
 
-      if(
-        !nombre
-      ){
-        return;
-      }
-
-
-      if(
-        indicesFijos.has(
-          indice
-        )
-      ){
-        return;
-      }
-
-
-      if(
-        esColumnaAuxiliar(
-          nombre
-        )
-      ){
-        return;
-      }
-
-
-      columnasRegistros.push(
-        {
-          indice,
-          nombre
-        }
-      );
-
+    // Solo contamos columnas desde J en adelante.
+    if(indice < 9){
+      return;
     }
-  );
+
+    // Si no tiene encabezado, no es una columna válida de registro.
+    if(!nombre){
+      return;
+    }
+
+    columnasRegistros.push({
+      indice,
+      nombre
+    });
+
+  });
 
 
   columnasRegistrosDetectadas =
