@@ -481,71 +481,20 @@ async function subirDatos(){
 
     setEstado("⏳ Creando carga en Supabase...");
 
-    const rnpDetalle=eventos.filter(x=>x.estado==="RNP");
-    const rffPorMes={};
-    eventos.filter(x=>x.estado==="RFF").forEach(x=>{
-      rffPorMes[x.mes]=(rffPorMes[x.mes]||0)+1;
-    });
-
-    // Normalizamos el resumen mensual calculado desde las marcas para que la vista existente calcule bien:
-    // Planificadas = P + R + RFF
-    // Realizadas   = R + RFF
-    // RNP          = aparte
-    const filas=[];
-
-    resumenMensual.forEach(x=>{
-      const plan=Math.max(0,Math.round(Number(x.planificadas)||0));
-      const real=Math.max(0,Math.min(plan,Math.round(Number(x.realizadas)||0)));
-      const rff=Math.min(real,rffPorMes[x.mes]||0);
-      const rNormal=real-rff;
-      const pendientes=plan-real;
-
-      for(let i=0;i<rff;i++){
-        filas.push({
-          item:-300000-(x.mes*100)-i,
-          tema:"RESUMEN OFICIAL - REALIZADA FUERA DE FECHA",
-          especialidades:[],
-          anio:x.anio,
-          mes:x.mes,
-          estado:"RFF"
-        });
-      }
-
-      for(let i=0;i<rNormal;i++){
-        filas.push({
-          item:-200000-(x.mes*100)-i,
-          tema:"RESUMEN OFICIAL - REALIZADA",
-          especialidades:[],
-          anio:x.anio,
-          mes:x.mes,
-          estado:"R"
-        });
-      }
-
-      for(let i=0;i<pendientes;i++){
-        filas.push({
-          item:-100000-(x.mes*100)-i,
-          tema:"RESUMEN OFICIAL - PLANIFICADA",
-          especialidades:[],
-          anio:x.anio,
-          mes:x.mes,
-          estado:"P"
-        });
-      }
-    });
-
-    // Las no programadas se conservan aparte porque no deben aumentar
-    // el cumplimiento de lo planificado.
-    rnpDetalle.forEach((x,i)=>{
-      filas.push({
-        item:-400000-(x.mes*100)-i,
-        tema:x.tema || "CAPACITACIÓN NO PROGRAMADA",
-        especialidades:x.especialidades || [],
-        anio:x.anio,
-        mes:x.mes,
-        estado:"RNP"
-      });
-    });
+    // Guardamos EXACTAMENTE los eventos detectados en el Excel.
+    // Así se conserva el nombre real de cada capacitación y:
+    // P   = planificada
+    // R   = realizada (CUENTA como realizada)
+    // RFF = realizada fuera de fecha (también CUENTA como realizada)
+    // RNP = realizada no programada (se conserva aparte y NO aumenta el cumplimiento)
+    const filas=eventos.map(x=>({
+      item:x.item,
+      tema:x.tema,
+      especialidades:x.especialidades || [],
+      anio:x.anio,
+      mes:x.mes,
+      estado:x.estado
+    }));
 
     const {data:carga,error:errorCarga}=await db
       .from("capacitaciones_cargas")
