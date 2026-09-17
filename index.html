@@ -1317,6 +1317,14 @@ color:var(--gris);
   color:var(--gris);
   margin-top:5px;
   font-size:10px;
+  line-height:1.35;
+}
+.capMes .capTema{
+  color:#31566e;
+  margin-top:7px;
+  font-size:10px;
+  line-height:1.35;
+  font-weight:700;
 }
 
 .capMes.realizada{
@@ -4988,6 +4996,22 @@ async function cargarCapacitaciones(){
 
     const filas = data || [];
 
+    // Nombres reales de las capacitaciones de la última carga.
+    // Esta vista fue creada en Supabase y ahora recibe los temas reales
+    // porque capacitaciones-admin.html ya no guarda "RESUMEN OFICIAL".
+    let eventosCapacitaciones = [];
+
+    const {data:detalleCap,error:errorDetalleCap} = await supabaseClient
+      .from("v_capacitaciones_detalle_dashboard")
+      .select("item,tema,anio,mes,estado")
+      .order("item",{ascending:true});
+
+    if(!errorDetalleCap){
+      eventosCapacitaciones = detalleCap || [];
+    }else{
+      console.warn("No se pudo leer el detalle de capacitaciones:", errorDetalleCap);
+    }
+
     if(!filas.length){
       estado.textContent = "Sin datos de capacitaciones disponibles.";
       return;
@@ -5073,11 +5097,44 @@ async function cargarCapacitaciones(){
           textoEstado = "● Pendiente";
         }
 
+        const eventosMes = eventosCapacitaciones.filter(e =>
+          Number(e.anio) === anio &&
+          Number(e.mes) === mes
+        );
+
+        // R y RFF son capacitaciones realizadas.
+        // P se muestra como nombre planificado.
+        // RNP se conserva aparte y no altera el cumplimiento oficial.
+        const temasRealizados = [...new Set(
+          eventosMes
+            .filter(e => ["R","RFF"].includes(String(e.estado || "").toUpperCase()))
+            .map(e => String(e.tema || "").trim())
+            .filter(Boolean)
+        )];
+
+        const temasPlanificados = [...new Set(
+          eventosMes
+            .filter(e => String(e.estado || "").toUpperCase() === "P")
+            .map(e => String(e.tema || "").trim())
+            .filter(Boolean)
+        )];
+
+        let detalleMes = "";
+        if(temasRealizados.length){
+          detalleMes = temasRealizados
+            .map(t => `<div class="capTema">${escapar(t)}</div>`)
+            .join("");
+        }else if(temasPlanificados.length){
+          detalleMes = temasPlanificados
+            .map(t => `<div class="capTema">${escapar(t)}</div>`)
+            .join("");
+        }
+
         return `
           <div class="capMes ${clase}">
             <div class="mes">${CAP_MESES[mes-1]} ${anio}</div>
             <div class="estado">${textoEstado}</div>
-            <div class="dato">${real} realizada${real===1?"":"s"} / ${plan} prevista${plan===1?"":"s"}</div>
+            ${detalleMes}
           </div>
         `;
       })
