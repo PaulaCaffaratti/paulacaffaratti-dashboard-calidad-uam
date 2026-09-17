@@ -2302,8 +2302,8 @@ class="seccion">
 
     <div class="capCard">
       <div class="capCardHeader">
-        <h3>Planificación mensual</h3>
-        <span class="capTag">Planificadas vs. realizadas</span>
+        <h3>Curva S · Capacitaciones</h3>
+        <span class="capTag">Plan acumulado vs. real acumulado</span>
       </div>
       <div class="capChart">
         <canvas id="chartCapacitaciones"></canvas>
@@ -5146,44 +5146,110 @@ async function cargarCapacitaciones(){
       chartCapacitaciones.destroy();
     }
 
+    // La Curva S se dibuja solamente hasta el mes actual.
+    // Los meses futuros siguen existiendo en el programa y en los KPIs,
+    // pero no se muestran todavía en la curva.
+    const hoyCurva = new Date();
+    const anioActualCurva = hoyCurva.getFullYear();
+    const mesActualCurva = hoyCurva.getMonth() + 1;
+
+    const filasCurva = filas
+      .filter(x => {
+        if(Number(x.planificadas || 0) <= 0) return false;
+        const anio = Number(x.anio);
+        const mes = Number(x.mes);
+        return anio < anioActualCurva ||
+               (anio === anioActualCurva && mes <= mesActualCurva);
+      })
+      .sort((a,b) => (Number(a.anio) * 12 + Number(a.mes)) - (Number(b.anio) * 12 + Number(b.mes)));
+
+    const labelsCurva = filasCurva.map(
+      x => `${CAP_MESES[Number(x.mes)-1].slice(0,3)} ${String(x.anio).slice(-2)}`
+    );
+
+    let acumPlan = 0;
+    let acumReal = 0;
+
+    const planAcumulado = filasCurva.map(x => {
+      acumPlan += Number(x.planificadas || 0);
+      return acumPlan;
+    });
+
+    const realAcumulado = filasCurva.map(x => {
+      acumReal += Number(x.realizadas_planificadas || 0);
+      return acumReal;
+    });
+
     chartCapacitaciones = new Chart(
       canvas,
       {
-        type:"bar",
+        type:"line",
         data:{
-          labels:filas
-            .filter(x => Number(x.planificadas || 0) > 0)
-            .map(x => `${CAP_MESES[Number(x.mes)-1].slice(0,3)} ${String(x.anio).slice(-2)}`),
+          labels:labelsCurva,
           datasets:[
             {
-              label:"Planificadas",
-              data:filas
-                .filter(x => Number(x.planificadas || 0) > 0)
-                .map(x => Number(x.planificadas || 0)),
-              backgroundColor:"#60c5e8",
-              borderRadius:5
+              label:"Plan acumulado",
+              data:planAcumulado,
+              borderColor:"#60c5e8",
+              backgroundColor:"rgba(96,197,232,.10)",
+              borderWidth:3,
+              borderDash:[8,6],
+              pointStyle:"circle",
+              pointRadius:5,
+              pointHoverRadius:7,
+              pointBorderWidth:2,
+              tension:.35,
+              fill:false
             },
             {
-              label:"Realizadas",
-              data:filas
-                .filter(x => Number(x.planificadas || 0) > 0)
-                .map(x => Number(x.realizadas_planificadas || 0)),
-              backgroundColor:"#179447",
-              borderRadius:5
+              label:"Real acumulado",
+              data:realAcumulado,
+              borderColor:"#179447",
+              backgroundColor:"rgba(23,148,71,.10)",
+              borderWidth:4,
+              pointStyle:"rectRot",
+              pointRadius:7,
+              pointHoverRadius:9,
+              pointBorderWidth:2,
+              tension:.35,
+              fill:false
             }
           ]
         },
         options:{
           responsive:true,
           maintainAspectRatio:false,
+          interaction:{
+            mode:"index",
+            intersect:false
+          },
           plugins:{
-            legend:{position:"bottom"}
+            legend:{
+              position:"bottom",
+              labels:{
+                usePointStyle:true,
+                boxWidth:8,
+                padding:18
+              }
+            },
+            tooltip:{
+              callbacks:{
+                label:(ctx)=>`${ctx.dataset.label}: ${ctx.parsed.y}`
+              }
+            }
           },
           scales:{
             y:{
               beginAtZero:true,
-              ticks:{precision:0,stepSize:1},
-              suggestedMax:1
+              suggestedMax:Math.max(planTotal,realTotal),
+              ticks:{
+                precision:0,
+                stepSize:1
+              },
+              title:{
+                display:true,
+                text:"Capacitaciones acumuladas"
+              }
             },
             x:{
               grid:{display:false}
