@@ -2231,26 +2231,73 @@ title="Dashboard Observaciones Blister">
 
 </div>
 
+
+<section id="hallazgos" class="seccion">
+
+  <div style="padding:30px 24px;">
+
+    <h2 style="color:#0b3568;font-size:26px;margin:0 0 8px;">
+      Hallazgos
+    </h2>
+
+    <p style="color:#687787;font-size:13px;">
+      Seguimiento de hallazgos · EPC Proyecto UAM - ALVS
+    </p>
+
+    <div id="hallazgosEstado"
+         style="margin:20px 0;color:#687787;font-size:13px;">
+      Consultando hallazgos...
+    </div>
+
+    <div id="hallazgosKpis"
+         style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:22px 0;">
+    </div>
+
+    <div style="background:white;border:1px solid #e0e7ec;border-radius:12px;padding:20px;">
+
+      <h3 style="color:#0b3568;margin:0 0 16px;">
+        Listado de hallazgos
+      </h3>
+
+      <input
+        id="hallazgosBuscar"
+        type="search"
+        placeholder="Buscar código, descripción, estado..."
+        style="width:100%;max-width:420px;padding:12px;border:1px solid #dce4eb;border-radius:8px;margin-bottom:16px;"
+        oninput="filtrarHallazgos()"
+      >
+
+      <div style="overflow-x:auto;">
+
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+
+          <thead>
+            <tr style="background:#eef3f8;text-align:left;">
+              <th style="padding:12px;">Código</th>
+              <th style="padding:12px;">Tipo de desvío</th>
+              <th style="padding:12px;">Estado actual</th>
+              <th style="padding:12px;">Descripción</th>
+            </tr>
+          </thead>
+
+          <tbody id="hallazgosTabla">
+            <tr>
+              <td colspan="4" style="padding:16px;">
+                Cargando información...
+              </td>
+            </tr>
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
 </section>
 
-
-<section
-id="hallazgos"
-class="seccion">
-
-<div class="proximamente">
-
-<h2>
-Hallazgos
-</h2>
-
-<p>
-Se conectará al Excel de Hallazgos.
-</p>
-
-</div>
-
-</section>
 
 
 <section
