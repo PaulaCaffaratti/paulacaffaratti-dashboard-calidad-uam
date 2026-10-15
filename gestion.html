@@ -1,394 +1,250 @@
+
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
-
 <meta charset="UTF-8">
-
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0"
->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Gestión de Calidad UAM</title>
 
 <style>
 
-/* =========================================================
-   GENERAL
-========================================================= */
+/* GENERAL */
 
-*{
-  box-sizing:border-box;
+* {
+  box-sizing: border-box;
 }
 
-:root{
-  --azul:#0c356a;
-  --celeste:#60c5e8;
-  --gris:#687787;
-  --fondo:#f4f7f9;
-  --blanco:#ffffff;
-  --borde:#dfe7ec;
+:root {
+  --azul: #0c356a;
+  --celeste: #60c5e8;
+  --gris: #687787;
+  --fondo: #f4f7f9;
+  --blanco: #ffffff;
+  --borde: #dfe7ec;
 }
 
-html{
-  width:100%;
-  margin:0;
-  padding:0;
-  overflow-x:hidden;
+html {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
-body{
-  width:100%;
-  margin:0;
-  padding:0;
-
-  font-family:
-  Arial,
-  Helvetica,
-  sans-serif;
-
-  background:var(--fondo);
-  color:#1d2a36;
-
-  /*
-  ÚNICO SCROLL VERTICAL:
-  el de la página principal.
-  */
-  overflow-x:hidden;
-  overflow-y:auto;
+body {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--fondo);
+  color: #1d2a36;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
+/* ENCABEZADO */
 
-/* =========================================================
-   HEADER
-========================================================= */
-
-header{
-  width:100%;
-  background:var(--blanco);
-  border-bottom:1px solid var(--borde);
+header {
+  width: 100%;
+  background: var(--blanco);
+  border-bottom: 1px solid var(--borde);
 }
 
-.topbar{
-  width:100%;
-  margin:0;
-
-  padding:
-  14px
-  22px
-  12px;
-
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:20px;
+.topbar {
+  width: 100%;
+  padding: 14px 22px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
 }
 
-.marca{
-  display:flex;
-  gap:12px;
-  align-items:center;
+.marca {
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
-.barra{
-  width:8px;
-  height:54px;
-
-  border-radius:8px;
-
-  background:
-  var(--celeste);
+.barra {
+  width: 8px;
+  height: 54px;
+  border-radius: 8px;
+  background: var(--celeste);
 }
 
-.marca h1{
-  margin:0;
-
-  color:
-  var(--azul);
-
-  font-size:23px;
-  font-weight:600;
-
-  letter-spacing:-.3px;
+.marca h1 {
+  margin: 0;
+  color: var(--azul);
+  font-size: 23px;
+  font-weight: 600;
+  letter-spacing: -.3px;
 }
 
-.marca p{
-  margin:
-  4px
-  0
-  0;
-
-  color:
-  var(--gris);
-
-  font-size:12px;
+.marca p {
+  margin: 4px 0 0;
+  color: var(--gris);
+  font-size: 12px;
 }
 
+/* NAVEGACIÓN */
 
-/* =========================================================
-   NAVEGACIÓN
-========================================================= */
-
-.nav{
-  width:100%;
-  background:var(--azul);
+.nav {
+  width: 100%;
+  background: var(--azul);
 }
 
-.tabs{
-  width:100%;
-  margin:0;
-  padding:0 10px;
-
-  display:flex;
-  align-items:center;
-
-  /*
-  Puede desplazarse horizontalmente si la pantalla
-  fuera muy chica, pero nunca verticalmente.
-  */
-  overflow-x:auto;
-  overflow-y:hidden;
+.tabs {
+  width: 100%;
+  margin: 0;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
 }
 
-.tab{
-  appearance:none;
-
-  border:0;
-
-  background:
-  transparent;
-
-  color:white;
-
-  padding:
-  14px
-  20px;
-
-  font-size:12px;
-  font-weight:600;
-
-  cursor:pointer;
-
-  border-bottom:
-  4px solid transparent;
-
-  white-space:nowrap;
+.tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: white;
+  padding: 14px 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 4px solid transparent;
+  white-space: nowrap;
+  transition: background .2s;
 }
 
-.tab:hover{
-  background:
-  rgba(255,255,255,.07);
+.tab:hover {
+  background: rgba(255,255,255,.07);
 }
 
-.tab.activo{
-  border-bottom-color:
-  var(--celeste);
-
-  background:
-  rgba(255,255,255,.05);
+.tab.activo {
+  border-bottom-color: var(--celeste);
+  background: rgba(255,255,255,.05);
 }
 
+/* CONTENIDO */
 
-/* =========================================================
-   CONTENIDO PRINCIPAL
-========================================================= */
-
-main{
-  width:100%;
-  max-width:none;
-
-  margin:0;
-
-  padding:12px;
-
-  overflow:visible;
+main {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 12px;
+  overflow: visible;
 }
 
-
-/* =========================================================
-   AVISO
-========================================================= */
-
-.aviso{
-  width:100%;
-
-  background:
-  #eef7fb;
-
-  border-left:
-  4px solid var(--celeste);
-
-  border-radius:8px;
-
-  padding:
-  9px
-  12px;
-
-  margin-bottom:
-  10px;
-
-  color:
-  #31566e;
-
-  font-size:
-  11.5px;
-
-  line-height:
-  1.4;
+.aviso {
+  width: 100%;
+  background: #eef7fb;
+  border-left: 4px solid var(--celeste);
+  border-radius: 8px;
+  padding: 9px 12px;
+  margin-bottom: 10px;
+  color: #31566e;
+  font-size: 11.5px;
+  line-height: 1.4;
 }
 
-
-/* =========================================================
-   CONTENEDOR DEL IFRAME
-========================================================= */
-
-.contenedor{
-  width:100%;
-  max-width:100%;
-
-  background:white;
-
-  border:
-  1px solid var(--borde);
-
-  border-radius:
-  10px;
-
-  /*
-  MUY IMPORTANTE:
-  este contenedor no tiene scroll.
-  */
-  overflow:visible;
-
-  box-shadow:
-  0
-  2px
-  9px
-  rgba(20,50,80,.04);
+.contenedor {
+  width: 100%;
+  max-width: 100%;
+  background: white;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  overflow: visible;
+  box-shadow: 0 2px 9px rgba(20,50,80,.04);
 }
 
+/* IFRAME */
 
-/* =========================================================
-   IFRAME
-========================================================= */
-
-#visor{
-  display:block;
-
-  width:100%;
-  max-width:100%;
-
-  min-height:900px;
-
-  margin:0;
-  padding:0;
-
-  border:0;
-
-  background:white;
-
-  /*
-  El iframe jamás debe generar
-  su propia barra vertical.
-  */
-  overflow:hidden;
+#visor {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-height: 900px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: white;
+  overflow: hidden;
 }
 
+/* NOTEBOOK */
 
-/* =========================================================
-   NOTEBOOK / PC
-========================================================= */
+@media(max-width:1450px) {
 
-@media(max-width:1450px){
-
-  .topbar{
-    padding:
-    11px
-    14px;
+  .topbar {
+    padding: 11px 14px;
   }
 
-  .marca h1{
-    font-size:21px;
+  .marca h1 {
+    font-size: 21px;
   }
 
-  .barra{
-    height:48px;
+  .barra {
+    height: 48px;
   }
 
-  .tab{
-    padding:
-    12px
-    15px;
-
-    font-size:
-    11px;
+  .tab {
+    padding: 12px 15px;
+    font-size: 11px;
   }
 
-  main{
-    padding:8px;
+  main {
+    padding: 8px;
   }
 
 }
 
+/* CELULAR */
 
-/* =========================================================
-   CELULAR
-========================================================= */
+@media(max-width:700px) {
 
-@media(max-width:700px){
-
-  .topbar{
-    padding:12px;
+  .topbar {
+    padding: 12px;
   }
 
-  .marca h1{
-    font-size:19px;
+  .marca h1 {
+    font-size: 19px;
   }
 
-  .marca p{
-    font-size:11px;
+  .marca p {
+    font-size: 11px;
   }
 
-  .barra{
-    width:6px;
-    height:44px;
+  .barra {
+    width: 6px;
+    height: 44px;
   }
 
-  .tabs{
-    padding:0;
+  .tabs {
+    padding: 0;
   }
 
-  .tab{
-    padding:
-    12px
-    14px;
-
-    font-size:
-    11px;
+  .tab {
+    padding: 12px 14px;
+    font-size: 11px;
   }
 
-  main{
-    padding:5px;
+  main {
+    padding: 5px;
   }
 
-  .contenedor{
-    border-radius:7px;
+  .contenedor {
+    border-radius: 7px;
   }
 
 }
 
 </style>
-
 </head>
 
-
 <body>
-
-
-<!-- =====================================================
-     HEADER
-====================================================== -->
 
 <header>
 
@@ -399,30 +255,19 @@ main{
       <div class="barra"></div>
 
       <div>
-
-        <h1>
-          DUPLICAR NORTE UAM
-        </h1>
-
-        <p>
-          Gestión de Inputs · Calidad
-        </p>
-
+        <h1>DUPLICAR NORTE UAM</h1>
+        <p>Gestión de Inputs · Calidad</p>
       </div>
 
     </div>
 
   </div>
 
-
-  <!-- =================================================
-       PESTAÑAS
-  ================================================== -->
+  <!-- PESTAÑAS -->
 
   <div class="nav">
 
     <div class="tabs">
-
 
       <button
         id="tabDocumentacion"
@@ -432,7 +277,6 @@ main{
         📄 ADMINISTRACIÓN DE DOCUMENTACIÓN
       </button>
 
-
       <button
         id="tabBlister"
         class="tab"
@@ -440,7 +284,6 @@ main{
       >
         ⚠️ OBSERVACIONES BLISTER
       </button>
-
 
       <button
         id="tabCapacitaciones"
@@ -450,7 +293,6 @@ main{
         🎓 CAPACITACIONES
       </button>
 
-
       <button
         id="tabMatriz"
         class="tab"
@@ -458,7 +300,6 @@ main{
       >
         📊 MATRIZ
       </button>
-
 
       <button
         id="tabPiping"
@@ -468,6 +309,15 @@ main{
         🔧 PIPING
       </button>
 
+      <!-- NUEVA PESTAÑA HALLAZGOS -->
+
+      <button
+        id="tabHallazgos"
+        class="tab"
+        onclick="abrirModulo('hallazgos',this)"
+      >
+        🔎 HALLAZGOS
+      </button>
 
       <button
         id="tabMaestro"
@@ -477,29 +327,20 @@ main{
         📋 LISTADO BASE
       </button>
 
-
     </div>
 
   </div>
 
 </header>
 
-
-<!-- =====================================================
-     CONTENIDO
-====================================================== -->
-
 <main>
 
-
   <div class="aviso">
-
     Ingresá una sola vez desde Administración de Documentación.
     Después podés cambiar de pestaña para cargar Blister,
-    Capacitaciones, Matriz, Piping o modificar el Listado Base.
-
+    Capacitaciones, Matriz, Piping, Hallazgos o modificar
+    el Listado Base.
   </div>
-
 
   <div class="contenedor">
 
@@ -512,296 +353,126 @@ main{
 
   </div>
 
-
 </main>
-
 
 <script>
 
-/* =========================================================
-   RUTAS
-========================================================= */
+/* RUTAS DE LOS MÓDULOS */
 
 const rutas = {
 
-  documentacion:
-  "admin.html",
+  documentacion: "admin.html",
 
-  blister:
-  "blister-admin.html",
+  blister: "blister-admin.html",
 
-  capacitaciones:
-  "capacitaciones-admin.html",
+  capacitaciones: "capacitaciones-admin.html",
 
-  matriz:
-  "matriz-admin.html",
+  matriz: "matriz-admin.html",
 
-  piping:
-  "piping-admin.html",
+  piping: "piping-admin.html",
 
-  maestro:
-  "maestro.html"
+  hallazgos: "hallazgos-admin.html",
+
+  maestro: "maestro.html"
 
 };
 
+let moduloActual = "documentacion";
 
-let moduloActual =
-"documentacion";
+/* CAMBIAR PESTAÑA */
 
+function abrirModulo(modulo, boton) {
 
-/* =========================================================
-   CAMBIAR DE PESTAÑA
-========================================================= */
-
-function abrirModulo(
-  modulo,
-  boton
-){
-
-  if(!rutas[modulo]){
+  if (!rutas[modulo]) {
     return;
   }
 
-
-  document
-  .querySelectorAll(".tab")
-  .forEach(tab => {
-
-    tab
-    .classList
-    .remove("activo");
-
+  document.querySelectorAll(".tab").forEach(tab => {
+    tab.classList.remove("activo");
   });
 
+  boton.classList.add("activo");
 
-  boton
-  .classList
-  .add("activo");
+  moduloActual = modulo;
 
+  const visor = document.getElementById("visor");
 
-  moduloActual =
-  modulo;
+  visor.style.height = "900px";
 
-
-  const visor =
-  document
-  .getElementById("visor");
-
-
-  /*
-  Reiniciamos momentáneamente la altura.
-  */
-
-  visor.style.height =
-  "900px";
-
-
-  visor.src =
-  rutas[modulo]
-  +
-  "?v="
-  +
-  Date.now();
-
+  visor.src = rutas[modulo] + "?v=" + Date.now();
 
   window.scrollTo({
-
-    top:0,
-
-    behavior:"smooth"
-
+    top: 0,
+    behavior: "smooth"
   });
 
 }
 
+/* ELIMINAR SCROLL VERTICAL INTERNO */
 
-/* =========================================================
-   QUITAR SCROLLS INTERNOS
-========================================================= */
+function quitarScrollInterno(iframe) {
 
-function quitarScrollInterno(
-  iframe
-){
+  try {
 
-  try{
+    const win = iframe.contentWindow;
+    const doc = win.document;
 
+    if (!doc || !doc.body) return;
 
-    const win =
-    iframe.contentWindow;
+    [doc.documentElement, doc.body].forEach(el => {
 
+      el.style.setProperty(
+        "height", "auto", "important"
+      );
 
-    const doc =
-    win.document;
+      el.style.setProperty(
+        "max-height", "none", "important"
+      );
 
+      el.style.setProperty(
+        "overflow-y", "visible", "important"
+      );
 
-    if(
-      !doc ||
-      !doc.body
-    ){
-      return;
-    }
+    });
 
+    doc.querySelectorAll("*").forEach(elemento => {
 
-    /* =====================================================
-       HTML
-    ===================================================== */
+      if (
+        elemento === doc.body ||
+        elemento === doc.documentElement
+      ) return;
 
-    doc.documentElement
-    .style
-    .setProperty(
-      "height",
-      "auto",
-      "important"
-    );
+      const estilo = win.getComputedStyle(elemento);
 
+      const overflowY = estilo.overflowY;
 
-    doc.documentElement
-    .style
-    .setProperty(
-      "max-height",
-      "none",
-      "important"
-    );
+      const tieneScroll =
+        overflowY === "auto" ||
+        overflowY === "scroll" ||
+        overflowY === "overlay";
 
+      if (
+        tieneScroll &&
+        elemento.scrollHeight > elemento.clientHeight + 1
+      ) {
 
-    doc.documentElement
-    .style
-    .setProperty(
-      "overflow-y",
-      "visible",
-      "important"
-    );
-
-
-    /* =====================================================
-       BODY
-    ===================================================== */
-
-    doc.body
-    .style
-    .setProperty(
-      "height",
-      "auto",
-      "important"
-    );
-
-
-    doc.body
-    .style
-    .setProperty(
-      "max-height",
-      "none",
-      "important"
-    );
-
-
-    doc.body
-    .style
-    .setProperty(
-      "overflow-y",
-      "visible",
-      "important"
-    );
-
-
-    /*
-    Buscamos TODOS los elementos de la página interna.
-
-    Esto es importante porque la barra que aparecía
-    al lado de la tabla no era necesariamente del iframe:
-    podía pertenecer a cualquier DIV que tuviera
-    overflow-y:auto o overflow-y:scroll.
-    */
-
-    const elementos =
-    doc.querySelectorAll("*");
-
-
-    elementos.forEach(
-      elemento => {
-
-
-        if(
-          elemento === doc.body ||
-          elemento === doc.documentElement
-        ){
-          return;
-        }
-
-
-        const estilo =
-        win.getComputedStyle(
-          elemento
+        elemento.style.setProperty(
+          "overflow-y", "visible", "important"
         );
 
+        elemento.style.setProperty(
+          "max-height", "none", "important"
+        );
 
-        const overflowY =
-        estilo.overflowY;
-
-
-        const tieneOverflowVertical =
-
-          overflowY === "auto" ||
-
-          overflowY === "scroll" ||
-
-          overflowY === "overlay";
-
-
-        if(
-          tieneOverflowVertical
-        ){
-
-
-          /*
-          Si el elemento realmente está cortando
-          contenido vertical, eliminamos ese límite.
-          */
-
-          if(
-            elemento.scrollHeight >
-            elemento.clientHeight + 1
-          ){
-
-
-            elemento
-            .style
-            .setProperty(
-              "overflow-y",
-              "visible",
-              "important"
-            );
-
-
-            elemento
-            .style
-            .setProperty(
-              "max-height",
-              "none",
-              "important"
-            );
-
-
-            elemento
-            .style
-            .setProperty(
-              "height",
-              "auto",
-              "important"
-            );
-
-
-          }
-
-        }
-
+        elemento.style.setProperty(
+          "height", "auto", "important"
+        );
 
       }
-    );
 
+    });
 
-  }
-  catch(error){
+  } catch(error) {
 
     console.log(
       "Error eliminando scroll interno:",
@@ -812,87 +483,36 @@ function quitarScrollInterno(
 
 }
 
+/* AJUSTE VISUAL DE LOS MÓDULOS */
 
-/* =========================================================
-   AJUSTAR ANCHO PARA PC
-========================================================= */
+function ajustarVisual(iframe) {
 
-function ajustarVisual(
-  iframe
-){
+  try {
 
-  try{
+    const doc = iframe.contentWindow.document;
 
+    if (!doc || !doc.head) return;
 
-    const doc =
-    iframe
-    .contentWindow
-    .document;
+    let estilo = doc.getElementById("gestion-ajuste-pc");
 
+    if (estilo) estilo.remove();
 
-    if(
-      !doc ||
-      !doc.head
-    ){
-      return;
-    }
+    estilo = doc.createElement("style");
 
+    estilo.id = "gestion-ajuste-pc";
 
-    let estilo =
-    doc.getElementById(
-      "gestion-ajuste-pc"
-    );
+    estilo.textContent = `
 
-
-    if(
-      estilo
-    ){
-      estilo.remove();
-    }
-
-
-    estilo =
-    doc.createElement(
-      "style"
-    );
-
-
-    estilo.id =
-    "gestion-ajuste-pc";
-
-
-    estilo.innerHTML = `
-
-
-      /* ================================================
-         PÁGINA INTERNA
-      ================================================= */
-
-      html,
-      body{
-
-        width:100% !important;
-
-        max-width:100% !important;
-
-        min-width:0 !important;
-
-        height:auto !important;
-
-        min-height:0 !important;
-
-        max-height:none !important;
-
-        overflow-y:visible !important;
-
-        overflow-x:hidden !important;
-
+      html, body {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow-y: visible !important;
+        overflow-x: hidden !important;
       }
-
-
-      /* ================================================
-         CONTENEDORES PRINCIPALES
-      ================================================= */
 
       main,
       section,
@@ -903,20 +523,11 @@ function ajustarVisual(
       .wrapper,
       .page,
       .panel,
-      .card{
-
-        max-width:100% !important;
-
-        max-height:none !important;
-
-        overflow-y:visible !important;
-
+      .card {
+        max-width: 100% !important;
+        max-height: none !important;
+        overflow-y: visible !important;
       }
-
-
-      /* ================================================
-         CONTENEDORES DE TABLAS
-      ================================================= */
 
       .table-container,
       .table-wrapper,
@@ -926,582 +537,260 @@ function ajustarVisual(
       .tabla-scroll,
       .table-scroll,
       .scroll-container,
-      .scroll-wrapper{
-
-        width:100% !important;
-
-        max-width:100% !important;
-
-        height:auto !important;
-
-        max-height:none !important;
-
-        overflow-y:visible !important;
-
+      .scroll-wrapper {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow-y: visible !important;
       }
 
-
-      /* ================================================
-         TABLAS
-      ================================================= */
-
-      table{
-
-        width:100% !important;
-
-        max-width:100% !important;
-
-        table-layout:fixed !important;
-
-        border-collapse:collapse;
-
+      table {
+        width: 100% !important;
+        max-width: 100% !important;
+        table-layout: fixed !important;
+        border-collapse: collapse;
       }
 
-
-      th,
-      td{
-
-        padding:
-        9px
-        8px !important;
-
-        font-size:
-        12px !important;
-
-        line-height:
-        1.25 !important;
-
-        vertical-align:
-        middle !important;
-
-        white-space:
-        normal !important;
-
-        overflow-wrap:
-        anywhere !important;
-
+      th, td {
+        padding: 9px 8px !important;
+        font-size: 12px !important;
+        line-height: 1.25 !important;
+        vertical-align: middle !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
       }
 
-
-      th{
-
-        font-size:
-        11px !important;
-
+      th {
+        font-size: 11px !important;
       }
 
-
-      /* ================================================
-         INPUT / SELECT / TEXTAREA
-      ================================================= */
-
-      input,
-      select,
-      textarea{
-
-        width:100%;
-
-        max-width:100% !important;
-
-        min-width:0 !important;
-
-        font-size:
-        12px !important;
-
+      input, select, textarea {
+        max-width: 100% !important;
+        min-width: 0 !important;
+        font-size: 12px !important;
       }
 
-
-      input,
-      select{
-
-        min-height:
-        38px !important;
-
-        padding:
-        7px
-        9px !important;
-
+      input, select {
+        min-height: 38px !important;
+        padding: 7px 9px !important;
       }
 
-
-      textarea{
-
-        padding:
-        7px
-        9px !important;
-
+      textarea {
+        padding: 7px 9px !important;
       }
 
+      @media(max-width:1450px) {
 
-      /* ================================================
-         NOTEBOOK 14"
-      ================================================= */
-
-      @media(max-width:1450px){
-
-
-        th,
-        td{
-
-          padding:
-          7px
-          6px !important;
-
-          font-size:
-          11px !important;
-
+        th, td {
+          padding: 7px 6px !important;
+          font-size: 11px !important;
         }
 
-
-        th{
-
-          font-size:
-          10px !important;
-
+        th {
+          font-size: 10px !important;
         }
 
-
-        input,
-        select,
-        textarea{
-
-          font-size:
-          11px !important;
-
+        input, select, textarea {
+          font-size: 11px !important;
         }
 
-
-        input,
-        select{
-
-          min-height:
-          34px !important;
-
-          padding:
-          5px
-          7px !important;
-
+        input, select {
+          min-height: 34px !important;
+          padding: 5px 7px !important;
         }
 
       }
-
 
     `;
 
+    doc.head.appendChild(estilo);
 
-    doc.head
-    .appendChild(
-      estilo
-    );
+  } catch(error) {
 
-
-  }
-  catch(error){
-
-    console.log(
-      "Error ajustando visual:",
-      error
-    );
+    console.log("Error ajustando visual:", error);
 
   }
 
 }
 
+/* CALCULAR ALTURA DEL IFRAME */
 
-/* =========================================================
-   CALCULAR ALTURA DEL IFRAME
-========================================================= */
+function ajustarAltura(iframe) {
 
-function ajustarAltura(
-  iframe
-){
+  try {
 
-  try{
+    const win = iframe.contentWindow;
+    const doc = win.document;
 
+    if (!doc || !doc.body) return;
 
-    const doc =
-    iframe
-    .contentWindow
-    .document;
+    quitarScrollInterno(iframe);
 
+    const body = doc.body;
+    const html = doc.documentElement;
 
-    if(
-      !doc ||
-      !doc.body
-    ){
-      return;
-    }
+    let maxBottom = 0;
 
+    doc.body.querySelectorAll("*").forEach(elemento => {
 
-    /*
-    Primero eliminamos cualquier
-    scroll interno.
-    */
+      const estilo = win.getComputedStyle(elemento);
 
-    quitarScrollInterno(
-      iframe
-    );
+      if (estilo.display === "none") return;
 
+      const rect = elemento.getBoundingClientRect();
 
-    const body =
-    doc.body;
+      if (Number.isFinite(rect.bottom)) {
 
-
-    const html =
-    doc.documentElement;
-
-
-    /*
-    Calculamos el punto inferior real
-    de todos los elementos visibles.
-    */
-
-    let maxBottom =
-    0;
-
-
-    const elementos =
-    doc.body
-    .querySelectorAll("*");
-
-
-    elementos
-    .forEach(
-      elemento => {
-
-
-        const estilo =
-        iframe
-        .contentWindow
-        .getComputedStyle(
-          elemento
+        maxBottom = Math.max(
+          maxBottom,
+          rect.bottom
         );
 
-
-        if(
-          estilo.display === "none"
-        ){
-          return;
-        }
-
-
-        const rect =
-        elemento
-        .getBoundingClientRect();
-
-
-        if(
-          Number.isFinite(
-            rect.bottom
-          )
-        ){
-
-          maxBottom =
-          Math.max(
-            maxBottom,
-            rect.bottom
-          );
-
-        }
-
-
       }
-    );
 
+    });
 
-    const alto =
-    Math.max(
-
+    const alto = Math.max(
       body.scrollHeight,
-
       body.offsetHeight,
-
       html.scrollHeight,
-
       html.offsetHeight,
-
       maxBottom,
-
       900
-
     );
 
+    iframe.style.height = Math.ceil(alto + 60) + "px";
 
-    /*
-    Margen de seguridad para evitar que
-    aparezca la barra del iframe por
-    unos pocos píxeles.
-    */
+  } catch(error) {
 
-    iframe.style.height =
-    Math.ceil(
-      alto + 60
-    )
-    +
-    "px";
-
+    console.log("Error ajustando altura:", error);
 
   }
-  catch(error){
+
+}
+
+/* PROCESAR IFRAME */
+
+function procesarIframe(iframe) {
+
+  ajustarVisual(iframe);
+  quitarScrollInterno(iframe);
+  ajustarAltura(iframe);
+
+}
+
+/* CARGA DE MÓDULOS */
+
+const visor = document.getElementById("visor");
+
+visor.setAttribute("scrolling", "no");
+
+let observerActual = null;
+let resizeObserverActual = null;
+
+visor.addEventListener("load", function() {
+
+  const iframe = this;
+
+  if (observerActual) {
+    observerActual.disconnect();
+    observerActual = null;
+  }
+
+  if (resizeObserverActual) {
+    resizeObserverActual.disconnect();
+    resizeObserverActual = null;
+  }
+
+  procesarIframe(iframe);
+
+  [
+    100,
+    300,
+    700,
+    1200,
+    2000,
+    3500
+  ].forEach(tiempo => {
+
+    setTimeout(() => {
+
+      if (iframe === visor) {
+        procesarIframe(iframe);
+      }
+
+    }, tiempo);
+
+  });
+
+  try {
+
+    const doc = iframe.contentWindow.document;
+
+    let pendiente = false;
+
+    observerActual = new MutationObserver(() => {
+
+      if (pendiente) return;
+
+      pendiente = true;
+
+      requestAnimationFrame(() => {
+
+        ajustarAltura(iframe);
+
+        pendiente = false;
+
+      });
+
+    });
+
+    observerActual.observe(doc.body, {
+      childList: true,
+      subtree: true
+    });
+
+    if (window.ResizeObserver) {
+
+      resizeObserverActual = new ResizeObserver(() => {
+        ajustarAltura(iframe);
+      });
+
+      resizeObserverActual.observe(doc.body);
+
+    }
+
+  } catch(error) {
 
     console.log(
-      "Error ajustando altura:",
+      "Error creando observadores:",
       error
     );
 
   }
 
-}
+});
 
-
-/* =========================================================
-   PROCESAR IFRAME
-========================================================= */
-
-function procesarIframe(
-  iframe
-){
-
-  ajustarVisual(
-    iframe
-  );
-
-
-  quitarScrollInterno(
-    iframe
-  );
-
-
-  ajustarAltura(
-    iframe
-  );
-
-}
-
-
-/* =========================================================
-   EVENTO LOAD
-========================================================= */
-
-const visor =
-document
-.getElementById(
-  "visor"
-);
-
-
-visor
-.setAttribute(
-  "scrolling",
-  "no"
-);
-
-
-visor
-.addEventListener(
-  "load",
-  function(){
-
-
-    const iframe =
-    this;
-
-
-    /*
-    Primera ejecución inmediata.
-    */
-
-    procesarIframe(
-      iframe
-    );
-
-
-    /*
-    Supabase puede cargar la tabla después.
-    Repetimos el ajuste.
-    */
-
-    [
-      100,
-      300,
-      700,
-      1200,
-      2000,
-      3500
-    ]
-    .forEach(
-      tiempo => {
-
-
-        setTimeout(
-          function(){
-
-            procesarIframe(
-              iframe
-            );
-
-          },
-          tiempo
-        );
-
-
-      }
-    );
-
-
-    /* =====================================================
-       OBSERVAR CAMBIOS INTERNOS
-    ===================================================== */
-
-    try{
-
-
-      const doc =
-      iframe
-      .contentWindow
-      .document;
-
-
-      let pendiente =
-      false;
-
-
-      const observer =
-      new MutationObserver(
-        function(){
-
-
-          if(
-            pendiente
-          ){
-            return;
-          }
-
-
-          pendiente =
-          true;
-
-
-          requestAnimationFrame(
-            function(){
-
-
-              procesarIframe(
-                iframe
-              );
-
-
-              pendiente =
-              false;
-
-
-            }
-          );
-
-
-        }
-      );
-
-
-      observer.observe(
-        doc.body,
-        {
-
-          childList:true,
-
-          subtree:true
-
-        }
-      );
-
-
-      /* =================================================
-         OBSERVAR CAMBIOS DE TAMAÑO
-      ================================================= */
-
-      if(
-        window.ResizeObserver
-      ){
-
-
-        const resizeObserver =
-        new ResizeObserver(
-          function(){
-
-
-            ajustarAltura(
-              iframe
-            );
-
-
-          }
-        );
-
-
-        resizeObserver.observe(
-          doc.body
-        );
-
-
-      }
-
-
-    }
-    catch(error){
-
-      console.log(
-        "Error creando observadores:",
-        error
-      );
-
-    }
-
-
-  }
-);
-
-
-/* =========================================================
-   CAMBIO DE TAMAÑO DE PANTALLA
-========================================================= */
+/* CAMBIO DE TAMAÑO DE PANTALLA */
 
 let resizeTimer;
 
+window.addEventListener("resize", function() {
 
-window.addEventListener(
-  "resize",
-  function(){
+  clearTimeout(resizeTimer);
 
+  resizeTimer = setTimeout(() => {
 
-    clearTimeout(
-      resizeTimer
+    procesarIframe(
+      document.getElementById("visor")
     );
 
+  }, 150);
 
-    resizeTimer =
-    setTimeout(
-      function(){
-
-
-        procesarIframe(
-          document
-          .getElementById(
-            "visor"
-          )
-        );
-
-
-      },
-      150
-    );
-
-
-  }
-);
-
+});
 
 </script>
 
 </body>
-
 </html>
