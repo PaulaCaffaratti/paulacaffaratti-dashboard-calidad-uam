@@ -2249,10 +2249,7 @@ title="Dashboard Observaciones Blister">
       Consultando hallazgos...
     </div>
 
-    <div id="hallazgosKpis"
-         style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:22px 0;">
-    </div>
-
+   
 <!-- RESUMEN GENERAL DE NO CONFORMIDADES -->
 <div id="hallazgosResumenGeneral"
      style="background:white;border:1px solid #e0e7ec;border-radius:14px;padding:24px;margin:24px 0;">
@@ -6759,13 +6756,7 @@ async function descargarInformeCompleto(){
         `${pecom.length} NC PECOM · ` +
         `${clienteNC.length} NC Cliente`;
 
-      $h("hallazgosKpis").innerHTML =
-        tarjeta(
-          pecom.length + clienteNC.length,
-          "Total de no conformidades"
-        ) +
-        tarjeta(pecom.length, "NC PECOM") +
-        tarjeta(clienteNC.length, "NC Cliente");
+ 
 actualizarResumenGeneralNC();
       window.seleccionarHallazgos(tipoActual);
 
