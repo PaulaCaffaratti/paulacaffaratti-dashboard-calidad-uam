@@ -6675,6 +6675,168 @@ let graficoVencidasNC = null;
     });
   }
 
+  // DETALLE DE NC VENCIDAS
+  function mostrarDetalleVencidasNC(tipo) {
+    const registros = window.detalleNCVencidas?.[tipo] || [];
+
+    // Cerrar cualquier ventana anterior
+    document.getElementById("modalDetalleNCVencidas")?.remove();
+
+    const fondo = document.createElement("div");
+    fondo.id = "modalDetalleNCVencidas";
+    fondo.style.cssText = `
+      position:fixed;
+      inset:0;
+      background:rgba(10,30,50,.65);
+      z-index:99999;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    `;
+
+    const ventana = document.createElement("div");
+    ventana.style.cssText = `
+      background:white;
+      border-radius:16px;
+      width:min(1100px,96vw);
+      max-height:88vh;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    `;
+
+    const cabecera = document.createElement("div");
+    cabecera.style.cssText = `
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:15px;
+      padding:20px 24px;
+      border-bottom:1px solid #e0e7ec;
+    `;
+
+    const titulo = document.createElement("h3");
+    titulo.textContent = tipo + " · " + registros.length;
+    titulo.style.cssText = "margin:0;color:#0b3568;";
+
+    const cerrar = document.createElement("button");
+    cerrar.type = "button";
+    cerrar.textContent = "✕";
+    cerrar.style.cssText = `
+      border:0;
+      background:#edf1f4;
+      border-radius:50%;
+      width:36px;
+      height:36px;
+      cursor:pointer;
+      font-size:18px;
+    `;
+    cerrar.onclick = () => fondo.remove();
+
+    cabecera.append(titulo, cerrar);
+
+    const contenido = document.createElement("div");
+    contenido.style.cssText = "overflow:auto;padding:20px;";
+
+    const tabla = document.createElement("table");
+    tabla.style.cssText = `
+      width:100%;
+      border-collapse:collapse;
+      font-size:12px;
+    `;
+
+    const encabezados = [
+      "Origen",
+      "Código / ID",
+      "Especialidad",
+      "Descripción",
+      "Vencimiento",
+      "Fecha de cierre"
+    ];
+
+    const thead = document.createElement("thead");
+    const filaCabecera = document.createElement("tr");
+
+    encabezados.forEach(nombre => {
+      const th = document.createElement("th");
+      th.textContent = nombre;
+      th.style.cssText = `
+        padding:12px;
+        background:#0b3568;
+        color:white;
+        text-align:left;
+      `;
+      filaCabecera.appendChild(th);
+    });
+
+    thead.appendChild(filaCabecera);
+    tabla.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+
+    registros.forEach(r => {
+      const datos = r.datos || {};
+
+      const valores = [
+        r.origen,
+        r.codigo || campo(datos, ["ID", "Código"]),
+        campo(datos, ["Especialidad"]),
+        campo(datos, [
+          "Observaciones",
+          "Descripción",
+          "Descripcion"
+        ]),
+        r.origen === "Cliente"
+          ? "Sí"
+          : campo(datos, [
+              "Fecha límite análisis",
+              "Fecha limite analisis",
+              "Fecha límite de análisis"
+            ]),
+        campo(datos, [
+          "Fecha Cierre",
+          "Fecha de cierre",
+          "Fecha de Cierre"
+        ])
+      ];
+
+      const tr = document.createElement("tr");
+
+      valores.forEach(valor => {
+        const td = document.createElement("td");
+        td.textContent = valor || "—";
+        td.style.cssText = `
+          padding:12px;
+          border-bottom:1px solid #e8edf1;
+          vertical-align:top;
+          min-width:100px;
+          overflow-wrap:anywhere;
+        `;
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    });
+
+    tabla.appendChild(tbody);
+    contenido.appendChild(tabla);
+
+    if (!registros.length) {
+      const mensaje = document.createElement("p");
+      mensaje.textContent = "No hay NC vencidas en esta categoría.";
+      contenido.appendChild(mensaje);
+    }
+
+    ventana.append(cabecera, contenido);
+    fondo.appendChild(ventana);
+    document.body.appendChild(fondo);
+
+    fondo.addEventListener("click", evento => {
+      if (evento.target === fondo) fondo.remove();
+    });
+  }
+
   function actualizarResumenGeneralNC() {
     const total = pecom.length + clienteNC.length;
 
