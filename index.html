@@ -6452,8 +6452,10 @@ async function descargarInformeCompleto(){
 
       ultimaCarga = Date.now();
 
-      /* ELIMINAR DUPLICADOS ENTRE NC PECOM Y NC CLIENTE
-         Se conserva siempre la NC Cliente.
+  
+      /* DEDUPLICACIÓN NC PECOM / NC CLIENTE
+         Prioridad: NC Cliente.
+         Se comparan las descripciones por similitud.
          No se modifica ningún registro de Supabase.
       */
 
@@ -6462,37 +6464,101 @@ async function descargarInformeCompleto(){
           .normalize("NFD")
           .replace(/[\u0300-\u036f]/g, "")
           .toLowerCase()
-          .replace(/\s+/g, " ")
-          .trim();
+          .replace(/[^a-z0-9]/g, "");
       }
 
-      // Reunir todas las observaciones de NC Cliente
-      const observacionesCliente = new Set(
-        clienteNC
-          .map(r => normalizarTextoNC(
-            campo(r.datos, ["Observaciones"])
-          ))
-          .filter(texto => texto.length > 0)
-      );
+      function similitudNC(texto1, texto2) {
+        const a = normalizarTextoNC(texto1);
+        const b = normalizarTextoNC(texto2);
 
-      // Excluir de PECOM las descripciones
-      // que ya existen en NC Cliente
+        if (!a || !b) return 0;
+        if (a === b) return 1;
+
+        const tamano = 5;
+
+        function fragmentos(texto) {
+          const resultado = new Set();
+
+          for (let i = 0; i <= texto.length - tamano; i++) {
+            resultado.add(texto.slice(i, i + tamano));
+          }
+
+          return resultado;
+        }
+
+        const conjuntoA = fragmentos(a);
+        const conjuntoB = fragmentos(b);
+
+        if (!conjuntoA.size || !conjuntoB.size) return 0;
+
+        let coincidencias = 0;
+
+        for (const fragmento of conjuntoA) {
+          if (conjuntoB.has(fragmento)) {
+            coincidencias++;
+          }
+        }
+
+        return (2 * coincidencias) /
+          (conjuntoA.size + conjuntoB.size);
+      }
+
+      const observacionesCliente = clienteNC
+        .map(r => ({
+          codigo: r.codigo,
+          texto: campo(r.datos, ["Observaciones"])
+        }))
+        .filter(r => normalizarTextoNC(r.texto).length > 0);
+
       const pecomOriginal = pecom.length;
+      const coincidenciasDetectadas = [];
 
       pecom = pecom.filter(r => {
-        const descripcion = normalizarTextoNC(
-          campo(r.datos, ["Descripción", "Descripcion"])
+        const descripcion = campo(
+          r.datos,
+          ["Descripción", "Descripcion"]
         );
 
-        if (!descripcion) return true;
+        if (!normalizarTextoNC(descripcion)) {
+          return true;
+        }
 
-        return !observacionesCliente.has(descripcion);
+        let mejorCoincidencia = null;
+        let mayorSimilitud = 0;
+
+        for (const nc of observacionesCliente) {
+          const similitud = similitudNC(
+            descripcion,
+            nc.texto
+          );
+
+          if (similitud > mayorSimilitud) {
+            mayorSimilitud = similitud;
+            mejorCoincidencia = nc;
+          }
+        }
+
+        // Si la similitud es 95% o mayor,
+        // la NC se contabiliza solamente en Cliente.
+        if (mayorSimilitud >= 0.95) {
+          coincidenciasDetectadas.push({
+            codigoPecom: r.codigo,
+            codigoCliente: mejorCoincidencia.codigo,
+            similitud: (mayorSimilitud * 100).toFixed(2) + "%"
+          });
+
+          return false;
+        }
+
+        return true;
       });
 
       console.log(
-        "NC PECOM duplicadas con Cliente:",
+        "NC PECOM excluidas por coincidencia con Cliente:",
         pecomOriginal - pecom.length
       );
+
+      console.table(coincidenciasDetectadas);
 
       estado.textContent =
         `${pecom.length + clienteNC.length} no conformidades · ` +
