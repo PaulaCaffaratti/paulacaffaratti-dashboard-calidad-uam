@@ -6549,11 +6549,9 @@ async function descargarInformeCompleto(){
     const etiquetas = Object.keys(conteos);
     const cantidades = Object.values(conteos);
     const colores = [
-      "#dc3b3b",
-      "#179447",
-      "#f28c28",
-      "#8b9bab"
-    ];
+  "#f28c28", // Abiertas: naranja
+  "#179447"  // Cerradas: verde
+];
 
     const estadosCanvas = $h("graficoNCEstados");
 
