@@ -6594,50 +6594,7 @@ async function descargarInformeCompleto(){
       });
     }
 
-    const indicadores = [
-      ["Vencidas", "#dc3b3b"],
-      ["Cerradas", "#179447"],
-      ["Sin tratar", "#f28c28"],
-      ["Otros estados", "#8b9bab"]
-    ];
 
-    const contenedor = $h("hallazgosResumenEstados");
-
-    if (contenedor) {
-      contenedor.innerHTML = indicadores.map(
-        ([nombre, color]) => {
-          const cantidad = conteos[nombre];
-
-          return `
-            <div style="
-              border:1px solid #e0e7ec;
-              border-top:4px solid ${color};
-              border-radius:12px;
-              padding:18px;
-              background:#fff;
-            ">
-              <div style="
-                font-size:12px;
-                color:#687787;
-                margin-bottom:10px;
-              ">${nombre}</div>
-
-              <div style="
-                font-size:32px;
-                color:#0b3568;
-                font-weight:600;
-              ">${cantidad}</div>
-
-              <div style="
-                font-size:14px;
-                color:${color};
-                margin-top:8px;
-              ">${porcentaje(cantidad)}%</div>
-            </div>
-          `;
-        }
-      ).join("");
-    }
   }
 
   async function cargarHallazgos() {
