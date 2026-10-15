@@ -6201,6 +6201,256 @@ async function descargarInformeCompleto(){
 
 </script>
 
+<script>
+/* ==========================================
+   HALLAZGOS UAM - DASHBOARD
+   ========================================== */
+
+(function () {
+  const PROYECTO = "EPC Proyecto UAM - ALVS";
+  let hallazgos = [];
+  let cargando = false;
+  let ultimaCarga = 0;
+
+  const $h = id => document.getElementById(id);
+
+  function escaparHTML(valor) {
+    return String(valor ?? "").replace(/[&<>"']/g, c => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[c]));
+  }
+
+  function campo(datos, nombres) {
+    const claves = Object.keys(datos || {});
+    for (const nombre of nombres) {
+      const clave = claves.find(k =>
+        k.trim().toLowerCase() === nombre.toLowerCase()
+      );
+      if (clave && String(datos[clave] ?? "").trim()) {
+        return String(datos[clave]).trim();
+      }
+    }
+    return "";
+  }
+
+  function tarjeta(valor, titulo) {
+    return `
+      <div style="
+        background:#fff;
+        border:1px solid #e0e7ec;
+        border-radius:12px;
+        padding:20px;">
+        <div style="
+          color:#0b3568;
+          font-size:30px;
+          font-weight:600;">
+          ${valor}
+        </div>
+        <div style="
+          color:#687787;
+          font-size:12px;
+          margin-top:7px;">
+          ${escaparHTML(titulo)}
+        </div>
+      </div>`;
+  }
+
+  function pintarHallazgos() {
+    const kpis = $h("hallazgosKpis");
+    if (!kpis) return;
+
+    const estados = {};
+
+    hallazgos.forEach(registro => {
+      const estado = campo(registro.datos, [
+        "Estado actual",
+        "Estado Actual",
+        "Estado"
+      ]) || "Sin estado";
+
+      estados[estado] = (estados[estado] || 0) + 1;
+    });
+
+    const principales = Object.entries(estados)
+      .sort((a, b) => b[1] - a[1]);
+
+    kpis.innerHTML =
+      tarjeta(hallazgos.length, "Total de hallazgos") +
+      principales.map(([estado, cantidad]) =>
+        tarjeta(cantidad, estado)
+      ).join("");
+
+    window.filtrarHallazgos();
+  }
+
+  window.filtrarHallazgos = function () {
+    const tbody = $h("hallazgosTabla");
+    if (!tbody) return;
+
+    const busqueda = ($h("hallazgosBuscar")?.value || "")
+      .trim()
+      .toLowerCase();
+
+    const filtrados = hallazgos.filter(registro =>
+      JSON.stringify(registro).toLowerCase().includes(busqueda)
+    );
+
+    if (!filtrados.length) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="4" style="padding:18px;color:#687787;">
+            No hay hallazgos para mostrar.
+          </td>
+        </tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtrados.map(registro => {
+      const datos = registro.datos || {};
+
+      const codigo = registro.codigo || campo(datos, ["Código"]);
+      const tipo = campo(datos, [
+        "Tipo de Desvío",
+        "Tipo de desvío",
+        "Tipo de Desvio"
+      ]);
+      const estado = campo(datos, [
+        "Estado actual",
+        "Estado Actual",
+        "Estado"
+      ]);
+      const descripcion = campo(datos, [
+        "Descripción",
+        "Descripcion"
+      ]);
+
+      return `
+        <tr>
+          <td style="padding:11px;border-bottom:1px solid #e6ebef;">
+            ${escaparHTML(codigo)}
+          </td>
+          <td style="padding:11px;border-bottom:1px solid #e6ebef;">
+            ${escaparHTML(tipo)}
+          </td>
+          <td style="padding:11px;border-bottom:1px solid #e6ebef;">
+            ${escaparHTML(estado)}
+          </td>
+          <td style="padding:11px;border-bottom:1px solid #e6ebef;">
+            ${escaparHTML(descripcion)}
+          </td>
+        </tr>`;
+    }).join("");
+  };
+
+  async function cargarHallazgos() {
+    const estado = $h("hallazgosEstado");
+    if (!estado || cargando) return;
+
+    if (
+      ultimaCarga &&
+      Date.now() - ultimaCarga < 15000
+    ) return;
+
+    cargando = true;
+    estado.textContent = "Consultando hallazgos...";
+
+    try {
+      if (!window.supabase?.createClient) {
+        throw new Error("No se cargó la biblioteca de Supabase.");
+      }
+
+      const cliente = window.supabase.createClient(
+        "https://mzgbtejfgsrskiuymtwh.supabase.co",
+        "sb_publishable_Wen9hxBnae8wRrEEaP5lOQ_aNl9OCGd",
+        {
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+            detectSessionInUrl: false
+          }
+        }
+      );
+
+      const todos = [];
+      let desde = 0;
+      const tamano = 1000;
+
+      while (true) {
+        const { data, error } = await cliente
+          .from("uam_hallazgos")
+          .select("codigo,datos")
+          .order("codigo", { ascending: true })
+          .range(desde, desde + tamano - 1);
+
+        if (error) throw error;
+
+        todos.push(...(data || []));
+
+        if (!data || data.length < tamano) break;
+
+        desde += tamano;
+      }
+
+      hallazgos = todos.filter(registro =>
+        campo(registro.datos, [
+          "Proyecto/Planta/Servicio"
+        ]) === PROYECTO
+      );
+
+      ultimaCarga = Date.now();
+
+      estado.textContent =
+        hallazgos.length +
+        " hallazgos registrados · EPC Proyecto UAM - ALVS";
+
+      pintarHallazgos();
+
+    } catch (error) {
+      estado.textContent =
+        "No se pudieron cargar los hallazgos: " +
+        error.message;
+      console.error("Hallazgos UAM:", error);
+    } finally {
+      cargando = false;
+    }
+  }
+
+  // Cargar al abrir la pestaña Hallazgos.
+  document.addEventListener("click", function (evento) {
+    const elemento = evento.target.closest(
+      "button,a,[role='tab']"
+    );
+
+    if (!elemento) return;
+
+    if (
+      elemento.textContent.trim().toUpperCase() === "HALLAZGOS"
+    ) {
+      setTimeout(cargarHallazgos, 100);
+    }
+  });
+
+  // Cargar si Hallazgos ya está visible.
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () {
+      const seccion = $h("hallazgos");
+      if (seccion && getComputedStyle(seccion).display !== "none") {
+        cargarHallazgos();
+      }
+    });
+  } else {
+    const seccion = $h("hallazgos");
+    if (seccion && getComputedStyle(seccion).display !== "none") {
+      cargarHallazgos();
+    }
+  }
+})();
+</script>
+  
 </body>
 
 </html>
