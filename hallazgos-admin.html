@@ -1,0 +1,736 @@
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Administración de Hallazgos UAM</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<style>
+
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --azul: #0b3568;
+  --celeste: #60c5e8;
+  --gris: #687787;
+  --fondo: #f4f7f9;
+  --borde: #e0e7ec;
+  --verde: #179447;
+  --rojo: #dc3b3b;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background: var(--fondo);
+  color: #243448;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+h1 {
+  margin: 0 0 8px;
+  color: var(--azul);
+  font-size: 23px;
+  font-weight: 600;
+}
+
+h2 {
+  margin: 0 0 16px;
+  color: var(--azul);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+p {
+  color: var(--gris);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.encabezado {
+  margin-bottom: 22px;
+}
+
+.panel {
+  background: white;
+  border: 1px solid var(--borde);
+  border-radius: 14px;
+  padding: 22px;
+  margin-bottom: 18px;
+}
+
+.filtro {
+  background: #eef7fb;
+  border-left: 4px solid var(--celeste);
+  padding: 13px 16px;
+  border-radius: 8px;
+  margin-bottom: 18px;
+  color: #31566e;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+input[type="file"] {
+  display: block;
+  width: 100%;
+  max-width: 500px;
+  padding: 12px;
+  border: 1px solid #d7e0e7;
+  border-radius: 9px;
+  background: white;
+  font-size: 12px;
+}
+
+button {
+  background: var(--azul);
+  color: white;
+  border: 0;
+  border-radius: 9px;
+  padding: 12px 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 16px;
+}
+
+button:hover:not(:disabled) {
+  background: #174f8a;
+}
+
+button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.resumen {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.dato {
+  background: #f7f9fb;
+  border: 1px solid #e6ebef;
+  padding: 18px;
+  border-radius: 11px;
+}
+
+.dato strong {
+  display: block;
+  color: var(--azul);
+  font-size: 30px;
+  margin-bottom: 6px;
+}
+
+.dato span {
+  color: var(--gris);
+  font-size: 11px;
+}
+
+.estado {
+  margin-top: 16px;
+  padding: 12px 14px;
+  background: #eef7fb;
+  color: #31566e;
+  border-radius: 9px;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.estado.error {
+  background: #fdecec;
+  color: #a62f2f;
+}
+
+.estado.ok {
+  background: #eaf8ef;
+  color: #176d3c;
+}
+
+.tablaContenedor {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+th {
+  background: #eef3f8;
+  color: var(--azul);
+  padding: 11px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+td {
+  border-bottom: 1px solid #e5ebf0;
+  padding: 10px 11px;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+tr:hover td {
+  background: #f8fbfd;
+}
+
+.nota {
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--gris);
+}
+
+@media(max-width:700px) {
+
+  body {
+    padding: 12px;
+  }
+
+  .panel {
+    padding: 16px;
+  }
+
+  .resumen {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="encabezado">
+
+  <h1>Hallazgos</h1>
+
+  <p>
+    Administración de hallazgos · Calidad UAM
+  </p>
+
+</div>
+
+<div class="panel">
+
+  <h2>Importación de Excel</h2>
+
+  <div class="filtro">
+
+    <strong>Filtro automático</strong>
+
+    <p>
+      Se incluirán únicamente los registros cuya
+      columna AK (Proyecto/Planta/Servicio)
+      sea exactamente:
+    </p>
+
+    <strong>EPC Proyecto UAM - ALVS</strong>
+
+    <p>
+      Cada nueva carga reemplazará completamente
+      los hallazgos anteriores, únicamente
+      después de confirmar.
+    </p>
+
+  </div>
+
+  <input
+    type="file"
+    id="archivo"
+    accept=".xls,.xlsx,.html,.htm"
+  >
+
+  <div id="estado" class="estado">
+    Seleccioná un Excel para comenzar el análisis.
+  </div>
+
+  <div id="resumen" class="resumen"></div>
+
+  <button id="confirmar" disabled>
+    Confirmar reemplazo de hallazgos
+  </button>
+
+</div>
+
+<div class="panel">
+
+  <h2>Vista previa de hallazgos</h2>
+
+  <div class="tablaContenedor">
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Tipo de desvío</th>
+          <th>Estado actual</th>
+          <th>Descripción</th>
+        </tr>
+      </thead>
+
+      <tbody id="filas">
+        <tr>
+          <td colspan="4">
+            Todavía no se cargó ningún archivo.
+          </td>
+        </tr>
+      </tbody>
+
+    </table>
+
+  </div>
+
+  <p class="nota">
+    Se muestran hasta 50 registros en la vista previa.
+    La confirmación procesa todos los hallazgos válidos.
+  </p>
+
+</div>
+
+<script>
+
+/* CONEXIÓN SUPABASE */
+
+const db = window.supabase.createClient(
+  "https://mzgbtejfgsrskiuymtwh.supabase.co",
+  "sb_publishable_Wen9hxBnae8wRrEEaP5lOQ_aNl9OCGd"
+);
+
+/* CONFIGURACIÓN */
+
+const PROYECTO = "EPC Proyecto UAM - ALVS";
+
+const COLUMNA_AK = 36;
+
+let registros = [];
+
+const $ = id => document.getElementById(id);
+
+/* ESCAPAR TEXTO PARA LA TABLA */
+
+function escapar(valor) {
+
+  return String(valor ?? "").replace(
+    /[&<>"']/g,
+    caracter => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[caracter])
+  );
+
+}
+
+/* MOSTRAR ESTADO */
+
+function mostrarEstado(mensaje, tipo = "") {
+
+  const elemento = $("estado");
+
+  elemento.textContent = mensaje;
+
+  elemento.className = "estado";
+
+  if (tipo) {
+    elemento.classList.add(tipo);
+  }
+
+}
+
+/* LECTURA DE ARCHIVO */
+
+async function leerExcel(archivo) {
+
+  const buffer = await archivo.arrayBuffer();
+
+  const inicio = new TextDecoder(
+    "windows-1252"
+  ).decode(buffer.slice(0, 500));
+
+  let libro;
+
+  if (/<table|<h3|<!doctype|<html/i.test(inicio)) {
+
+    const contenido = new TextDecoder(
+      "windows-1252"
+    ).decode(buffer);
+
+    libro = XLSX.read(contenido, {
+      type: "string"
+    });
+
+  } else {
+
+    libro = XLSX.read(buffer, {
+      type: "array",
+      cellDates: true
+    });
+
+  }
+
+  let matriz = [];
+
+  for (const nombre of libro.SheetNames) {
+
+    const hoja = libro.Sheets[nombre];
+
+    const filas = XLSX.utils.sheet_to_json(
+      hoja,
+      {
+        header: 1,
+        defval: "",
+        raw: false
+      }
+    );
+
+    if (filas.length > matriz.length) {
+      matriz = filas;
+    }
+
+  }
+
+  return matriz;
+
+}
+
+/* ANALIZAR EXCEL */
+
+$("archivo").addEventListener(
+  "change",
+  async function(evento) {
+
+    registros = [];
+
+    $("confirmar").disabled = true;
+
+    $("resumen").innerHTML = "";
+
+    $("filas").innerHTML = "";
+
+    const archivo = evento.target.files[0];
+
+    if (!archivo) {
+      mostrarEstado("Seleccioná un archivo.");
+      return;
+    }
+
+    mostrarEstado("Analizando archivo...");
+
+    try {
+
+      const matriz = await leerExcel(archivo);
+
+      /* IDENTIFICAR ENCABEZADOS */
+
+      const indiceEncabezado = matriz.findIndex(
+        fila => fila.some(
+          celda =>
+            String(celda).trim() ===
+            "Proyecto/Planta/Servicio"
+        )
+      );
+
+      if (indiceEncabezado < 0) {
+
+        throw new Error(
+          "No se encontró el encabezado Proyecto/Planta/Servicio."
+        );
+
+      }
+
+      const encabezados = matriz[
+        indiceEncabezado
+      ].map(
+        (valor, indice) =>
+          String(
+            valor || "Columna " + (indice + 1)
+          ).trim()
+      );
+
+      /* VALIDAR COLUMNA AK */
+
+      if (
+        encabezados[COLUMNA_AK] !==
+        "Proyecto/Planta/Servicio"
+      ) {
+
+        throw new Error(
+          "La columna AK no corresponde a Proyecto/Planta/Servicio. " +
+          "Se canceló la carga para evitar datos incorrectos."
+        );
+
+      }
+
+      /* FILTRAR PROYECTO */
+
+      const todasLasFilas = matriz.slice(
+        indiceEncabezado + 1
+      ).filter(
+        fila => fila.some(
+          celda => String(celda ?? "").trim() !== ""
+        )
+      );
+
+      const filasUAM = todasLasFilas.filter(
+        fila =>
+          String(
+            fila[COLUMNA_AK] ?? ""
+          ).trim() === PROYECTO
+      );
+
+      /* PREPARAR REGISTROS */
+
+      const mapa = new Map();
+
+      for (const fila of filasUAM) {
+
+        const datos = {};
+
+        encabezados.forEach(
+          (encabezado, indice) => {
+
+            datos[encabezado] = String(
+              fila[indice] ?? ""
+            );
+
+          }
+        );
+
+        const codigo = String(
+          datos["Código"] ?? ""
+        ).trim();
+
+        if (!codigo) {
+
+          throw new Error(
+            "Hay un hallazgo sin Código. Se canceló la carga."
+          );
+
+        }
+
+        if (mapa.has(codigo)) {
+
+          throw new Error(
+            "Código duplicado dentro del Excel: " +
+            codigo
+          );
+
+        }
+
+        mapa.set(codigo, {
+          codigo: codigo,
+          datos: datos
+        });
+
+      }
+
+      registros = [...mapa.values()];
+
+      /* RESUMEN */
+
+      $("resumen").innerHTML = `
+
+        <div class="dato">
+          <strong>${todasLasFilas.length}</strong>
+          <span>Registros leídos</span>
+        </div>
+
+        <div class="dato">
+          <strong>${registros.length}</strong>
+          <span>Hallazgos UAM</span>
+        </div>
+
+        <div class="dato">
+          <strong>
+            ${todasLasFilas.length - filasUAM.length}
+          </strong>
+          <span>Registros excluidos</span>
+        </div>
+
+      `;
+
+      /* VISTA PREVIA */
+
+      $("filas").innerHTML = registros
+        .slice(0, 50)
+        .map(registro => {
+
+          const datos = registro.datos;
+
+          return `
+
+            <tr>
+
+              <td>
+                ${escapar(datos["Código"])}
+              </td>
+
+              <td>
+                ${escapar(datos["Tipo de Desvío"])}
+              </td>
+
+              <td>
+                ${escapar(datos["Estado actual"])}
+              </td>
+
+              <td>
+                ${escapar(datos["Descripción"])}
+              </td>
+
+            </tr>
+
+          `;
+
+        })
+        .join("");
+
+      if (!registros.length) {
+
+        $("filas").innerHTML = `
+          <tr>
+            <td colspan="4">
+              No se encontraron hallazgos del proyecto UAM.
+            </td>
+          </tr>
+        `;
+
+        mostrarEstado(
+          "El Excel no contiene registros del proyecto indicado.",
+          "error"
+        );
+
+        return;
+
+      }
+
+      mostrarEstado(
+        "Análisis terminado. Se encontraron " +
+        registros.length +
+        " hallazgos de EPC Proyecto UAM - ALVS. " +
+        "Revisá la vista previa antes de confirmar.",
+        "ok"
+      );
+
+      $("confirmar").disabled = false;
+
+    } catch(error) {
+
+      mostrarEstado(
+        "Error al analizar el Excel: " +
+        error.message,
+        "error"
+      );
+
+    }
+
+  }
+);
+
+/* CONFIRMAR REEMPLAZO */
+
+$("confirmar").addEventListener(
+  "click",
+  async function() {
+
+    if (!registros.length) {
+      return;
+    }
+
+    const cantidad = registros.length;
+
+    const aceptar = confirm(
+      "¿Confirmás reemplazar TODOS los hallazgos " +
+      "actuales por los " +
+      cantidad +
+      " registros del nuevo Excel?\n\n" +
+      "Los registros anteriores dejarán de figurar."
+    );
+
+    if (!aceptar) {
+      return;
+    }
+
+    const boton = $("confirmar");
+
+    boton.disabled = true;
+
+    mostrarEstado(
+      "Guardando reemplazo en Supabase..."
+    );
+
+    try {
+
+      /* VALIDAR SESIÓN */
+
+      const respuesta = await db.auth.getUser();
+
+      const usuario = respuesta.data?.user;
+
+      if (respuesta.error || !usuario) {
+
+        throw new Error(
+          "Tenés que iniciar sesión en Administración " +
+          "de Documentación antes de confirmar la carga."
+        );
+
+      }
+
+      /* REEMPLAZO ATÓMICO */
+
+      const resultado = await db.rpc(
+        "reemplazar_uam_hallazgos",
+        {
+          p_registros: registros
+        }
+      );
+
+      if (resultado.error) {
+        throw resultado.error;
+      }
+
+      mostrarEstado(
+        "✓ Reemplazo completado correctamente.\n" +
+        cantidad +
+        " hallazgos guardados en Supabase.\n" +
+        "El dashboard mostrará los datos nuevos " +
+        "cuando se actualice.",
+        "ok"
+      );
+
+    } catch(error) {
+
+      mostrarEstado(
+        "No se reemplazaron los hallazgos.\n" +
+        error.message,
+        "error"
+      );
+
+      boton.disabled = false;
+
+    }
+
+  }
+);
+
+</script>
+
+</body>
+</html>
