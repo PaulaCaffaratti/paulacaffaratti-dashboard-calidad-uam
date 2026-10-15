@@ -6446,6 +6446,40 @@ async function descargarInformeCompleto(){
   let graficoOrigenNC = null;
   let graficoEstadosNC = null;
 
+  // Muestra el total en el centro de los gráficos de NC
+  const pluginTotalCentroNC = {
+    id: "totalCentroNC",
+
+    afterDraw(chart) {
+      const { ctx, chartArea } = chart;
+
+      if (!chartArea || chart.config.type !== "doughnut") return;
+
+      const total = chart.data.datasets[0].data.reduce(
+        (suma, valor) => suma + Number(valor || 0), 0
+      );
+
+      const centroX = (chartArea.left + chartArea.right) / 2;
+      const centroY = (chartArea.top + chartArea.bottom) / 2;
+
+      ctx.save();
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      ctx.fillStyle = "#0b3568";
+      ctx.font = "bold 32px Arial";
+      ctx.fillText(total, centroX, centroY - 10);
+
+      ctx.fillStyle = "#687787";
+      ctx.font = "12px Arial";
+      ctx.fillText("Total NC", centroX, centroY + 18);
+
+      ctx.restore();
+    }
+  };
+
+  Chart.register(pluginTotalCentroNC);
+
   function actualizarResumenGeneralNC() {
     const total = pecom.length + clienteNC.length;
 
