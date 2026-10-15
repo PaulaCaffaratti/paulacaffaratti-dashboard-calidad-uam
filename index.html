@@ -6503,62 +6503,48 @@ async function descargarInformeCompleto(){
       });
     }
 
+    
     const conteos = {
-      "Vencidas": 0,
-      "Cerradas": 0,
-      "Sin tratar": 0,
-      "Otros estados": 0
+      "Abiertas": 0,
+      "Cerradas": 0
     };
 
     function normalizarEstado(valor) {
       return String(valor ?? "")
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .trim();
+        .trim()
+        .toLowerCase();
     }
 
-    function clasificarNC(registro, origen) {
-      const datos = registro.datos || {};
-
+    // NC Cliente: columna J = Estado
+    clienteNC.forEach(r => {
       const estado = normalizarEstado(
-        campo(datos, ["Estado", "Estado actual"])
+        campo(r.datos, ["Estado"])
       );
 
-      const vencido = normalizarEstado(
-        campo(datos, ["Vencido"])
-      );
-
-      if (
-        estado.includes("cerrad") ||
-        estado.includes("finalizad") ||
-        estado.includes("resuelt") ||
-        estado.includes("anulad")
-      ) {
-        // Anuladas se mantienen en Otros estados.
-        if (estado.includes("anulad")) {
-          conteos["Otros estados"]++;
-        } else {
-          conteos["Cerradas"]++;
-        }
-      } else if (
-        estado.includes("vencid") ||
-        (origen === "cliente" &&
-         ["si", "true", "1"].includes(vencido))
-      ) {
-        conteos["Vencidas"]++;
-      } else if (
-        estado.includes("sin tratar") ||
-        estado.includes("sin tratamiento")
-      ) {
-        conteos["Sin tratar"]++;
+      if (estado === "cerrado" || estado === "cerrada") {
+        conteos["Cerradas"]++;
       } else {
-        conteos["Otros estados"]++;
+        conteos["Abiertas"]++;
       }
-    }
+    });
 
-    clienteNC.forEach(r => clasificarNC(r, "cliente"));
-    pecom.forEach(r => clasificarNC(r, "pecom"));
+    // NC PECOM: columna AB = Fecha de cierre
+    pecom.forEach(r => {
+      const fechaCierre = campo(r.datos, [
+        "Fecha de cierre",
+        "Fecha Cierre",
+        "Fecha de Cierre"
+      ]);
+
+      if (fechaCierre) {
+        conteos["Cerradas"]++;
+      } else {
+        conteos["Abiertas"]++;
+      }
+    });
+
 
     const etiquetas = Object.keys(conteos);
     const cantidades = Object.values(conteos);
