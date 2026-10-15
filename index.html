@@ -6452,6 +6452,48 @@ async function descargarInformeCompleto(){
 
       ultimaCarga = Date.now();
 
+      /* ELIMINAR DUPLICADOS ENTRE NC PECOM Y NC CLIENTE
+         Se conserva siempre la NC Cliente.
+         No se modifica ningún registro de Supabase.
+      */
+
+      function normalizarTextoNC(texto) {
+        return String(texto ?? "")
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
+      // Reunir todas las observaciones de NC Cliente
+      const observacionesCliente = new Set(
+        clienteNC
+          .map(r => normalizarTextoNC(
+            campo(r.datos, ["Observaciones"])
+          ))
+          .filter(texto => texto.length > 0)
+      );
+
+      // Excluir de PECOM las descripciones
+      // que ya existen en NC Cliente
+      const pecomOriginal = pecom.length;
+
+      pecom = pecom.filter(r => {
+        const descripcion = normalizarTextoNC(
+          campo(r.datos, ["Descripción", "Descripcion"])
+        );
+
+        if (!descripcion) return true;
+
+        return !observacionesCliente.has(descripcion);
+      });
+
+      console.log(
+        "NC PECOM duplicadas con Cliente:",
+        pecomOriginal - pecom.length
+      );
+
       estado.textContent =
         `${pecom.length + clienteNC.length} no conformidades · ` +
         `${pecom.length} NC PECOM · ` +
