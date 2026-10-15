@@ -2253,6 +2253,47 @@ title="Dashboard Observaciones Blister">
          style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:22px 0;">
     </div>
 
+<!-- RESUMEN GENERAL DE NO CONFORMIDADES -->
+<div id="hallazgosResumenGeneral"
+     style="background:white;border:1px solid #e0e7ec;border-radius:14px;padding:24px;margin:24px 0;">
+
+  <h3 style="margin:0 0 6px;color:#0b3568;font-size:20px;">
+    Resumen general de no conformidades
+  </h3>
+
+  <p style="margin:0 0 24px;color:#687787;font-size:12px;">
+    NC únicas · Las coincidencias se contabilizan en Cliente
+  </p>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;">
+
+    <div style="border:1px solid #e8edf1;border-radius:12px;padding:20px;">
+      <h4 style="color:#0b3568;margin:0 0 15px;">
+        NC por origen
+      </h4>
+      <div style="height:260px;position:relative;">
+        <canvas id="graficoNCOrigen"></canvas>
+      </div>
+    </div>
+
+    <div style="border:1px solid #e8edf1;border-radius:12px;padding:20px;">
+      <h4 style="color:#0b3568;margin:0 0 15px;">
+        NC por estado
+      </h4>
+      <div style="height:260px;position:relative;">
+        <canvas id="graficoNCEstados"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="hallazgosResumenEstados"
+       style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-top:22px;">
+  </div>
+
+</div>
+<!-- FIN RESUMEN GENERAL -->
+
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;">
 
       <button id="hallazgosBtnPecom"
@@ -6403,6 +6444,218 @@ async function descargarInformeCompleto(){
     return registros;
   }
 
+  /* GRÁFICOS DEL RESUMEN GENERAL DE NC */
+
+  let graficoOrigenNC = null;
+  let graficoEstadosNC = null;
+
+  function actualizarResumenGeneralNC() {
+    const total = pecom.length + clienteNC.length;
+
+    if (!window.Chart) {
+      console.warn("Chart.js no está disponible.");
+      return;
+    }
+
+    const porcentaje = cantidad =>
+      total ? (cantidad * 100 / total).toFixed(1) : "0,0";
+
+    // Los duplicados ya fueron excluidos de pecom.
+    // Cliente tiene prioridad.
+    const origenCanvas = $h("graficoNCOrigen");
+
+    if (origenCanvas) {
+      if (graficoOrigenNC) graficoOrigenNC.destroy();
+
+      graficoOrigenNC = new Chart(origenCanvas, {
+        type: "doughnut",
+        data: {
+          labels: ["NC Cliente", "NC PECOM únicas"],
+          datasets: [{
+            data: [clienteNC.length, pecom.length],
+            backgroundColor: ["#0b3568", "#60c5e8"],
+            borderWidth: 2,
+            borderColor: "#ffffff"
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: "64%",
+          plugins: {
+            legend: {
+              position: "bottom"
+            },
+            tooltip: {
+              callbacks: {
+                label: function(contexto) {
+                  const cantidad = contexto.parsed;
+                  return (
+                    contexto.label + ": " +
+                    cantidad + " (" +
+                    porcentaje(cantidad) + "%)"
+                  );
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    const conteos = {
+      "Vencidas": 0,
+      "Cerradas": 0,
+      "Sin tratar": 0,
+      "Otros estados": 0
+    };
+
+    function normalizarEstado(valor) {
+      return String(valor ?? "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+    }
+
+    function clasificarNC(registro, origen) {
+      const datos = registro.datos || {};
+
+      const estado = normalizarEstado(
+        campo(datos, ["Estado", "Estado actual"])
+      );
+
+      const vencido = normalizarEstado(
+        campo(datos, ["Vencido"])
+      );
+
+      if (
+        estado.includes("cerrad") ||
+        estado.includes("finalizad") ||
+        estado.includes("resuelt") ||
+        estado.includes("anulad")
+      ) {
+        // Anuladas se mantienen en Otros estados.
+        if (estado.includes("anulad")) {
+          conteos["Otros estados"]++;
+        } else {
+          conteos["Cerradas"]++;
+        }
+      } else if (
+        estado.includes("vencid") ||
+        (origen === "cliente" &&
+         ["si", "true", "1"].includes(vencido))
+      ) {
+        conteos["Vencidas"]++;
+      } else if (
+        estado.includes("sin tratar") ||
+        estado.includes("sin tratamiento")
+      ) {
+        conteos["Sin tratar"]++;
+      } else {
+        conteos["Otros estados"]++;
+      }
+    }
+
+    clienteNC.forEach(r => clasificarNC(r, "cliente"));
+    pecom.forEach(r => clasificarNC(r, "pecom"));
+
+    const etiquetas = Object.keys(conteos);
+    const cantidades = Object.values(conteos);
+    const colores = [
+      "#dc3b3b",
+      "#179447",
+      "#f28c28",
+      "#8b9bab"
+    ];
+
+    const estadosCanvas = $h("graficoNCEstados");
+
+    if (estadosCanvas) {
+      if (graficoEstadosNC) graficoEstadosNC.destroy();
+
+      graficoEstadosNC = new Chart(estadosCanvas, {
+        type: "doughnut",
+        data: {
+          labels: etiquetas,
+          datasets: [{
+            data: cantidades,
+            backgroundColor: colores,
+            borderWidth: 2,
+            borderColor: "#ffffff"
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: "64%",
+          plugins: {
+            legend: {
+              position: "bottom"
+            },
+            tooltip: {
+              callbacks: {
+                label: function(contexto) {
+                  const cantidad = contexto.parsed;
+                  return (
+                    contexto.label + ": " +
+                    cantidad + " (" +
+                    porcentaje(cantidad) + "%)"
+                  );
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    const indicadores = [
+      ["Vencidas", "#dc3b3b"],
+      ["Cerradas", "#179447"],
+      ["Sin tratar", "#f28c28"],
+      ["Otros estados", "#8b9bab"]
+    ];
+
+    const contenedor = $h("hallazgosResumenEstados");
+
+    if (contenedor) {
+      contenedor.innerHTML = indicadores.map(
+        ([nombre, color]) => {
+          const cantidad = conteos[nombre];
+
+          return `
+            <div style="
+              border:1px solid #e0e7ec;
+              border-top:4px solid ${color};
+              border-radius:12px;
+              padding:18px;
+              background:#fff;
+            ">
+              <div style="
+                font-size:12px;
+                color:#687787;
+                margin-bottom:10px;
+              ">${nombre}</div>
+
+              <div style="
+                font-size:32px;
+                color:#0b3568;
+                font-weight:600;
+              ">${cantidad}</div>
+
+              <div style="
+                font-size:14px;
+                color:${color};
+                margin-top:8px;
+              ">${porcentaje(cantidad)}%</div>
+            </div>
+          `;
+        }
+      ).join("");
+    }
+  }
+
   async function cargarHallazgos() {
     const estado = $h("hallazgosEstado");
 
@@ -6572,7 +6825,7 @@ async function descargarInformeCompleto(){
         ) +
         tarjeta(pecom.length, "NC PECOM") +
         tarjeta(clienteNC.length, "NC Cliente");
-
+actualizarResumenGeneralNC();
       window.seleccionarHallazgos(tipoActual);
 
     } catch(error) {
