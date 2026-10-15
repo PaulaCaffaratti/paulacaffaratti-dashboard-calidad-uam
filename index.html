@@ -2282,6 +2282,16 @@ title="Dashboard Observaciones Blister">
       </div>
     </div>
 
+    <!-- TERCER GRÁFICO: NC VENCIDAS -->
+    <div style="border:1px solid #e8edf1;border-radius:12px;padding:20px;">
+      <h4 style="color:#0b3568;margin:0 0 15px;">
+        NC vencidas
+      </h4>
+      <div style="height:260px;position:relative;">
+        <canvas id="graficoNCVencidas"></canvas>
+      </div>
+    </div>
+
   </div>
 
   <div id="hallazgosResumenEstados"
@@ -6443,9 +6453,10 @@ async function descargarInformeCompleto(){
 
   /* GRÁFICOS DEL RESUMEN GENERAL DE NC */
 
-  let graficoOrigenNC = null;
-  let graficoEstadosNC = null;
-
+let graficoOrigenNC = null;
+let graficoEstadosNC = null;
+let graficoVencidasNC = null;
+  
   // Muestra el total en el centro de los gráficos de NC
   const pluginTotalCentroNC = {
     id: "totalCentroNC",
@@ -6819,6 +6830,146 @@ async function descargarInformeCompleto(){
       });
     }
 
+
+    // TERCER GRÁFICO: NC VENCIDAS
+    function normalizarSi(valor) {
+      return String(valor ?? "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase() === "si";
+    }
+
+    function convertirFechaNC(valor) {
+      if (!valor || String(valor).trim() === "-") return null;
+
+      const texto = String(valor).trim();
+      let anio, mes, dia;
+
+      if (/^\d{4}-\d{2}-\d{2}/.test(texto)) {
+        [anio, mes, dia] = texto.substring(0, 10).split("-").map(Number);
+      } else {
+        const partes = texto.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/);
+        if (!partes) return null;
+        dia = Number(partes[1]);
+        mes = Number(partes[2]);
+        anio = Number(partes[3]);
+      }
+
+      const fecha = new Date(anio, mes - 1, dia);
+      if (
+        fecha.getFullYear() !== anio ||
+        fecha.getMonth() !== mes - 1 ||
+        fecha.getDate() !== dia
+      ) return null;
+
+      return fecha;
+    }
+
+    const abiertasVencidas = [];
+    const cerradasVencidas = [];
+
+    // CLIENTE: usar columna Vencido
+    clienteNC.forEach(r => {
+      if (!normalizarSi(campo(r.datos, ["Vencido"]))) return;
+
+      const estado = normalizarEstado(campo(r.datos, ["Estado"]));
+      const registro = { ...r, origen: "Cliente" };
+
+      if (estado === "cerrado" || estado === "cerrada") {
+        cerradasVencidas.push(registro);
+      } else {
+        abiertasVencidas.push(registro);
+      }
+    });
+
+    // PECOM: fecha límite de análisis (R) y fecha cierre (AB)
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    pecom.forEach(r => {
+      const limite = convertirFechaNC(campo(r.datos, [
+        "Fecha límite análisis",
+        "Fecha limite analisis",
+        "Fecha límite de análisis"
+      ]));
+
+      const cierre = convertirFechaNC(campo(r.datos, [
+        "Fecha Cierre",
+        "Fecha de cierre",
+        "Fecha de Cierre"
+      ]));
+
+      if (!limite) return;
+
+      const registro = { ...r, origen: "PECOM" };
+
+      if (cierre) {
+        if (cierre > limite) cerradasVencidas.push(registro);
+      } else if (limite < hoy) {
+        abiertasVencidas.push(registro);
+      }
+    });
+
+    window.detalleNCVencidas = {
+      "Abiertas vencidas": abiertasVencidas,
+      "Cerradas vencidas": cerradasVencidas
+    };
+
+    const canvasVencidas = $h("graficoNCVencidas");
+
+    if (canvasVencidas) {
+      if (graficoVencidasNC) graficoVencidasNC.destroy();
+
+      const etiquetasVencidas = [
+        "Abiertas vencidas",
+        "Cerradas vencidas"
+      ];
+
+      graficoVencidasNC = new Chart(canvasVencidas, {
+        type: "doughnut",
+        data: {
+          labels: etiquetasVencidas,
+          datasets: [{
+            data: [
+              abiertasVencidas.length,
+              cerradasVencidas.length
+            ],
+            backgroundColor: ["#dc3b3b", "#179447"],
+            borderColor: "#ffffff",
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: "64%",
+          onClick: function(evento, elementos) {
+            if (!elementos.length) return;
+            const tipo = etiquetasVencidas[elementos[0].index];
+            mostrarDetalleVencidasNC(tipo);
+          },
+          plugins: {
+            legend: { position: "bottom" },
+            tooltip: {
+              callbacks: {
+                label: function(contexto) {
+                  const cantidad = contexto.parsed;
+                  const totalVencidas =
+                    abiertasVencidas.length + cerradasVencidas.length;
+                  const porcentajeVencidas = totalVencidas
+                    ? (cantidad * 100 / totalVencidas).toFixed(1)
+                    : "0.0";
+
+                  return contexto.label + ": " + cantidad +
+                    " (" + porcentajeVencidas + "%)";
+                }
+              }
+            }
+          }
+        }
+      });
+    }
 
   }
 
