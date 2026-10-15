@@ -6538,7 +6538,7 @@ async function descargarInformeCompleto(){
         "Fecha de Cierre"
       ]);
 
-      if (fechaCierre) {
+      if (fechaCierre && fechaCierre.trim() !== "-") {
         conteos["Cerradas"]++;
       } else {
         conteos["Abiertas"]++;
