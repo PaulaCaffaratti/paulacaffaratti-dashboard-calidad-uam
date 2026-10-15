@@ -2234,7 +2234,6 @@ title="Dashboard Observaciones Blister">
 </section>
   
 <section id="hallazgos" class="seccion">
-
   <div style="padding:30px 24px;">
 
     <h2 style="color:#0b3568;font-size:26px;margin:0 0 8px;">
@@ -2242,7 +2241,7 @@ title="Dashboard Observaciones Blister">
     </h2>
 
     <p style="color:#687787;font-size:13px;">
-      Seguimiento de hallazgos · EPC Proyecto UAM - ALVS
+      Seguimiento de no conformidades · Calidad UAM
     </p>
 
     <div id="hallazgosEstado"
@@ -2254,53 +2253,61 @@ title="Dashboard Observaciones Blister">
          style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:22px 0;">
     </div>
 
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;">
+
+      <button id="hallazgosBtnPecom"
+              type="button"
+              onclick="seleccionarHallazgos('pecom')"
+              style="background:#0b3568;color:white;border:0;border-radius:9px;padding:11px 18px;cursor:pointer;">
+        NC PECOM
+      </button>
+
+      <button id="hallazgosBtnCliente"
+              type="button"
+              onclick="seleccionarHallazgos('cliente')"
+              style="background:#e9eef3;color:#0b3568;border:0;border-radius:9px;padding:11px 18px;cursor:pointer;">
+        NC Cliente
+      </button>
+
+    </div>
+
     <div style="background:white;border:1px solid #e0e7ec;border-radius:12px;padding:20px;">
 
-      <h3 style="color:#0b3568;margin:0 0 16px;">
-        Listado de hallazgos
+      <h3 id="hallazgosTitulo"
+          style="color:#0b3568;margin:0 0 16px;">
+        Listado de NC PECOM
       </h3>
 
-      <input
-        id="hallazgosBuscar"
-        type="search"
-        placeholder="Buscar código, descripción, estado..."
-        style="width:100%;max-width:420px;padding:12px;border:1px solid #dce4eb;border-radius:8px;margin-bottom:16px;"
-        oninput="filtrarHallazgos()"
-      >
+      <div id="hallazgosEstados"
+           style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px;">
+      </div>
+
+      <input id="hallazgosBuscar"
+             type="search"
+             placeholder="Buscar código, descripción, estado..."
+             style="width:100%;max-width:420px;padding:12px;border:1px solid #dce4eb;border-radius:8px;margin-bottom:16px;"
+             oninput="filtrarHallazgos()">
 
       <div style="overflow-x:auto;">
-
         <table style="width:100%;border-collapse:collapse;font-size:12px;">
 
-          <thead>
-            <tr style="background:#eef3f8;text-align:left;">
-              <th style="padding:12px;">Código</th>
-              <th style="padding:12px;">Tipo de desvío</th>
-              <th style="padding:12px;">Estado actual</th>
-              <th style="padding:12px;">Descripción</th>
-            </tr>
-          </thead>
+          <thead id="hallazgosEncabezado"></thead>
 
           <tbody id="hallazgosTabla">
             <tr>
-              <td colspan="4" style="padding:16px;">
+              <td style="padding:16px;">
                 Cargando información...
               </td>
             </tr>
           </tbody>
 
         </table>
-
       </div>
 
     </div>
-
   </div>
-
 </section>
-
-
-
+     
 <section
 id="capacitaciones"
 class="seccion">
@@ -6203,89 +6210,118 @@ async function descargarInformeCompleto(){
 </script>
 
 <script>
-/* ==========================================
-   HALLAZGOS UAM - DASHBOARD
-   ========================================== */
 
+<script>
+/* HALLAZGOS UAM: NC PECOM Y NC CLIENTE */
 (function () {
   const PROYECTO = "EPC Proyecto UAM - ALVS";
-  let hallazgos = [];
+  const $h = id => document.getElementById(id);
+
+  let pecom = [];
+  let clienteNC = [];
+  let tipoActual = "pecom";
   let cargando = false;
   let ultimaCarga = 0;
 
-  const $h = id => document.getElementById(id);
-
-  function escaparHTML(valor) {
+  function escapar(valor) {
     return String(valor ?? "").replace(/[&<>"']/g, c => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;"
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#39;"
     }[c]));
   }
 
   function campo(datos, nombres) {
     const claves = Object.keys(datos || {});
+
     for (const nombre of nombres) {
       const clave = claves.find(k =>
         k.trim().toLowerCase() === nombre.toLowerCase()
       );
+
       if (clave && String(datos[clave] ?? "").trim()) {
         return String(datos[clave]).trim();
       }
     }
+
     return "";
   }
 
   function tarjeta(valor, titulo) {
     return `
-      <div style="
-        background:#fff;
-        border:1px solid #e0e7ec;
-        border-radius:12px;
-        padding:20px;">
-        <div style="
-          color:#0b3568;
-          font-size:30px;
-          font-weight:600;">
-          ${valor}
+      <div style="background:white;border:1px solid #e0e7ec;border-radius:12px;padding:20px;">
+        <div style="color:#0b3568;font-size:30px;font-weight:600;">
+          ${escapar(valor)}
         </div>
-        <div style="
-          color:#687787;
-          font-size:12px;
-          margin-top:7px;">
-          ${escaparHTML(titulo)}
+        <div style="color:#687787;font-size:12px;margin-top:7px;">
+          ${escapar(titulo)}
         </div>
       </div>`;
   }
 
-  function pintarHallazgos() {
-    const kpis = $h("hallazgosKpis");
-    if (!kpis) return;
+  function registrosActuales() {
+    return tipoActual === "pecom" ? pecom : clienteNC;
+  }
 
+  window.seleccionarHallazgos = function (tipo) {
+    tipoActual = tipo === "cliente" ? "cliente" : "pecom";
+    const esPecom = tipoActual === "pecom";
+
+    $h("hallazgosBtnPecom").style.background =
+      esPecom ? "#0b3568" : "#e9eef3";
+
+    $h("hallazgosBtnPecom").style.color =
+      esPecom ? "white" : "#0b3568";
+
+    $h("hallazgosBtnCliente").style.background =
+      esPecom ? "#e9eef3" : "#0b3568";
+
+    $h("hallazgosBtnCliente").style.color =
+      esPecom ? "#0b3568" : "white";
+
+    $h("hallazgosTitulo").textContent = esPecom
+      ? "Listado de NC PECOM"
+      : "Listado de NC Cliente";
+
+    $h("hallazgosBuscar").value = "";
+
+    const columnas = esPecom
+      ? ["Código", "Tipo de desvío", "Estado actual", "Descripción"]
+      : ["ID", "Proyecto", "Especialidad", "Estado", "Vencido", "Observaciones"];
+
+    $h("hallazgosEncabezado").innerHTML = `
+      <tr>
+        ${columnas.map(c =>
+          `<th style="padding:12px;">${escapar(c)}</th>`
+        ).join("")}
+      </tr>`;
+
+    pintarEstados();
+    window.filtrarHallazgos();
+  };
+
+  function pintarEstados() {
     const estados = {};
 
-    hallazgos.forEach(registro => {
-      const estado = campo(registro.datos, [
-        "Estado actual",
-        "Estado Actual",
-        "Estado"
-      ]) || "Sin estado";
+    registrosActuales().forEach(r => {
+      const estado = campo(
+        r.datos,
+        tipoActual === "pecom"
+          ? ["Estado actual", "Estado"]
+          : ["Estado", "Estado actual"]
+      ) || "Sin estado";
 
       estados[estado] = (estados[estado] || 0) + 1;
     });
 
-    const principales = Object.entries(estados)
-      .sort((a, b) => b[1] - a[1]);
-
-    kpis.innerHTML =
-      tarjeta(hallazgos.length, "Total de hallazgos") +
-      principales.map(([estado, cantidad]) =>
-        tarjeta(cantidad, estado)
-      ).join("");
-
-    window.filtrarHallazgos();
+    $h("hallazgosEstados").innerHTML =
+      Object.entries(estados)
+        .sort((a,b) => b[1] - a[1])
+        .map(([estado, cantidad]) =>
+          tarjeta(cantidad, estado)
+        ).join("");
   }
 
   window.filtrarHallazgos = function () {
@@ -6296,159 +6332,187 @@ async function descargarInformeCompleto(){
       .trim()
       .toLowerCase();
 
-    const filtrados = hallazgos.filter(registro =>
-      JSON.stringify(registro).toLowerCase().includes(busqueda)
+    const filtrados = registrosActuales().filter(r =>
+      JSON.stringify(r).toLowerCase().includes(busqueda)
     );
+
+    const esPecom = tipoActual === "pecom";
+    const columnas = esPecom ? 4 : 6;
 
     if (!filtrados.length) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="4" style="padding:18px;color:#687787;">
-            No hay hallazgos para mostrar.
+          <td colspan="${columnas}"
+              style="padding:18px;color:#687787;">
+            No hay registros para mostrar.
           </td>
         </tr>`;
       return;
     }
 
-    tbody.innerHTML = filtrados.map(registro => {
-      const datos = registro.datos || {};
+    tbody.innerHTML = filtrados.map(r => {
+      const d = r.datos || {};
 
-      const codigo = registro.codigo || campo(datos, ["Código"]);
-      const tipo = campo(datos, [
-        "Tipo de Desvío",
-        "Tipo de desvío",
-        "Tipo de Desvio"
-      ]);
-      const estado = campo(datos, [
-        "Estado actual",
-        "Estado Actual",
-        "Estado"
-      ]);
-      const descripcion = campo(datos, [
-        "Descripción",
-        "Descripcion"
-      ]);
+      const valores = esPecom ? [
+        r.codigo || campo(d, ["Código"]),
+        campo(d, [
+          "Tipo de Desvío",
+          "Tipo de desvío",
+          "Tipo de Desvio"
+        ]),
+        campo(d, ["Estado actual", "Estado"]),
+        campo(d, ["Descripción", "Descripcion"])
+      ] : [
+        r.codigo || campo(d, ["ID"]),
+        campo(d, ["Proyecto"]),
+        campo(d, ["Especialidad"]),
+        campo(d, ["Estado"]),
+        campo(d, ["Vencido"]),
+        campo(d, ["Observaciones"])
+      ];
 
       return `
         <tr>
-          <td style="padding:11px;border-bottom:1px solid #e6ebef;">
-            ${escaparHTML(codigo)}
-          </td>
-          <td style="padding:11px;border-bottom:1px solid #e6ebef;">
-            ${escaparHTML(tipo)}
-          </td>
-          <td style="padding:11px;border-bottom:1px solid #e6ebef;">
-            ${escaparHTML(estado)}
-          </td>
-          <td style="padding:11px;border-bottom:1px solid #e6ebef;">
-            ${escaparHTML(descripcion)}
-          </td>
+          ${valores.map(v => `
+            <td style="padding:11px;border-bottom:1px solid #e6ebef;">
+              ${escapar(v)}
+            </td>
+          `).join("")}
         </tr>`;
     }).join("");
   };
 
+  async function obtenerTodos(db, tabla) {
+    const registros = [];
+    const tamano = 1000;
+
+    for (let desde = 0; ; desde += tamano) {
+      const {data, error} = await db
+        .from(tabla)
+        .select("codigo,datos")
+        .order("codigo", {ascending:true})
+        .range(desde, desde + tamano - 1);
+
+      if (error) {
+        throw new Error(`${tabla}: ${error.message}`);
+      }
+
+      registros.push(...(data || []));
+
+      if (!data || data.length < tamano) break;
+    }
+
+    return registros;
+  }
+
   async function cargarHallazgos() {
     const estado = $h("hallazgosEstado");
+
     if (!estado || cargando) return;
 
-    if (
-      ultimaCarga &&
-      Date.now() - ultimaCarga < 15000
-    ) return;
+    if (ultimaCarga && Date.now() - ultimaCarga < 15000) {
+      return;
+    }
 
     cargando = true;
-    estado.textContent = "Consultando hallazgos...";
+    estado.textContent = "Consultando NC PECOM y NC Cliente...";
 
     try {
       if (!window.supabase?.createClient) {
-        throw new Error("No se cargó la biblioteca de Supabase.");
+        throw new Error("No se cargó Supabase.");
       }
 
-      const cliente = window.supabase.createClient(
+      const db = window.supabase.createClient(
         "https://mzgbtejfgsrskiuymtwh.supabase.co",
         "sb_publishable_Wen9hxBnae8wRrEEaP5lOQ_aNl9OCGd",
         {
           auth: {
-            persistSession: false,
-            autoRefreshToken: false,
-            detectSessionInUrl: false
+            persistSession:false,
+            autoRefreshToken:false,
+            detectSessionInUrl:false
           }
         }
       );
 
-      const todos = [];
-      let desde = 0;
-      const tamano = 1000;
+      const [datosPecom, datosCliente] = await Promise.all([
+        obtenerTodos(db, "uam_hallazgos"),
+        obtenerTodos(db, "uam_nc_cliente")
+      ]);
 
-      while (true) {
-        const { data, error } = await cliente
-          .from("uam_hallazgos")
-          .select("codigo,datos")
-          .order("codigo", { ascending: true })
-          .range(desde, desde + tamano - 1);
-
-        if (error) throw error;
-
-        todos.push(...(data || []));
-
-        if (!data || data.length < tamano) break;
-
-        desde += tamano;
-      }
-
-      hallazgos = todos.filter(registro =>
-        campo(registro.datos, [
-          "Proyecto/Planta/Servicio"
-        ]) === PROYECTO
+      pecom = datosPecom.filter(r =>
+        campo(r.datos, ["Proyecto/Planta/Servicio"]) === PROYECTO
       );
+
+      clienteNC = datosCliente.filter(r => {
+        const nc = campo(r.datos, ["No Conformidad"]);
+
+        return nc.normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .trim()
+          .toUpperCase() === "SI";
+      });
 
       ultimaCarga = Date.now();
 
       estado.textContent =
-        hallazgos.length +
-        " hallazgos registrados · EPC Proyecto UAM - ALVS";
+        `${pecom.length + clienteNC.length} no conformidades · ` +
+        `${pecom.length} NC PECOM · ` +
+        `${clienteNC.length} NC Cliente`;
 
-      pintarHallazgos();
+      $h("hallazgosKpis").innerHTML =
+        tarjeta(
+          pecom.length + clienteNC.length,
+          "Total de no conformidades"
+        ) +
+        tarjeta(pecom.length, "NC PECOM") +
+        tarjeta(clienteNC.length, "NC Cliente");
 
-    } catch (error) {
+      window.seleccionarHallazgos(tipoActual);
+
+    } catch(error) {
       estado.textContent =
-        "No se pudieron cargar los hallazgos: " +
+        "No se pudieron cargar las no conformidades: " +
         error.message;
+
       console.error("Hallazgos UAM:", error);
+
     } finally {
       cargando = false;
     }
   }
 
-  // Cargar al abrir la pestaña Hallazgos.
-  document.addEventListener("click", function (evento) {
+  document.addEventListener("click", function(evento) {
     const elemento = evento.target.closest(
       "button,a,[role='tab']"
     );
 
-    if (!elemento) return;
-
     if (
+      elemento &&
       elemento.textContent.trim().toUpperCase() === "HALLAZGOS"
     ) {
       setTimeout(cargarHallazgos, 100);
     }
   });
 
-  // Cargar si Hallazgos ya está visible.
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", function () {
-      const seccion = $h("hallazgos");
-      if (seccion && getComputedStyle(seccion).display !== "none") {
-        cargarHallazgos();
-      }
-    });
-  } else {
+  function iniciar() {
+    window.seleccionarHallazgos("pecom");
+
     const seccion = $h("hallazgos");
-    if (seccion && getComputedStyle(seccion).display !== "none") {
+
+    if (
+      seccion &&
+      getComputedStyle(seccion).display !== "none"
+    ) {
       cargarHallazgos();
     }
   }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", iniciar);
+  } else {
+    iniciar();
+  }
+
 })();
 </script>
   
