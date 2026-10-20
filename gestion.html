@@ -327,6 +327,16 @@ main {
         📋 LISTADO BASE
       </button>
 
+      <!-- ÍNDICE DE PRODUCCIÓN -->
+
+      <button
+        id="tabIndiceProduccion"
+        class="tab"
+        onclick="abrirModulo('indiceProduccion',this)"
+      >
+        📈 ÍNDICE DE PRODUCCIÓN
+      </button>
+      
     </div>
 
   </div>
@@ -369,13 +379,17 @@ const rutas = {
 
   matriz: "matriz-admin.html",
 
+
   piping: "piping-admin.html",
 
   hallazgos: "hallazgos-admin.html",
 
-  maestro: "maestro.html"
+  maestro: "maestro.html",
+
+  indiceProduccion: "indice-produccion-admin.html"
 
 };
+
 
 let moduloActual = "documentacion";
 
