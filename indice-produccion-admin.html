@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Índice de Producción | Administración UAM</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  padding:24px;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#f4f7f9;
+  color:#1d2a36;
+}
+
+.panel{
+  background:white;
+  border:1px solid #dfe7ec;
+  border-radius:16px;
+  padding:26px;
+}
+
+h2{
+  margin:0 0 8px;
+  color:#0b3568;
+  font-size:24px;
+}
+
+.descripcion{
+  color:#687787;
+  font-size:13px;
+  margin-bottom:28px;
+}
+
+.carga{
+  border:2px dashed #cbd8e2;
+  border-radius:14px;
+  padding:30px;
+  background:#fafcfd;
+}
+
+.carga h3{
+  color:#0b3568;
+  margin:0 0 10px;
+}
+
+input[type=file]{
+  display:block;
+  margin:18px 0;
+  max-width:100%;
+}
+
+button{
+  background:#0b3568;
+  color:white;
+  border:0;
+  border-radius:9px;
+  padding:12px 20px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+button:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
+
+#estado{
+  margin-top:18px;
+  font-size:12px;
+  color:#687787;
+}
+
+.nota{
+  margin-top:20px;
+  font-size:12px;
+  color:#687787;
+}
+</style>
+</head>
+
+<body>
+
+<div class="panel">
+
+  <h2>Índice de Producción</h2>
+
+  <p class="descripcion">
+    Administración y actualización de indicadores
+    de producción · UAM
+  </p>
+
+  <div class="carga">
+
+    <h3>Cargar Excel de producción</h3>
+
+    <p>
+      Seleccioná el archivo Excel que contiene
+      los datos de producción.
+    </p>
+
+    <input
+      type="file"
+      id="archivoProduccion"
+      accept=".xlsx,.xls"
+    >
+
+    <button
+      id="btnCargar"
+      onclick="cargarExcel()"
+    >
+      Cargar Excel
+    </button>
+
+    <div id="estado">
+      Ningún archivo seleccionado.
+    </div>
+
+  </div>
+
+  <p class="nota">
+    La importación y actualización de datos
+    se configurará según la estructura del Excel.
+  </p>
+
+</div>
+
+<script>
+function cargarExcel(){
+
+  const archivo = document.getElementById(
+    "archivoProduccion"
+  ).files[0];
+
+  const estado = document.getElementById("estado");
+
+  if(!archivo){
+    estado.textContent =
+      "Seleccioná un archivo Excel primero.";
+    return;
+  }
+
+  estado.textContent =
+    "Archivo seleccionado: " + archivo.name +
+    ". Pendiente de configurar la importación.";
+
+}
+</script>
+
+</body>
+</html>
