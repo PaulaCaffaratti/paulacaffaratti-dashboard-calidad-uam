@@ -3,65 +3,71 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Índice de Producción | Administración UAM</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Índice de Producción | UAM</title>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
 *{box-sizing:border-box}
 
 body{
   margin:0;
-  padding:24px;
+  padding:20px;
   font-family:Arial,Helvetica,sans-serif;
   background:#f4f7f9;
-  color:#1d2a36;
+  color:#263544;
+}
+
+h2{
+  margin:0 0 7px;
+  color:#0b3568;
+  font-size:23px;
+  font-weight:600;
+}
+
+h3{
+  color:#0b3568;
+  font-size:16px;
+  margin:0 0 15px;
+}
+
+.subtitulo{
+  font-size:12px;
+  color:#687787;
+  margin-bottom:24px;
 }
 
 .panel{
   background:white;
   border:1px solid #dfe7ec;
-  border-radius:16px;
-  padding:26px;
-}
-
-h2{
-  margin:0 0 8px;
-  color:#0b3568;
-  font-size:24px;
-}
-
-.descripcion{
-  color:#687787;
-  font-size:13px;
-  margin-bottom:28px;
+  border-radius:14px;
+  padding:22px;
+  margin-bottom:16px;
 }
 
 .carga{
-  border:2px dashed #cbd8e2;
-  border-radius:14px;
-  padding:30px;
   background:#fafcfd;
+  border:1px dashed #bfcfdc;
+  border-radius:12px;
+  padding:20px;
 }
 
-.carga h3{
-  color:#0b3568;
-  margin:0 0 10px;
-}
-
-input[type=file]{
-  display:block;
-  margin:18px 0;
+input,select{
   max-width:100%;
+  padding:10px;
+  font-size:12px;
 }
 
 button{
   background:#0b3568;
-  color:white;
   border:0;
+  color:white;
   border-radius:9px;
-  padding:12px 20px;
+  padding:12px 22px;
+  font-weight:600;
   cursor:pointer;
-  font-weight:bold;
+  margin-top:14px;
 }
 
 button:disabled{
@@ -70,15 +76,99 @@ button:disabled{
 }
 
 #estado{
-  margin-top:18px;
   font-size:12px;
   color:#687787;
+  margin-top:14px;
+  line-height:1.6;
 }
 
-.nota{
-  margin-top:20px;
-  font-size:12px;
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+}
+
+.kpi{
+  background:#fff;
+  border:1px solid #dfe7ec;
+  border-radius:13px;
+  padding:20px;
+}
+
+.kpi .etiqueta{
+  font-size:11px;
   color:#687787;
+  margin-bottom:10px;
+}
+
+.kpi .numero{
+  font-size:30px;
+  color:#0b3568;
+  font-weight:700;
+}
+
+.kpi .detalle{
+  margin-top:8px;
+  color:#687787;
+  font-size:11px;
+}
+
+.verde{color:#16815c!important}
+.rojo{color:#c43d3d!important}
+
+.tabla-contenedor{
+  width:100%;
+  overflow-x:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+
+th{
+  background:#f3f7fa;
+  color:#0b3568;
+  text-align:left;
+  padding:13px;
+}
+
+td{
+  border-bottom:1px solid #e8edf1;
+  padding:13px;
+}
+
+.barra-fondo{
+  width:100%;
+  height:9px;
+  background:#e9eff3;
+  border-radius:20px;
+  overflow:hidden;
+}
+
+.barra{
+  height:100%;
+  background:#60a8ce;
+  border-radius:20px;
+}
+
+.barra.supera{
+  background:#d65b5b;
+}
+
+.oculto{display:none}
+
+.nota{
+  font-size:11px;
+  color:#687787;
+  line-height:1.6;
+}
+
+@media(max-width:700px){
+  body{padding:10px}
+  .grid{grid-template-columns:1fr}
+  .panel{padding:15px}
 }
 </style>
 </head>
@@ -86,67 +176,341 @@ button:disabled{
 <body>
 
 <div class="panel">
-
   <h2>Índice de Producción</h2>
-
-  <p class="descripcion">
-    Administración y actualización de indicadores
-    de producción · UAM
-  </p>
+  <div class="subtitulo">
+    Piping · Control de rechazos de soldadura
+  </div>
 
   <div class="carga">
-
-    <h3>Cargar Excel de producción</h3>
-
-    <p>
-      Seleccioná el archivo Excel que contiene
-      los datos de producción.
-    </p>
+    <h3>Cargar trazabilidad de soldadura</h3>
 
     <input
       type="file"
-      id="archivoProduccion"
+      id="archivo"
       accept=".xlsx,.xls"
     >
 
-    <button
-      id="btnCargar"
-      onclick="cargarExcel()"
-    >
-      Cargar Excel
+    <div id="selectorHoja" class="oculto"
+         style="margin-top:14px">
+      <label for="hoja">Hoja del Excel:</label>
+      <select id="hoja"></select>
+    </div>
+
+    <button id="procesar" onclick="procesarExcel()">
+      Procesar Excel
     </button>
 
     <div id="estado">
-      Ningún archivo seleccionado.
+      Seleccioná un Excel de trazabilidad.
+    </div>
+  </div>
+</div>
+
+<div id="resultados" class="oculto">
+
+  <div class="grid">
+
+    <div class="kpi">
+      <div class="etiqueta">COSTURAS TOTALES</div>
+      <div class="numero" id="totalCosturas">0</div>
+      <div class="detalle">
+        Costuras con soldador en columna AH
+      </div>
+    </div>
+
+    <div class="kpi">
+      <div class="etiqueta">RECHAZOS TOTALES</div>
+      <div class="numero" id="totalRechazos">0</div>
+      <div class="detalle">
+        Resultado RZ en columna AN
+      </div>
+    </div>
+
+    <div class="kpi">
+      <div class="etiqueta">ÍNDICE DE RECHAZO TOTAL</div>
+      <div class="numero" id="indiceTotal">0%</div>
+      <div class="detalle">
+        Límite de referencia: 5%
+      </div>
     </div>
 
   </div>
 
-  <p class="nota">
-    La importación y actualización de datos
-    se configurará según la estructura del Excel.
-  </p>
+  <div class="panel" style="margin-top:16px">
+
+    <h3>Índice de rechazo por soldador</h3>
+
+    <div class="tabla-contenedor">
+      <table>
+        <thead>
+          <tr>
+            <th>Soldador</th>
+            <th>Costuras</th>
+            <th>Rechazos RZ</th>
+            <th>Índice</th>
+            <th style="width:30%">Gráfico</th>
+          </tr>
+        </thead>
+        <tbody id="tablaSoldadores"></tbody>
+      </table>
+    </div>
+
+    <p class="nota">
+      Límite de referencia por soldador: 3%.
+      Una costura con dos soldadores se asigna
+      a ambos en sus índices individuales.
+    </p>
+  </div>
 
 </div>
 
 <script>
-function cargarExcel(){
+const SOLDADORES = [
+  "W1","W2","W3","W4",
+  "W10","W48","W60"
+];
 
-  const archivo = document.getElementById(
-    "archivoProduccion"
-  ).files[0];
+let libroActual = null;
 
-  const estado = document.getElementById("estado");
+const archivoInput = document.getElementById("archivo");
+const hojaSelect = document.getElementById("hoja");
+const estado = document.getElementById("estado");
 
-  if(!archivo){
+archivoInput.addEventListener("change", async function(){
+
+  document.getElementById("resultados")
+    .classList.add("oculto");
+
+  document.getElementById("selectorHoja")
+    .classList.add("oculto");
+
+  libroActual = null;
+
+  const archivo = this.files[0];
+  if(!archivo) return;
+
+  try{
+    if(typeof XLSX === "undefined"){
+      throw new Error("No se pudo cargar el lector de Excel.");
+    }
+
+    estado.textContent = "Leyendo archivo...";
+
+    const datos = await archivo.arrayBuffer();
+
+    libroActual = XLSX.read(datos,{
+      type:"array"
+    });
+
+    hojaSelect.innerHTML = "";
+
+    libroActual.SheetNames.forEach(nombre=>{
+      const opcion = document.createElement("option");
+      opcion.value = nombre;
+      opcion.textContent = nombre;
+      hojaSelect.appendChild(opcion);
+    });
+
+    const hojaPrincipal = libroActual.SheetNames.find(
+      nombre=>nombre.toUpperCase().includes("TRAZABILIDAD")
+    );
+
+    if(hojaPrincipal){
+      hojaSelect.value = hojaPrincipal;
+    }
+
+    document.getElementById("selectorHoja")
+      .classList.remove("oculto");
+
     estado.textContent =
-      "Seleccioná un archivo Excel primero.";
+      "Archivo leído correctamente. Seleccioná la hoja y presioná Procesar Excel.";
+
+  }catch(error){
+    estado.textContent = "Error: " + error.message;
+  }
+});
+
+function obtenerSoldadores(valor){
+
+  const texto = String(valor ?? "")
+    .toUpperCase();
+
+  // Evita confundir W1 con W10.
+  const encontrados = texto.match(
+    /(^|[^A-Z0-9])W(?:10|48|60|[1-4])(?=$|[^0-9])/g
+  ) || [];
+
+  const resultado = new Set();
+
+  encontrados.forEach(fragmento=>{
+    const codigo = fragmento.match(/W(?:10|48|60|[1-4])/);
+
+    if(codigo && SOLDADORES.includes(codigo[0])){
+      resultado.add(codigo[0]);
+    }
+  });
+
+  return [...resultado];
+}
+
+function porcentaje(numerador,denominador){
+  if(!denominador) return 0;
+  return numerador / denominador * 100;
+}
+
+function formatoPorcentaje(valor){
+  return valor.toLocaleString("es-AR",{
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+  }) + "%";
+}
+
+function procesarExcel(){
+
+  if(!libroActual){
+    estado.textContent = "Primero seleccioná un Excel.";
     return;
   }
 
+  const nombreHoja = hojaSelect.value;
+  const hoja = libroActual.Sheets[nombreHoja];
+
+  const filas = XLSX.utils.sheet_to_json(hoja,{
+    header:1,
+    defval:"",
+    blankrows:false
+  });
+
+  const estadisticas = {};
+
+  SOLDADORES.forEach(codigo=>{
+    estadisticas[codigo] = {
+      costuras:0,
+      rechazos:0
+    };
+  });
+
+  let totalCosturas = 0;
+  let totalRechazos = 0;
+
+  filas.forEach(fila=>{
+
+    // AH = columna 34, índice 33.
+    const lote = fila[33];
+
+    // AN = columna 40, índice 39.
+    const resultado = String(fila[39] ?? "")
+      .trim()
+      .toUpperCase();
+
+    const soldadores = obtenerSoldadores(lote);
+
+    if(soldadores.length === 0) return;
+
+    totalCosturas++;
+
+    const rechazado = resultado === "RZ";
+
+    if(rechazado){
+      totalRechazos++;
+    }
+
+    soldadores.forEach(codigo=>{
+
+      estadisticas[codigo].costuras++;
+
+      if(rechazado){
+        estadisticas[codigo].rechazos++;
+      }
+
+    });
+
+  });
+
+  document.getElementById("totalCosturas")
+    .textContent = totalCosturas.toLocaleString("es-AR");
+
+  document.getElementById("totalRechazos")
+    .textContent = totalRechazos.toLocaleString("es-AR");
+
+  const indice = porcentaje(
+    totalRechazos,
+    totalCosturas
+  );
+
+  const indiceElemento =
+    document.getElementById("indiceTotal");
+
+  indiceElemento.textContent = formatoPorcentaje(indice);
+
+  indiceElemento.className =
+    "numero " + (indice > 5 ? "rojo" : "verde");
+
+  const tbody =
+    document.getElementById("tablaSoldadores");
+
+  tbody.innerHTML = "";
+
+  SOLDADORES.forEach(codigo=>{
+
+    const datos = estadisticas[codigo];
+
+    const valor = porcentaje(
+      datos.rechazos,
+      datos.costuras
+    );
+
+    const supera = valor > 3;
+
+    const fila = document.createElement("tr");
+
+    const valores = [
+      codigo,
+      datos.costuras,
+      datos.rechazos,
+      formatoPorcentaje(valor)
+    ];
+
+    valores.forEach((contenido,i)=>{
+      const celda = document.createElement("td");
+      celda.textContent = contenido;
+
+      if(i === 3){
+        celda.className = supera ? "rojo" : "verde";
+        celda.style.fontWeight = "bold";
+      }
+
+      fila.appendChild(celda);
+    });
+
+    const celdaGrafico = document.createElement("td");
+
+    const fondo = document.createElement("div");
+    fondo.className = "barra-fondo";
+
+    const barra = document.createElement("div");
+    barra.className = "barra" + (supera ? " supera" : "");
+
+    // Escala visual de 0 a 5%.
+    barra.style.width =
+      Math.min(valor / 5 * 100,100) + "%";
+
+    fondo.appendChild(barra);
+    celdaGrafico.appendChild(fondo);
+    fila.appendChild(celdaGrafico);
+
+    tbody.appendChild(fila);
+
+  });
+
+  document.getElementById("resultados")
+    .classList.remove("oculto");
+
   estado.textContent =
-    "Archivo seleccionado: " + archivo.name +
-    ". Pendiente de configurar la importación.";
+    "Procesamiento finalizado · Hoja: " +
+    nombreHoja +
+    " · " + totalCosturas +
+    " costuras identificadas.";
 
 }
 </script>
