@@ -1751,6 +1751,7 @@ id="contenido"
 style="display:none;">
 
 
+
 <!-- ÍNDICE DE PRODUCCIÓN -->
 
 <section id="indiceProduccion" class="seccion">
@@ -1761,13 +1762,75 @@ style="display:none;">
       <h2>Índice de Producción</h2>
     </div>
 
-    <p style="color:#687787;font-size:13px;">
-      Seguimiento de indicadores de producción · UAM
+    <p style="color:#687787;font-size:13px;margin-bottom:24px;">
+      Piping · Control de rechazos de soldadura
     </p>
+
+    <div id="indiceProduccionEstado"
+         style="font-size:12px;color:#687787;margin-bottom:18px;">
+      Consultando indicadores de producción...
+    </div>
+
+    <div class="pipingKpis" style="grid-template-columns:repeat(auto-fit,minmax(190px,1fr));">
+
+      <div class="pipingKpi">
+        <small>Costuras totales</small>
+        <strong id="ipCosturas">—</strong>
+      </div>
+
+      <div class="pipingKpi">
+        <small>Rechazos totales</small>
+        <strong id="ipRechazos">—</strong>
+      </div>
+
+      <div class="pipingKpi">
+        <small>Índice de rechazo total</small>
+        <strong id="ipIndiceTotal">—</strong>
+        <div class="pipingNota">Límite de referencia: 5%</div>
+      </div>
+
+    </div>
+
+    <div class="pipingCard" style="margin-top:20px;">
+
+      <h3>Índice de rechazo por soldador</h3>
+
+      <div class="tabla" style="margin-top:16px;">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Soldador</th>
+              <th>Costuras</th>
+              <th>Rechazos RZ</th>
+              <th>Índice</th>
+              <th>Gráfico</th>
+            </tr>
+          </thead>
+
+          <tbody id="ipTablaSoldadores">
+            <tr>
+              <td colspan="5">Cargando información...</td>
+            </tr>
+          </tbody>
+
+        </table>
+
+      </div>
+
+      <p class="pipingNota">
+        Límite de referencia por soldador: 3%.
+        Una costura con dos soldadores se contabiliza
+        para ambos en sus indicadores individuales.
+      </p>
+
+    </div>
 
   </div>
 
 </section>
+
 
 <!-- RESUMEN -->
 
@@ -4893,13 +4956,153 @@ btn.classList.add(
 "activo"
 );
 
-
+if(id === "indiceProduccion"){
+  cargarIndiceProduccion();
+}
 window.scrollTo(
 {
 top:0,
 behavior:"smooth"
 }
 );
+
+}
+
+/* ÍNDICE DE PRODUCCIÓN - SUPABASE */
+
+async function cargarIndiceProduccion(){
+
+  const estado = document.getElementById("indiceProduccionEstado");
+  const tabla = document.getElementById("ipTablaSoldadores");
+
+  if(!estado || !tabla) return;
+
+  estado.textContent = "Consultando indicadores de producción...";
+  estado.style.color = "#687787";
+
+  try{
+
+    const {data:total,error:errorTotal} = await supabaseClient
+      .from("indice_produccion_piping_total")
+      .select("*")
+      .eq("id",1)
+      .maybeSingle();
+
+    if(errorTotal) throw errorTotal;
+
+    const {data:soldadores,error:errorSoldadores} = await supabaseClient
+      .from("indice_produccion_piping")
+      .select("soldador,costuras,rechazos")
+      .order("soldador");
+
+    if(errorSoldadores) throw errorSoldadores;
+
+    if(!total){
+      estado.textContent = "Todavía no hay indicadores guardados.";
+      tabla.innerHTML = '<tr><td colspan="5">Sin datos disponibles.</td></tr>';
+      return;
+    }
+
+    const costuras = Number(total.costuras_totales) || 0;
+    const rechazos = Number(total.rechazos_totales) || 0;
+
+    const porcentaje = (n,d) => d > 0 ? n / d * 100 : 0;
+
+    const formato = n => n.toLocaleString("es-AR",{
+      minimumFractionDigits:2,
+      maximumFractionDigits:2
+    }) + "%";
+
+    const indiceGeneral = porcentaje(rechazos,costuras);
+
+    document.getElementById("ipCosturas").textContent =
+      costuras.toLocaleString("es-AR");
+
+    document.getElementById("ipRechazos").textContent =
+      rechazos.toLocaleString("es-AR");
+
+    const indicador = document.getElementById("ipIndiceTotal");
+
+    indicador.textContent = formato(indiceGeneral);
+    indicador.style.color = indiceGeneral > 5 ? "#dc3b3b" : "#179447";
+
+    tabla.innerHTML = "";
+
+    const orden = ["W1","W2","W3","W4","W10","W48","W60"];
+
+    const datosPorSoldador = new Map(
+      (soldadores || []).map(s => [s.soldador,s])
+    );
+
+    orden.forEach(codigo => {
+
+      const datos = datosPorSoldador.get(codigo) || {
+        costuras:0,
+        rechazos:0
+      };
+
+      const cantidad = Number(datos.costuras) || 0;
+      const rechazadas = Number(datos.rechazos) || 0;
+      const indice = porcentaje(rechazadas,cantidad);
+      const supera = indice > 3;
+
+      const color = supera ? "#dc3b3b" : "#179447";
+      const ancho = Math.min(indice / 5 * 100,100);
+
+      const fila = document.createElement("tr");
+
+      [codigo,cantidad,rechazadas,formato(indice)].forEach((valor,i)=>{
+        const celda = document.createElement("td");
+        celda.textContent = valor;
+
+        if(i === 3){
+          celda.style.color = color;
+          celda.style.fontWeight = "bold";
+        }
+
+        fila.appendChild(celda);
+      });
+
+      const celdaGrafico = document.createElement("td");
+
+      const fondo = document.createElement("div");
+      fondo.style.cssText =
+        "height:12px;background:#e8edf1;border-radius:20px;overflow:hidden;min-width:100px;";
+
+      const barra = document.createElement("div");
+      barra.style.width = ancho + "%";
+      barra.style.height = "100%";
+      barra.style.background = color;
+      barra.style.borderRadius = "20px";
+
+      fondo.appendChild(barra);
+      celdaGrafico.appendChild(fondo);
+      fila.appendChild(celdaGrafico);
+
+      tabla.appendChild(fila);
+
+    });
+
+    const fecha = total.actualizado_en
+      ? new Date(total.actualizado_en).toLocaleString("es-AR")
+      : "Sin fecha";
+
+    estado.textContent = "Última actualización: " + fecha;
+    estado.style.color = "#16815c";
+
+  }catch(error){
+
+    console.error("Error Índice de Producción:",error);
+
+    estado.textContent =
+      "No se pudieron cargar los indicadores: " + error.message;
+
+    estado.style.color = "#dc3b3b";
+
+    tabla.innerHTML =
+      '<tr><td colspan="5">Error al consultar Supabase.</td></tr>';
+
+  }
 
 }
 
