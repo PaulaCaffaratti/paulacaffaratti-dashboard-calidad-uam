@@ -201,6 +201,15 @@ td{
       Procesar Excel
     </button>
 
+<button
+  id="btnGuardarSupabase"
+  onclick="guardarIndiceSupabase()"
+  disabled
+  style="background:#16815c;margin-left:8px"
+>
+  Guardar en Supabase
+</button>
+
     <div id="estado">
       Seleccioná un Excel de trazabilidad.
     </div>
@@ -283,11 +292,16 @@ const SOLDADORES = [
 
 let libroActual = null;
 
+let datosParaGuardar = null;
+
 const archivoInput = document.getElementById("archivo");
 const hojaSelect = document.getElementById("hoja");
 const estado = document.getElementById("estado");
 
 archivoInput.addEventListener("change", async function(){
+
+  datosParaGuardar = null;
+  document.getElementById("btnGuardarSupabase").disabled = true;
 
   document.getElementById("resultados")
     .classList.add("oculto");
@@ -514,16 +528,93 @@ function procesarExcel(){
 
   });
 
-  document.getElementById("resultados")
-    .classList.remove("oculto");
+  
+document.getElementById("resultados")
+  .classList.remove("oculto");
 
-  estado.textContent =
-    "Procesamiento finalizado · Hoja: " +
-    nombreHoja +
-    " · " + totalCosturas +
-    " costuras identificadas.";
+datosParaGuardar = {
+  totalCosturas,
+  totalRechazos,
+  estadisticas,
+  archivoNombre: archivoInput.files[0]?.name || ""
+};
+
+document.getElementById("btnGuardarSupabase").disabled = false;
+
+estado.textContent =
+  "Procesamiento finalizado · Hoja: " +
+  nombreHoja +
+  " · " + totalCosturas +
+  " costuras identificadas. Ya podés guardar en Supabase.";
+
 
 }
+  
+async function guardarIndiceSupabase(){
+
+  if(!datosParaGuardar){
+    estado.textContent = "Primero procesá el Excel.";
+    return;
+  }
+
+  const btn = document.getElementById("btnGuardarSupabase");
+  btn.disabled = true;
+
+  try{
+
+    const {data:{session},error:errorSesion} =
+      await db.auth.getSession();
+
+    if(errorSesion) throw errorSesion;
+
+    if(!session){
+      throw new Error("No hay sesión iniciada. Ingresá como administrador.");
+    }
+
+    estado.textContent = "Guardando indicadores por soldador...";
+
+    const filas = SOLDADORES.map(codigo=>({
+      soldador: codigo,
+      costuras: datosParaGuardar.estadisticas[codigo].costuras,
+      rechazos: datosParaGuardar.estadisticas[codigo].rechazos,
+      actualizado_en: new Date().toISOString()
+    }));
+
+    const {error:errorSoldadores} = await db
+      .from("indice_produccion_piping")
+      .upsert(filas,{onConflict:"soldador"});
+
+    if(errorSoldadores) throw errorSoldadores;
+
+    estado.textContent = "Guardando resumen general...";
+
+    const {error:errorTotal} = await db
+      .from("indice_produccion_piping_total")
+      .upsert({
+        id: 1,
+        costuras_totales: datosParaGuardar.totalCosturas,
+        rechazos_totales: datosParaGuardar.totalRechazos,
+        archivo_nombre: datosParaGuardar.archivoNombre,
+        actualizado_en: new Date().toISOString()
+      },{onConflict:"id"});
+
+    if(errorTotal) throw errorTotal;
+
+    estado.textContent = "✓ Indicadores guardados correctamente en Supabase.";
+    estado.style.color = "#16815c";
+
+  }catch(error){
+
+    console.error(error);
+    estado.textContent = "Error al guardar: " + error.message;
+    estado.style.color = "#c43d3d";
+
+  }finally{
+    btn.disabled = false;
+  }
+
+}
+
 </script>
 
 </body>
