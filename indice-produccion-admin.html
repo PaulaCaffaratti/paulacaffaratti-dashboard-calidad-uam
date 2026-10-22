@@ -7,6 +7,7 @@
 <title>Índice de Producción | UAM</title>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 *{box-sizing:border-box}
@@ -265,6 +266,16 @@ td{
 </div>
 
 <script>
+  
+const SUPABASE_URL = "https://mzgbtejfgsrskiuymtwh.supabase.co";
+
+const SUPABASE_KEY = "sb_publishable_Wen9hxBnae8wRrEEaP5lOQ_aNl9OCGd";
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
 const SOLDADORES = [
   "W1","W2","W3","W4",
   "W10","W48","W60"
