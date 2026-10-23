@@ -5115,8 +5115,13 @@ async function cargarIndiceCivil(){
     document.getElementById("civilRechazadas").textContent =
       formato(totalRechazadas);
 
-    document.getElementById("civilIndice").textContent =
-      porcentaje(totalRechazadas, totalEnsayadas);
+const civilIndiceElemento = document.getElementById("civilIndice");
+
+civilIndiceElemento.textContent =
+  porcentaje(totalRechazadas, totalEnsayadas);
+
+civilIndiceElemento.style.color =
+  totalRechazadas === 0 ? "#16815c" : "#c43d3d";
 
     document.getElementById("civilEdades").innerHTML =
       [7, 28, 56].map(edad => {
