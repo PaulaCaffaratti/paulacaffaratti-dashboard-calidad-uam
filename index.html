@@ -1829,6 +1829,99 @@ style="display:none;">
 
   </div>
 
+<!-- CIVIL - ÍNDICE DE RECHAZO DE PROBETAS -->
+
+<details class="seguimientoProduccion" style="margin-top:22px;">
+
+  <summary>Civil · Rechazos de probetas de hormigón</summary>
+
+  <div class="contenidoSeguimiento">
+
+    <div id="civilEstado"
+         style="font-size:12px;margin-bottom:18px;">
+      Consultando resultados de Civil...
+    </div>
+
+    <div class="pipingKpis"
+         style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));">
+
+      <div class="pipingKpi">
+        <small>Probetas ensayadas</small>
+        <strong id="civilEnsayadas">—</strong>
+      </div>
+
+      <div class="pipingKpi">
+        <small>Probetas rechazadas</small>
+        <strong id="civilRechazadas">—</strong>
+      </div>
+
+      <div class="pipingKpi">
+        <small>Índice de rechazo total</small>
+        <strong id="civilIndice">—</strong>
+      </div>
+
+    </div>
+
+    <div class="pipingCard" style="margin-top:20px;">
+
+      <h3>Índice de rechazo por edad</h3>
+
+      <div class="tabla">
+        <table>
+          <thead>
+            <tr>
+              <th>Edad</th>
+              <th>Ensayadas</th>
+              <th>Rechazadas</th>
+              <th>Índice</th>
+              <th>Resistencia mínima</th>
+            </tr>
+          </thead>
+
+          <tbody id="civilEdades"></tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <details style="margin-top:20px;">
+
+      <summary>Detalle de probetas rechazadas</summary>
+
+      <div class="tabla" style="margin-top:12px;">
+
+        <table>
+          <thead>
+            <tr>
+              <th>Remito</th>
+              <th>Identificación</th>
+              <th>Edad</th>
+              <th>Resistencia (MPa)</th>
+              <th>Mínimo (MPa)</th>
+              <th>Elemento</th>
+            </tr>
+          </thead>
+
+          <tbody id="civilDetalle"></tbody>
+        </table>
+
+      </div>
+
+    </details>
+
+    <p class="pipingNota" style="margin-top:16px;">
+      Criterios de rechazo:
+      7 días: menor a 24,5 MPa.
+      28 y 56 días: menor a 35 MPa.
+      Los ensayos sin resultado no se contabilizan.
+    </p>
+
+  </div>
+
+</details>
+
+<!-- FIN CIVIL -->
+
 </section>
 
 
@@ -4958,6 +5051,7 @@ btn.classList.add(
 
 if(id === "indiceProduccion"){
   cargarIndiceProduccion();
+  cargarIndiceCivil();
 }
 window.scrollTo(
 {
@@ -4965,6 +5059,126 @@ top:0,
 behavior:"smooth"
 }
 );
+
+}
+
+/* CIVIL - ÍNDICE DE RECHAZO DE PROBETAS */
+
+async function cargarIndiceCivil(){
+
+  const estado = document.getElementById("civilEstado");
+  if(!estado) return;
+
+  const formato = valor =>
+    Number(valor || 0).toLocaleString("es-AR", {
+      maximumFractionDigits: 2
+    });
+
+  const porcentaje = (rechazadas, ensayadas) =>
+    ensayadas
+      ? formato((rechazadas / ensayadas) * 100) + "%"
+      : "0%";
+
+  try {
+
+    const { data: resumen, error: errorResumen } =
+      await supabaseClient
+        .from("indice_produccion_civil_resumen")
+        .select("*")
+        .order("edad");
+
+    if(errorResumen) throw errorResumen;
+
+    const { data: detalle, error: errorDetalle } =
+      await supabaseClient
+        .from("indice_produccion_civil_rechazos")
+        .select("*")
+        .order("edad");
+
+    if(errorDetalle) throw errorDetalle;
+
+    const filas = resumen || [];
+
+    const totalEnsayadas = filas.reduce(
+      (total, fila) => total + Number(fila.ensayadas || 0),
+      0
+    );
+
+    const totalRechazadas = filas.reduce(
+      (total, fila) => total + Number(fila.rechazadas || 0),
+      0
+    );
+
+    document.getElementById("civilEnsayadas").textContent =
+      formato(totalEnsayadas);
+
+    document.getElementById("civilRechazadas").textContent =
+      formato(totalRechazadas);
+
+    document.getElementById("civilIndice").textContent =
+      porcentaje(totalRechazadas, totalEnsayadas);
+
+    document.getElementById("civilEdades").innerHTML =
+      [7, 28, 56].map(edad => {
+
+        const fila = filas.find(
+          item => Number(item.edad) === edad
+        ) || {};
+
+        const minimo = edad === 7 ? "24,5" : "35";
+
+        return `
+          <tr>
+            <td>${edad} días</td>
+            <td>${formato(fila.ensayadas)}</td>
+            <td>${formato(fila.rechazadas)}</td>
+            <td>${porcentaje(fila.rechazadas, fila.ensayadas)}</td>
+            <td>${minimo} MPa</td>
+          </tr>
+        `;
+
+      }).join("");
+
+    const tablaDetalle =
+      document.getElementById("civilDetalle");
+
+    tablaDetalle.replaceChildren();
+
+    (detalle || []).forEach(fila => {
+
+      const tr = document.createElement("tr");
+
+      const valores = [
+        fila.remito,
+        fila.identificacion,
+        fila.edad + " días",
+        formato(fila.resistencia),
+        formato(fila.limite),
+        fila.elemento
+      ];
+
+      valores.forEach(valor => {
+        const td = document.createElement("td");
+        td.textContent = valor ?? "";
+        tr.appendChild(td);
+      });
+
+      tablaDetalle.appendChild(tr);
+
+    });
+
+    estado.textContent = totalEnsayadas
+      ? "Indicadores de Civil cargados correctamente."
+      : "Todavía no hay indicadores de Civil guardados.";
+
+  } catch(error) {
+
+    estado.textContent =
+      "Error al consultar Civil: " + error.message;
+
+    console.error("Error Índice Civil:", error);
+
+  }
 
 }
 
