@@ -274,6 +274,136 @@ td{
 
 </div>
 
+<!-- CIVIL - PROBETAS DE HORMIGÓN -->
+
+<details class="panel">
+
+  <summary style="cursor:pointer;color:#0b3568;font-size:17px;font-weight:700;">
+    Civil · Probetas de hormigón
+  </summary>
+
+  <div style="margin-top:22px;">
+
+    <p class="nota">
+      Índice de rechazo de probetas de hormigón.
+      Resistencia mínima a 7 días: 24,5 MPa.
+      Resistencia mínima a 28 y 56 días: 35 MPa.
+    </p>
+
+    <div class="carga">
+
+      <h3>Cargar trazabilidad de hormigón</h3>
+
+      <input
+        type="file"
+        id="civilArchivo"
+        accept=".xlsx,.xls"
+      >
+
+      <div style="margin-top:14px;">
+        <label for="civilHoja">Hoja del Excel:</label>
+        <select id="civilHoja"></select>
+      </div>
+
+      <button
+        type="button"
+        id="civilProcesar"
+        onclick="procesarCivil()">
+        Procesar Civil
+      </button>
+
+      <button
+        type="button"
+        id="civilGuardar"
+        onclick="guardarCivil()"
+        disabled
+        style="background:#16815c;margin-left:8px;">
+        Guardar Civil en Supabase
+      </button>
+
+      <div id="civilMensaje" class="nota" style="margin-top:14px;">
+        Seleccioná el Excel de trazabilidad de hormigón.
+      </div>
+
+    </div>
+
+    <div id="civilResultados" class="oculto" style="margin-top:20px;">
+
+      <div class="grid">
+
+        <div class="kpi">
+          <div class="etiqueta">PROBETAS ENSAYADAS</div>
+          <div class="numero" id="cEnsayadas">0</div>
+        </div>
+
+        <div class="kpi">
+          <div class="etiqueta">PROBETAS RECHAZADAS</div>
+          <div class="numero" id="cRechazadas">0</div>
+        </div>
+
+        <div class="kpi">
+          <div class="etiqueta">ÍNDICE DE RECHAZO TOTAL</div>
+          <div class="numero" id="cIndice">0%</div>
+        </div>
+
+      </div>
+
+      <div class="panel" style="margin-top:18px;">
+
+        <h3>Índice de rechazo por edad</h3>
+
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>Edad</th>
+                <th>Ensayadas</th>
+                <th>Rechazadas</th>
+                <th>Índice</th>
+              </tr>
+            </thead>
+
+            <tbody id="cEdades"></tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <details class="panel">
+
+        <summary style="cursor:pointer;font-weight:700;color:#0b3568;">
+          Ver detalle de probetas rechazadas
+        </summary>
+
+        <div class="tabla-contenedor" style="margin-top:16px;">
+
+          <table>
+            <thead>
+              <tr>
+                <th>Remito</th>
+                <th>Identificación</th>
+                <th>Edad</th>
+                <th>Resistencia (MPa)</th>
+                <th>Mínimo (MPa)</th>
+                <th>Elemento</th>
+              </tr>
+            </thead>
+
+            <tbody id="cDetalle"></tbody>
+          </table>
+
+        </div>
+
+      </details>
+
+    </div>
+
+  </div>
+
+</details>
+
+<!-- FIN CIVIL -->
+
 <script>
   
 const SUPABASE_URL = "https://mzgbtejfgsrskiuymtwh.supabase.co";
@@ -284,6 +414,285 @@ const db = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
+
+/* CIVIL - LECTURA DEL ARCHIVO EXCEL */
+
+let civilLibro = null;
+let civilDatosParaGuardar = null;
+
+document.getElementById("civilArchivo").addEventListener("change", async function(){
+
+  const mensaje = document.getElementById("civilMensaje");
+  const selector = document.getElementById("civilHoja");
+
+  civilLibro = null;
+  civilDatosParaGuardar = null;
+
+  document.getElementById("civilGuardar").disabled = true;
+  document.getElementById("civilResultados").classList.add("oculto");
+
+  const archivo = this.files[0];
+
+  if(!archivo){
+    mensaje.textContent = "Seleccioná un Excel de hormigón.";
+    return;
+  }
+
+  try{
+
+    mensaje.textContent = "Leyendo Excel de Civil...";
+
+    const contenido = await archivo.arrayBuffer();
+
+    civilLibro = XLSX.read(contenido,{
+      type:"array"
+    });
+
+    selector.innerHTML = "";
+
+    civilLibro.SheetNames.forEach(nombre=>{
+
+      const opcion = document.createElement("option");
+
+      opcion.value = nombre;
+      opcion.textContent = nombre;
+
+      selector.appendChild(opcion);
+
+    });
+
+    const hojaPrincipal = civilLibro.SheetNames.find(nombre=>
+      nombre.toUpperCase().includes("AR-4-ICUM-Q-C-PR-07-F-2")
+    );
+
+    if(hojaPrincipal){
+      selector.value = hojaPrincipal;
+    }
+
+    mensaje.textContent =
+      "Excel leído correctamente. Seleccioná la hoja y presioná Procesar Civil.";
+
+  }catch(error){
+
+    mensaje.textContent = "Error al leer Civil: " + error.message;
+
+  }
+
+});
+
+/* CIVIL - PROCESAMIENTO DE PROBETAS */
+
+function civilNumero(valor){
+
+  if(typeof valor === "number"){
+    return Number.isFinite(valor) ? valor : null;
+  }
+
+  const texto = String(valor ?? "")
+    .replace(/MPA/gi,"")
+    .replace(/\s/g,"")
+    .replace(",",".")
+    .trim();
+
+  if(!texto) return null;
+
+  const numero = Number(texto);
+
+  return Number.isFinite(numero) ? numero : null;
+
+}
+
+function procesarCivil(){
+
+  const mensaje = document.getElementById("civilMensaje");
+  const guardar = document.getElementById("civilGuardar");
+
+  guardar.disabled = true;
+  civilDatosParaGuardar = null;
+
+  document.getElementById("civilResultados")
+    .classList.add("oculto");
+
+  if(!civilLibro){
+    mensaje.textContent = "Primero seleccioná el Excel de Civil.";
+    return;
+  }
+
+  try{
+
+    const nombreHoja =
+      document.getElementById("civilHoja").value;
+
+    const hoja = civilLibro.Sheets[nombreHoja];
+
+    if(!hoja){
+      throw new Error("No se encontró la hoja seleccionada.");
+    }
+
+    const filas = XLSX.utils.sheet_to_json(hoja,{
+      header:1,
+      defval:"",
+      blankrows:true
+    });
+
+    const resumen = {
+      7:{ensayadas:0,rechazadas:0},
+      28:{ensayadas:0,rechazadas:0},
+      56:{ensayadas:0,rechazadas:0}
+    };
+
+    const rechazos = [];
+
+    const ensayos = [
+      {edad:7,identificacion:16,resistencia:19,limite:24.5},
+      {edad:28,identificacion:20,resistencia:23,limite:35},
+      {edad:28,identificacion:24,resistencia:27,limite:35},
+      {edad:56,identificacion:28,resistencia:31,limite:35}
+    ];
+
+    // Los datos comienzan en la fila 8 del Excel.
+    filas.slice(7).forEach(fila=>{
+
+      const remito = String(fila[3] ?? "").trim();
+
+      const elemento = [
+        fila[1],
+        fila[2]
+      ].filter(valor=>String(valor ?? "").trim())
+       .join(" · ");
+
+      ensayos.forEach(ensayo=>{
+
+        const resistencia =
+          civilNumero(fila[ensayo.resistencia]);
+
+        if(resistencia === null) return;
+
+        const identificacion =
+          String(fila[ensayo.identificacion] ?? "").trim();
+
+        // Evita contabilizar textos de encabezados o totales.
+        if(!identificacion) return;
+
+        resumen[ensayo.edad].ensayadas++;
+
+        if(resistencia < ensayo.limite){
+
+          resumen[ensayo.edad].rechazadas++;
+
+          rechazos.push({
+            remito,
+            identificacion,
+            edad:ensayo.edad,
+            resistencia,
+            limite:ensayo.limite,
+            elemento
+          });
+
+        }
+
+      });
+
+    });
+
+    const totalEnsayadas = Object.values(resumen)
+      .reduce((total,item)=>total+item.ensayadas,0);
+
+    const totalRechazadas = Object.values(resumen)
+      .reduce((total,item)=>total+item.rechazadas,0);
+
+    if(totalEnsayadas === 0){
+      throw new Error(
+        "No se encontraron probetas válidas. Revisá la hoja y las columnas del Excel."
+      );
+    }
+
+    const porcentaje = (rechazadas,ensayadas)=>
+      ensayadas
+        ? (rechazadas / ensayadas * 100).toLocaleString(
+            "es-AR",
+            {minimumFractionDigits:2,maximumFractionDigits:2}
+          ) + "%"
+        : "0,00%";
+
+    document.getElementById("cEnsayadas").textContent =
+      totalEnsayadas.toLocaleString("es-AR");
+
+    document.getElementById("cRechazadas").textContent =
+      totalRechazadas.toLocaleString("es-AR");
+
+    document.getElementById("cIndice").textContent =
+      porcentaje(totalRechazadas,totalEnsayadas);
+
+    document.getElementById("cEdades").innerHTML =
+      [7,28,56].map(edad=>{
+
+        const datos = resumen[edad];
+
+        return `
+          <tr>
+            <td>${edad} días</td>
+            <td>${datos.ensayadas}</td>
+            <td>${datos.rechazadas}</td>
+            <td>${porcentaje(datos.rechazadas,datos.ensayadas)}</td>
+          </tr>
+        `;
+
+      }).join("");
+
+    const detalle = document.getElementById("cDetalle");
+    detalle.replaceChildren();
+
+    rechazos.forEach(item=>{
+
+      const tr = document.createElement("tr");
+
+      [
+        item.remito,
+        item.identificacion,
+        item.edad + " días",
+        item.resistencia,
+        item.limite,
+        item.elemento
+      ].forEach(valor=>{
+
+        const td = document.createElement("td");
+        td.textContent = valor;
+        tr.appendChild(td);
+
+      });
+
+      detalle.appendChild(tr);
+
+    });
+
+    civilDatosParaGuardar = {
+      resumen,
+      rechazos,
+      archivoNombre:
+        document.getElementById("civilArchivo").files[0]?.name || ""
+    };
+
+    document.getElementById("civilResultados")
+      .classList.remove("oculto");
+
+    guardar.disabled = false;
+
+    mensaje.textContent =
+      "Procesamiento finalizado: " +
+      totalEnsayadas + " probetas ensayadas y " +
+      totalRechazadas + " rechazadas. Ya podés guardar.";
+
+  }catch(error){
+
+    mensaje.textContent =
+      "Error al procesar Civil: " + error.message;
+
+    console.error(error);
+
+  }
+
+}
 
 const SOLDADORES = [
   "W1","W2","W3","W4",
@@ -550,6 +959,92 @@ estado.textContent =
 
 }
   
+/* CIVIL - GUARDAR INDICADORES EN SUPABASE */
+
+async function guardarCivil(){
+
+  const mensaje = document.getElementById("civilMensaje");
+  const boton = document.getElementById("civilGuardar");
+
+  if(!civilDatosParaGuardar){
+    mensaje.textContent = "Primero procesá el Excel de Civil.";
+    return;
+  }
+
+  boton.disabled = true;
+
+  try{
+
+    const {data:{session},error:errorSesion} =
+      await db.auth.getSession();
+
+    if(errorSesion) throw errorSesion;
+
+    if(!session){
+      throw new Error(
+        "No hay sesión iniciada. Ingresá como administrador."
+      );
+    }
+
+    const fecha = new Date().toISOString();
+
+    const filasResumen = [7,28,56].map(edad=>({
+      edad,
+      ensayadas: civilDatosParaGuardar.resumen[edad].ensayadas,
+      rechazadas: civilDatosParaGuardar.resumen[edad].rechazadas,
+      archivo_nombre: civilDatosParaGuardar.archivoNombre,
+      actualizado_en: fecha
+    }));
+
+    mensaje.textContent = "Guardando resumen de Civil...";
+
+    const {error:errorResumen} = await db
+      .from("indice_produccion_civil_resumen")
+      .upsert(filasResumen,{onConflict:"edad"});
+
+    if(errorResumen) throw errorResumen;
+
+    mensaje.textContent = "Actualizando detalle de rechazos...";
+
+    const {error:errorEliminar} = await db
+      .from("indice_produccion_civil_rechazos")
+      .delete()
+      .gte("id",0);
+
+    if(errorEliminar) throw errorEliminar;
+
+    if(civilDatosParaGuardar.rechazos.length > 0){
+
+      const {error:errorDetalle} = await db
+        .from("indice_produccion_civil_rechazos")
+        .insert(civilDatosParaGuardar.rechazos);
+
+      if(errorDetalle) throw errorDetalle;
+
+    }
+
+    mensaje.textContent =
+      "✓ Indicadores de Civil guardados correctamente en Supabase.";
+
+    mensaje.style.color = "#16815c";
+
+  }catch(error){
+
+    console.error("Error al guardar Civil:",error);
+
+    mensaje.textContent =
+      "Error al guardar Civil: " + error.message;
+
+    mensaje.style.color = "#c43d3d";
+
+  }finally{
+
+    boton.disabled = false;
+
+  }
+
+}
+
 async function guardarIndiceSupabase(){
 
   if(!datosParaGuardar){
