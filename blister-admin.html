@@ -463,211 +463,126 @@ function archivoSeleccionado(){
 ANALIZAR EXCEL
 ============================================================ */
 
+
 async function analizarBlister(){
 
   if(!archivoActual){
-
-    mostrarEstado(
-      "estadoCarga",
-      "Seleccioná primero un archivo Excel.",
-      "error"
-    );
-
+    mostrarEstado("estadoCarga",
+      "Seleccioná primero un archivo Excel.", "error");
     return;
   }
 
-  mostrarEstado(
-    "estadoCarga",
-    "Analizando Excel...",
-    "info"
-  );
+  cancelarAnalisis(false);
+  mostrarEstado("estadoCarga", "Analizando Excel...", "info");
 
   try{
+    const buffer = await archivoActual.arrayBuffer();
+    const libro = XLSX.read(buffer, {
+      type:"array",
+      cellDates:true
+    });
 
-    const buffer =
-    await archivoActual
-    .arrayBuffer();
-
-    const libro =
-    XLSX.read(
-      buffer,
-      {
-        type:"array",
-        cellDates:true
-      }
-    );
-
-    if(
-      !libro.SheetNames.length
-    ){
-      throw new Error(
-        "El archivo no contiene hojas."
-      );
+    if(!libro.SheetNames.length){
+      throw new Error("El archivo no contiene hojas.");
     }
 
-    const hoja =
-    libro.Sheets[
-      libro.SheetNames[0]
+    const hoja = libro.Sheets[libro.SheetNames[0]];
+    const filas = XLSX.utils.sheet_to_json(hoja, {
+      header:1,
+      defval:"",
+      raw:true
+    });
+
+    const filaCabecera = detectarCabecera(filas);
+
+    if(filaCabecera < 0){
+      throw new Error("No encontré la fila de encabezados esperada.");
+    }
+
+    const columnas = obtenerColumnasBlister(filas[filaCabecera]);
+
+    const requeridas = [
+      "id", "proyecto", "fase", "especialidad",
+      "contratista", "fecha_deteccion", "fecha_carga",
+      "inspector", "tipo_observacion", "estado",
+      "vencido", "no_conformidad"
     ];
 
-    const filas =
-    XLSX.utils.sheet_to_json(
-      hoja,
-      {
-        header:1,
-        defval:"",
-        raw:true
-      }
+    const faltantes = requeridas.filter(
+      campo => columnas[campo] === undefined
     );
 
-    const filaCabecera =
-    detectarCabecera(
-      filas
-    );
-
-    if(
-      filaCabecera < 0
-    ){
+    if(faltantes.length){
       throw new Error(
-        "No encontré la fila de encabezados esperada."
+        "Faltan columnas obligatorias: " + faltantes.join(", ")
       );
     }
 
     const registros = [];
+    const ids = new Set();
 
-    for(
-      let i =
-      filaCabecera + 1;
-      i < filas.length;
-      i++
-    ){
+    for(let i = filaCabecera + 1; i < filas.length; i++){
 
-      const fila =
-      filas[i];
+      const fila = filas[i];
+
+      if(!fila || !fila.some(
+        x => String(x ?? "").trim() !== ""
+      )) continue;
+
+      const cabeceraRepetida = obtenerColumnasBlister(fila);
 
       if(
-        !fila ||
-        !fila.some(
-          x =>
-          String(
-            x ?? ""
-          ).trim() !== ""
-        )
-      ){
-        continue;
+        cabeceraRepetida.id !== undefined &&
+        cabeceraRepetida.estado !== undefined
+      ) continue;
+
+      const dato = campo => fila[columnas[campo]];
+      const id = numeroId(dato("id"));
+
+      if(!id) continue;
+
+      if(ids.has(id)){
+        throw new Error("ID duplicado en el Excel: " + id);
       }
 
-      /*
-      Si aparece otra fila de encabezados,
-      se ignora.
-      */
-      if(
-        normalizar(
-          fila[0]
-        ) === "id" &&
-        normalizar(
-          fila[1]
-        ) === "proyecto"
-      ){
-        continue;
-      }
-
-      const id =
-      numeroId(
-        fila[0]
-      );
-
-      if(!id){
-        continue;
-      }
+      ids.add(id);
 
       registros.push({
         id:id,
-        proyecto:texto(
-          fila[1]
-        ),
-        fase:texto(
-          fila[2]
-        ),
-        especialidad:texto(
-          fila[3]
-        ),
-        contratista:texto(
-          fila[4]
-        ),
-        fecha_deteccion:
-        convertirFechaISO(
-          fila[5]
-        ),
-        fecha_carga:
-        convertirFechaISO(
-          fila[6]
-        ),
-        inspector:texto(
-          fila[7]
-        ),
-        tipo_observacion:
-        texto(
-          fila[8]
-        ).toUpperCase(),
-        estado:
-        texto(
-          fila[9]
-        ).toUpperCase(),
-        vencido:
-        convertirBooleano(
-          fila[10]
-        ),
-        no_conformidad:
-        convertirBooleano(
-          fila[11]
-        ),
-        archivo_origen:
-        archivoActual.name,
-        fecha_actualizacion:
-        new Date()
-        .toISOString(),
-        usuario_actualizacion:
-        usuarioActual.email
+        proyecto:texto(dato("proyecto")),
+        fase:texto(dato("fase")),
+        especialidad:texto(dato("especialidad")),
+        contratista:texto(dato("contratista")),
+        fecha_deteccion:convertirFechaISO(dato("fecha_deteccion")),
+        fecha_carga:convertirFechaISO(dato("fecha_carga")),
+        inspector:texto(dato("inspector")),
+        tipo_observacion:texto(dato("tipo_observacion")).toUpperCase(),
+        estado:texto(dato("estado")).toUpperCase(),
+        vencido:convertirBooleano(dato("vencido")),
+        no_conformidad:convertirBooleano(dato("no_conformidad")),
+        archivo_origen:archivoActual.name,
+        fecha_actualizacion:new Date().toISOString(),
+        usuario_actualizacion:usuarioActual.email
       });
-
     }
 
-    if(
-      !registros.length
-    ){
-      throw new Error(
-        "No encontré observaciones válidas para importar."
-      );
+    if(!registros.length){
+      throw new Error("No encontré observaciones válidas para importar.");
     }
 
-    registrosProcesados =
-    registros;
-
+    registrosProcesados = registros;
     pintarAnalisis();
 
-    mostrarEstado(
-      "estadoCarga",
+    mostrarEstado("estadoCarga",
       "Excel analizado correctamente. Revisá la vista previa antes de confirmar.",
-      "ok"
-    );
+      "ok");
 
+  }catch(error){
+    console.error(error);
+    mostrarEstado("estadoCarga",
+      "No se pudo analizar el Excel: " + error.message,
+      "error");
   }
-  catch(error){
-
-    console.error(
-      error
-    );
-
-    mostrarEstado(
-      "estadoCarga",
-      "No se pudo analizar el Excel: " +
-      error.message,
-      "error"
-    );
-
-  }
-
 }
 
 
@@ -675,66 +590,60 @@ async function analizarBlister(){
 DETECTAR CABECERA
 ============================================================ */
 
-function detectarCabecera(
-filas
-){
+function obtenerColumnasBlister(fila){
 
-  const candidatos = [];
+  const equivalencias = {
+    "id": "id",
+    "proyecto": "proyecto",
+    "fase": "fase",
+    "especialidad": "especialidad",
+    "contratista": "contratista",
+    "fecha de deteccion": "fecha_deteccion",
+    "fecha de carga": "fecha_carga",
+    "inspector": "inspector",
+    "tipo observacion": "tipo_observacion",
+    "tipo de observacion": "tipo_observacion",
+    "estado": "estado",
+    "vencido": "vencido",
+    "no conformidad": "no_conformidad"
+  };
 
-  filas.forEach(
-    (
-      fila,
-      indice
-    ) => {
+  const columnas = {};
 
-      if(!fila){
-        return;
-      }
+  (fila || []).forEach((valor, indice) => {
+    const nombre = normalizar(valor)
+      .replace(/\s+/g, " ")
+      .trim();
 
-      const a =
-      normalizar(
-        fila[0]
-      );
+    const clave = equivalencias[nombre];
 
-      const b =
-      normalizar(
-        fila[1]
-      );
-
-      const j =
-      normalizar(
-        fila[9]
-      );
-
-      if(
-        a === "id" &&
-        b === "proyecto" &&
-        j === "estado"
-      ){
-        candidatos.push(
-          indice
-        );
-      }
-
+    if(clave !== undefined && columnas[clave] === undefined){
+      columnas[clave] = indice;
     }
-  );
+  });
 
-  if(
-    !candidatos.length
-  ){
-    return -1;
-  }
-
-  /*
-  Elegimos la última cabecera porque
-  el export puede traer una cabecera
-  inicial y otra antes del listado real.
-  */
-  return candidatos[
-    candidatos.length - 1
-  ];
-
+  return columnas;
 }
+
+function detectarCabecera(filas){
+  let encontrada = -1;
+
+  filas.forEach((fila, indice) => {
+    const c = obtenerColumnasBlister(fila);
+
+    if(
+      c.id !== undefined &&
+      c.proyecto !== undefined &&
+      c.estado !== undefined &&
+      c.no_conformidad !== undefined
+    ){
+      encontrada = indice;
+    }
+  });
+
+  return encontrada;
+}
+
 
 
 /* ============================================================
