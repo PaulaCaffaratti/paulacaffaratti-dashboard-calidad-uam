@@ -787,12 +787,27 @@ registrosCliente = [...mapa.values()];
     data-codigo="${escapar(codigo)}"
     data-origen="cliente"
   >
-    <option value="Abierta"
-  ${estadosNC["cliente:" + codigo] === "Cerrada" ? "" : "selected"}>
+   <option value="Abierta"
+  ${
+    (
+      estadosNC["cliente:" + codigo] ||
+      (/cerrad|finalizad|resuelt/i.test(
+        String(datos["Estado"] || datos["Estado actual"] || "")
+      ) ? "Cerrada" : "Abierta")
+    ) === "Abierta" ? "selected" : ""
+  }>
   Abierta
 </option>
+
 <option value="Cerrada"
-  ${estadosNC["cliente:" + codigo] === "Cerrada" ? "selected" : ""}>
+  ${
+    (
+      estadosNC["cliente:" + codigo] ||
+      (/cerrad|finalizad|resuelt/i.test(
+        String(datos["Estado"] || datos["Estado actual"] || "")
+      ) ? "Cerrada" : "Abierta")
+    ) === "Cerrada" ? "selected" : ""
+  }>
   Cerrada
 </option>
   </select>
@@ -890,12 +905,44 @@ async function confirmarReemplazo(tipo) {
         "Verificá los registros en Supabase."
       );
     }
-const cambiosEstados = registros.map(registro => ({
-  origen: tipo,
-  codigo: registro.codigo,
-  estado: estadosNC[tipo + ":" + registro.codigo]
-    || "Abierta"
-}));
+const cambiosEstados = registros.map(registro => {
+
+  const clave = tipo + ":" + registro.codigo;
+
+  const estadoExistente = estadosNC[clave];
+
+  const datos = registro.datos || {};
+
+  let estadoOriginal = "Abierta";
+
+  if (tipo === "cliente") {
+    const valor = String(
+      datos["Estado"] || datos["Estado actual"] || ""
+    );
+
+    estadoOriginal = /cerrad|finalizad|resuelt/i.test(valor)
+      ? "Cerrada"
+      : "Abierta";
+  } else {
+    const fecha = String(
+      datos["Fecha de cierre"] ||
+      datos["Fecha Cierre"] ||
+      datos["Fecha de Cierre"] ||
+      ""
+    ).trim();
+
+    estadoOriginal = fecha && fecha !== "-"
+      ? "Cerrada"
+      : "Abierta";
+  }
+
+  return {
+    origen: tipo,
+    codigo: registro.codigo,
+    estado: estadoExistente || estadoOriginal
+  };
+
+});
 
 const { error: errorEstados } = await db
   .from("uam_nc_estados_manuales")
