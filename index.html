@@ -6535,12 +6535,13 @@ async function descargarInformeCompleto(){
   }
 
   const secciones = [
-    {id:"resumen", titulo:"Control Documental"},
-        {id:"blister", titulo:"Observaciones Blister", especial:"blister"},
-    {id:"hallazgos", titulo:"Hallazgos"},
-    {id:"capacitaciones", titulo:"Capacitaciones"},
-    {id:"matriz", titulo:"Matriz de Calidad"}
-  ];
+  {id:"resumen", titulo:"Control Documental"},
+  {id:"blister", titulo:"Observaciones Blister", especial:"blister"},
+  {id:"hallazgos", titulo:"Hallazgos"},
+  {id:"capacitaciones", titulo:"Capacitaciones"},
+  {id:"matriz", titulo:"Matriz de Calidad"},
+  {id:"indiceProduccion", titulo:"Índice de Producción"}
+];
 
   const estadoSecciones = secciones.map(s => {
     const el = document.getElementById(s.id);
