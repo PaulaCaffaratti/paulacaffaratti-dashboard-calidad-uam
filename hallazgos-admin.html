@@ -668,13 +668,54 @@ console.log("NC PECOM duplicadas excluidas:", duplicadasPecom);
     data-origen="pecom"
   >
     <option value="Abierta"
-      ${estadosNC["pecom:" + codigo] === "Cerrada" ? "" : "selected"}>
-      Abierta
-    </option>
-    <option value="Cerrada"
-      ${estadosNC["pecom:" + codigo] === "Cerrada" ? "selected" : ""}>
-      Cerrada
-    </option>
+  ${
+    (
+      estadosNC["pecom:" + codigo] ||
+      (
+        String(
+          datos["Fecha de cierre"] ||
+          datos["Fecha Cierre"] ||
+          datos["Fecha de Cierre"] ||
+          ""
+        ).trim() &&
+        String(
+          datos["Fecha de cierre"] ||
+          datos["Fecha Cierre"] ||
+          datos["Fecha de Cierre"] ||
+          ""
+        ).trim() !== "-"
+          ? "Cerrada"
+          : "Abierta"
+      )
+    ) === "Abierta" ? "selected" : ""
+  }>
+  Abierta
+</option>
+
+<option value="Cerrada"
+  ${
+    (
+      estadosNC["pecom:" + codigo] ||
+      (
+        String(
+          datos["Fecha de cierre"] ||
+          datos["Fecha Cierre"] ||
+          datos["Fecha de Cierre"] ||
+          ""
+        ).trim() &&
+        String(
+          datos["Fecha de cierre"] ||
+          datos["Fecha Cierre"] ||
+          datos["Fecha de Cierre"] ||
+          ""
+        ).trim() !== "-"
+          ? "Cerrada"
+          : "Abierta"
+      )
+    ) === "Cerrada" ? "selected" : ""
+  }>
+  Cerrada
+</option>
   </select>
 </td>
         </tr>
