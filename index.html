@@ -1841,6 +1841,33 @@ style="display:none;">
       Consultando resultados de Civil...
     </div>
 
+<div class="pipingKpi">
+
+  <details>
+    <summary style="cursor:pointer;list-style:none;">
+      <small>PROBETAS TOTALES ▼</small>
+      <strong id="civilTotales">—</strong>
+    </summary>
+
+    <div style="margin-top:15px;font-size:12px;line-height:2;color:#687787;">
+
+      <div>
+        7 días: <b id="civilTotal7">—</b>
+      </div>
+
+      <div>
+        28 días: <b id="civilTotal28">—</b>
+      </div>
+
+      <div>
+        56 días: <b id="civilTotal56">—</b>
+      </div>
+
+    </div>
+  </details>
+
+</div>
+
     <div class="pipingKpis"
          style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));">
 
@@ -5097,6 +5124,31 @@ async function cargarIndiceCivil(){
     if(errorDetalle) throw errorDetalle;
 
     const filas = resumen || [];
+
+const totalProbetas = filas.reduce(
+  (total, fila) => total + Number(fila.totales || 0),
+  0
+);
+
+const totalPorEdad = edad => {
+  const fila = filas.find(
+    item => Number(item.edad) === edad
+  );
+
+  return Number(fila?.totales || 0);
+};
+
+document.getElementById("civilTotales").textContent =
+  formato(totalProbetas);
+
+document.getElementById("civilTotal7").textContent =
+  formato(totalPorEdad(7));
+
+document.getElementById("civilTotal28").textContent =
+  formato(totalPorEdad(28));
+
+document.getElementById("civilTotal56").textContent =
+  formato(totalPorEdad(56));
 
     const totalEnsayadas = filas.reduce(
       (total, fila) => total + Number(fila.ensayadas || 0),
