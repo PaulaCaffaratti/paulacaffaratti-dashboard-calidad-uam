@@ -324,17 +324,41 @@ async function cargarEstadosNC() {
 
 }
 const $ = id => document.getElementById(id);
-document.addEventListener("change", function(evento) {
+document.addEventListener("change", async function(evento) {
 
   if (!evento.target.classList.contains("selectorEstadoNC")) {
     return;
   }
 
-  const codigo = evento.target.dataset.codigo;
-  const origen = evento.target.dataset.origen;
-  const estado = evento.target.value;
+  const selector = evento.target;
+  const codigo = selector.dataset.codigo;
+  const origen = selector.dataset.origen;
+  const estado = selector.value;
+  const clave = origen + ":" + codigo;
+  const estadoAnterior = estadosNC[clave] || "Abierta";
 
-  estadosNC[origen + ":" + codigo] = estado;
+  selector.disabled = true;
+
+  const { error } = await db
+    .from("uam_nc_estados_manuales")
+    .upsert({
+      origen: origen,
+      codigo: codigo,
+      estado: estado
+    }, {
+      onConflict: "origen,codigo"
+    });
+
+  selector.disabled = false;
+
+  if (error) {
+    selector.value = estadoAnterior;
+    alert("No se pudo guardar el estado: " + error.message);
+    return;
+  }
+
+  estadosNC[clave] = estado;
+  alert("Estado guardado correctamente: " + estado);
 
 });
 /* ==========================================
