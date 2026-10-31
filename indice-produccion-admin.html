@@ -331,6 +331,38 @@ Costuras con fecha en X y soldador en V y/o W
 
       <div class="grid">
 
+<div class="kpi">
+
+  <details>
+    <summary style="cursor:pointer;list-style:none;">
+      <div class="etiqueta">
+        PROBETAS TOTALES ▼
+      </div>
+
+      <div class="numero" id="cTotales">
+        0
+      </div>
+    </summary>
+
+    <div style="margin-top:15px;font-size:13px;line-height:2;">
+
+      <div>
+        7 días: <strong id="cTotal7">0</strong>
+      </div>
+
+      <div>
+        28 días: <strong id="cTotal28">0</strong>
+      </div>
+
+      <div>
+        56 días: <strong id="cTotal56">0</strong>
+      </div>
+
+    </div>
+  </details>
+
+</div>
+
         <div class="kpi">
           <div class="etiqueta">PROBETAS ENSAYADAS</div>
           <div class="numero" id="cEnsayadas">0</div>
@@ -535,11 +567,13 @@ function procesarCivil(){
       blankrows:true
     });
 
-    const resumen = {
-      7:{ensayadas:0,rechazadas:0},
-      28:{ensayadas:0,rechazadas:0},
-      56:{ensayadas:0,rechazadas:0}
-    };
+    
+const resumen = {
+  7:{totales:0,ensayadas:0,rechazadas:0},
+  28:{totales:0,ensayadas:0,rechazadas:0},
+  56:{totales:0,ensayadas:0,rechazadas:0}
+};
+
 
     const rechazos = [];
 
@@ -561,20 +595,27 @@ function procesarCivil(){
       ].filter(valor=>String(valor ?? "").trim())
        .join(" · ");
 
-      ensayos.forEach(ensayo=>{
+     
+ensayos.forEach(ensayo=>{
 
-        const resistencia =
-          civilNumero(fila[ensayo.resistencia]);
+  const identificacion =
+    String(fila[ensayo.identificacion] ?? "").trim();
 
-        if(resistencia === null) return;
+  // Solo cuenta probetas con identificación.
+  if(!identificacion) return;
 
-        const identificacion =
-          String(fila[ensayo.identificacion] ?? "").trim();
+  // Cuenta todas las probetas identificadas,
+  // tengan o no resultado de ensayo.
+  resumen[ensayo.edad].totales++;
 
-        // Evita contabilizar textos de encabezados o totales.
-        if(!identificacion) return;
+  const resistencia =
+    civilNumero(fila[ensayo.resistencia]);
 
-        resumen[ensayo.edad].ensayadas++;
+  // Sin resistencia, todavía no fue ensayada.
+  if(resistencia === null) return;
+
+  resumen[ensayo.edad].ensayadas++;
+
 
         if(resistencia < ensayo.limite){
 
@@ -595,6 +636,9 @@ function procesarCivil(){
 
     });
 
+const totalProbetas = Object.values(resumen)
+  .reduce((total,item)=>total+item.totales,0);
+
     const totalEnsayadas = Object.values(resumen)
       .reduce((total,item)=>total+item.ensayadas,0);
 
@@ -614,6 +658,18 @@ function procesarCivil(){
             {minimumFractionDigits:2,maximumFractionDigits:2}
           ) + "%"
         : "0,00%";
+
+document.getElementById("cTotales").textContent =
+  totalProbetas.toLocaleString("es-AR");
+
+document.getElementById("cTotal7").textContent =
+  resumen[7].totales.toLocaleString("es-AR");
+
+document.getElementById("cTotal28").textContent =
+  resumen[28].totales.toLocaleString("es-AR");
+
+document.getElementById("cTotal56").textContent =
+  resumen[56].totales.toLocaleString("es-AR");
 
     document.getElementById("cEnsayadas").textContent =
       totalEnsayadas.toLocaleString("es-AR");
@@ -1008,13 +1064,15 @@ async function guardarCivil(){
 
     const fecha = new Date().toISOString();
 
-    const filasResumen = [7,28,56].map(edad=>({
-      edad,
-      ensayadas: civilDatosParaGuardar.resumen[edad].ensayadas,
-      rechazadas: civilDatosParaGuardar.resumen[edad].rechazadas,
-      archivo_nombre: civilDatosParaGuardar.archivoNombre,
-      actualizado_en: fecha
-    }));
+   
+const filasResumen = [7,28,56].map(edad=>({
+  edad,
+  totales: civilDatosParaGuardar.resumen[edad].totales,
+  ensayadas: civilDatosParaGuardar.resumen[edad].ensayadas,
+  rechazadas: civilDatosParaGuardar.resumen[edad].rechazadas,
+  archivo_nombre: civilDatosParaGuardar.archivoNombre,
+  actualizado_en: fecha
+}));
 
     mensaje.textContent = "Guardando resumen de Civil...";
 
