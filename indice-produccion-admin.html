@@ -224,7 +224,7 @@ td{
       <div class="etiqueta">COSTURAS TOTALES</div>
       <div class="numero" id="totalCosturas">0</div>
       <div class="detalle">
-        Costuras con soldador en columna AH
+Costuras con fecha en X y soldador en V y/o W
       </div>
     </div>
 
@@ -827,39 +827,59 @@ function procesarExcel(){
   let totalCosturas = 0;
   let totalRechazos = 0;
 
-  filas.forEach(fila=>{
+  
+  filas.forEach(fila => {
 
-    // AH = columna 34, índice 33.
-    const lote = fila[33];
+    // V y W: soldadores que ejecutaron la costura
+    const soldadores = [
+      ...new Set([
+        ...obtenerSoldadores(fila[21]),
+        ...obtenerSoldadores(fila[22])
+      ])
+    ];
 
-    // AN = columna 40, índice 39.
+    // X: fecha de soldadura
+    const fechaSoldadura = fila[23];
+
+    const tieneFecha =
+      fechaSoldadura !== null &&
+      fechaSoldadura !== undefined &&
+      String(fechaSoldadura).trim() !== "";
+
+    // AH: soldadores asociados al control END
+    const soldadoresRechazo =
+      obtenerSoldadores(fila[33]);
+
+    // AN: resultado END
     const resultado = String(fila[39] ?? "")
       .trim()
       .toUpperCase();
 
-    const soldadores = obtenerSoldadores(lote);
+    // Contar costuras soldadas
+    if(tieneFecha && soldadores.length > 0){
 
-    if(soldadores.length === 0) return;
+      totalCosturas++;
 
-    totalCosturas++;
+      soldadores.forEach(codigo => {
+        estadisticas[codigo].costuras++;
+      });
 
-    const rechazado = resultado === "RZ";
-
-    if(rechazado){
-      totalRechazos++;
     }
 
-    soldadores.forEach(codigo=>{
+    // Contar rechazos RZ
+    if(resultado === "RZ" &&
+       soldadoresRechazo.length > 0){
 
-      estadisticas[codigo].costuras++;
+      totalRechazos++;
 
-      if(rechazado){
+      soldadoresRechazo.forEach(codigo => {
         estadisticas[codigo].rechazos++;
-      }
+      });
 
-    });
+    }
 
   });
+
 
   document.getElementById("totalCosturas")
     .textContent = totalCosturas.toLocaleString("es-AR");
