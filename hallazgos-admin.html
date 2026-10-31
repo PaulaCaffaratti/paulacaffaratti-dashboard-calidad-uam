@@ -585,7 +585,19 @@ const duplicadasPecom = [];
 
 registrosPecom = [...mapa.values()].filter(registro => {
   const descripcion = registro.datos["Descripción"] || "";
+const referenciasCliente = {
+  "26 010309": "652",
+  "26 010476": "666",
+  "26 010477": "668",
+  "26 010705": "707",
+  "26 010706": "719"
+};
 
+const coincidePorReferencia = (ncCliente || []).some(
+  cliente =>
+    String(cliente.codigo).trim() ===
+    referenciasCliente[registro.codigo]
+);
   const numeroBlister = descripcion.match(/\bBLISTER\s*(?:N[°º.]?\s*)?(\d+)\b/i);
 
 const coincidePorBlister = numeroBlister
@@ -600,7 +612,9 @@ const coincidePorDescripcion = descripcionesCliente.some(
 );
 
 const esDuplicada =
-  coincidePorBlister || coincidePorDescripcion;
+  coincidePorReferencia ||
+  coincidePorBlister ||
+  coincidePorDescripcion;
   if (esDuplicada) {
     duplicadasPecom.push(registro.codigo);
   }
