@@ -382,7 +382,29 @@ function normalizar(valor) {
     .trim()
     .toUpperCase();
 }
+function normalizarDescripcion(texto) {
+  return normalizar(texto)
+    .replace(/[^A-Z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
+function similitudNC(texto1, texto2) {
+  const a = normalizarDescripcion(texto1);
+  const b = normalizarDescripcion(texto2);
+
+  if (!a || !b) return 0;
+  if (a === b) return 1;
+
+  const palabrasA = new Set(a.split(" "));
+  const palabrasB = new Set(b.split(" "));
+
+  const comunes = [...palabrasA].filter(
+    palabra => palabrasB.has(palabra)
+  ).length;
+
+  return (2 * comunes) / (palabrasA.size + palabrasB.size);
+}
 function buscarColumna(encabezados, nombre) {
   return encabezados.findIndex(
     encabezado => normalizar(encabezado) === normalizar(nombre)
@@ -544,7 +566,39 @@ $("archivoPecom").addEventListener("change", async function(evento) {
 
 await cargarEstadosNC();
 
-registrosPecom = [...mapa.values()];
+const { data: ncCliente, error: errorCliente } = await db
+  .from("uam_nc_cliente")
+  .select("codigo,datos");
+
+if (errorCliente) {
+  throw new Error(
+    "No se pudieron consultar las NC Cliente: " +
+    errorCliente.message
+  );
+}
+
+const descripcionesCliente = (ncCliente || [])
+  .map(registro => registro.datos?.["Observaciones"] || "")
+  .filter(descripcion => normalizarDescripcion(descripcion).length >= 30);
+
+const duplicadasPecom = [];
+
+registrosPecom = [...mapa.values()].filter(registro => {
+  const descripcion = registro.datos["Descripción"] || "";
+
+  const esDuplicada = descripcionesCliente.some(
+    descripcionCliente =>
+      similitudNC(descripcion, descripcionCliente) >= 0.95
+  );
+
+  if (esDuplicada) {
+    duplicadasPecom.push(registro.codigo);
+  }
+
+  return !esDuplicada;
+});
+
+console.log("NC PECOM duplicadas excluidas:", duplicadasPecom);
     mostrarResumen(
       "resumenPecom",
       filas.length,
