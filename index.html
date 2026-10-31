@@ -7015,30 +7015,23 @@ let graficoVencidasNC = null;
 
     const registros = [];
 
-    // Cliente: cerrada cuando Estado = Cerrado
-    clienteNC.forEach(r => {
-      const estado = normalizar(campo(r.datos, ["Estado"]));
-      const cerrada = estado === "cerrado" || estado === "cerrada";
+  // NC CLIENTE: respetar estado manual
+clienteNC.forEach(r => {
+  const cerrada = window.estadoGestionNC(r, "cliente") === "Cerrada";
 
-      if ((tipo === "Cerradas") === cerrada) {
-        registros.push({ ...r, origen: "Cliente", cerrada });
-      }
-    });
+  if ((tipo === "Cerradas") === cerrada) {
+    registros.push({ ...r, origen: "Cliente", cerrada });
+  }
+});
 
-    // PECOM: cerrada cuando Fecha Cierre tiene fecha
-    pecom.forEach(r => {
-      const fecha = campo(r.datos, [
-        "Fecha Cierre",
-        "Fecha de cierre",
-        "Fecha de Cierre"
-      ]);
+// NC PECOM: respetar estado manual
+pecom.forEach(r => {
+  const cerrada = window.estadoGestionNC(r, "pecom") === "Cerrada";
 
-      const cerrada = !!fecha && fecha.trim() !== "-";
-
-      if ((tipo === "Cerradas") === cerrada) {
-        registros.push({ ...r, origen: "PECOM", cerrada });
-      }
-    });
+  if ((tipo === "Cerradas") === cerrada) {
+    registros.push({ ...r, origen: "PECOM", cerrada });
+  }
+});
 
     // Eliminar ventana anterior, si existe
     document.getElementById("modalDetalleNCEstado")?.remove();
@@ -7416,35 +7409,27 @@ let graficoVencidasNC = null;
         .toLowerCase();
     }
 
-    // NC Cliente: columna J = Estado
-    clienteNC.forEach(r => {
-      const estado = normalizarEstado(
-        campo(r.datos, ["Estado"])
-      );
+   // NC CLIENTE: prioridad al estado manual
+clienteNC.forEach(r => {
+  const estado = window.estadoGestionNC(r, "cliente");
 
-      if (estado === "cerrado" || estado === "cerrada") {
-        conteos["Cerradas"]++;
-      } else {
-        conteos["Abiertas"]++;
-      }
-    });
+  if (estado === "Cerrada") {
+    conteos["Cerradas"]++;
+  } else {
+    conteos["Abiertas"]++;
+  }
+});
 
-    // NC PECOM: columna AB = Fecha de cierre
-    pecom.forEach(r => {
-      const fechaCierre = campo(r.datos, [
-        "Fecha de cierre",
-        "Fecha Cierre",
-        "Fecha de Cierre"
-      ]);
+// NC PECOM: prioridad al estado manual
+pecom.forEach(r => {
+  const estado = window.estadoGestionNC(r, "pecom");
 
-      if (fechaCierre && fechaCierre.trim() !== "-") {
-        conteos["Cerradas"]++;
-      } else {
-        conteos["Abiertas"]++;
-      }
-    });
-
-
+  if (estado === "Cerrada") {
+    conteos["Cerradas"]++;
+  } else {
+    conteos["Abiertas"]++;
+  }
+});
     const etiquetas = Object.keys(conteos);
     const cantidades = Object.values(conteos);
     const colores = [
@@ -7675,11 +7660,63 @@ let graficoVencidasNC = null;
         }
       );
 
-      const [datosPecom, datosCliente] = await Promise.all([
-        obtenerTodos(db, "uam_hallazgos"),
-        obtenerTodos(db, "uam_nc_cliente")
-      ]);
+     const [datosPecom, datosCliente, datosEstados] = await Promise.all([
+  obtenerTodos(db, "uam_hallazgos"),
+  obtenerTodos(db, "uam_nc_cliente"),
+(async () => {
+  const { data, error } = await db
+    .from("uam_nc_estados_manuales")
+    .select("origen,codigo,estado");
 
+  if (error) {
+    throw new Error(
+      "Error al consultar estados manuales: " + error.message
+    );
+  }
+
+  return data || [];
+})()
+     ]);
+
+const estadosManualesNC = {};
+
+datosEstados.forEach(registro => {
+  estadosManualesNC[
+    registro.origen + ":" + registro.codigo
+  ] = registro.estado;
+});
+
+function estadoGestionNC(registro, origen) {
+const clave = origen + ":" + String(registro.codigo ?? "").trim();
+  const manual = estadosManualesNC[clave];
+
+  if (manual === "Abierta" || manual === "Cerrada") {
+    return manual;
+  }
+
+  if (origen === "pecom") {
+  const fechaCierre = campo(registro.datos, [
+    "Fecha de cierre",
+    "Fecha Cierre",
+    "Fecha de Cierre"
+  ]);
+
+  return fechaCierre && fechaCierre.trim() !== "-"
+    ? "Cerrada"
+    : "Abierta";
+}
+
+const estadoOriginal = campo(registro.datos, [
+  "Estado",
+  "Estado actual"
+]);
+
+return /cerrad|finalizad|resuelt/i.test(estadoOriginal)
+  ? "Cerrada"
+  : "Abierta";
+}
+
+      window.estadoGestionNC = estadoGestionNC;
       pecom = datosPecom.filter(r =>
         campo(r.datos, ["Proyecto/Planta/Servicio"]) === PROYECTO
       );
