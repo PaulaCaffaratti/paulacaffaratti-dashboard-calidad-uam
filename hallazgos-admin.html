@@ -202,13 +202,14 @@ tr:hover td{background:#f8fbfd}
           <thead>
             <tr>
               <th>Código</th>
-              <th>Tipo de desvío</th>
-              <th>Estado actual</th>
-              <th>Descripción</th>
+<th>Tipo de desvío</th>
+<th>Estado actual</th>
+<th>Descripción</th>
+<th>Estado de gestión</th>
             </tr>
           </thead>
           <tbody id="filasPecom">
-            <tr><td colspan="4">Todavía no se cargó ningún archivo.</td></tr>
+            <tr><td colspan="5">Todavía no se cargó ningún archivo.</td></tr>
           </tbody>
         </table>
       </div>
@@ -260,15 +261,16 @@ tr:hover td{background:#f8fbfd}
           <thead>
             <tr>
               <th>ID</th>
-              <th>Proyecto</th>
-              <th>Especialidad</th>
-              <th>Estado</th>
-              <th>Vencido</th>
-              <th>Observaciones</th>
+<th>Proyecto</th>
+<th>Especialidad</th>
+<th>Estado</th>
+<th>Vencido</th>
+<th>Observaciones</th>
+<th>Estado de gestión</th>
             </tr>
           </thead>
           <tbody id="filasCliente">
-            <tr><td colspan="6">Todavía no se cargó ningún archivo.</td></tr>
+            <tr><td colspan="7">Todavía no se cargó ningún archivo.</td></tr>
           </tbody>
         </table>
       </div>
@@ -297,9 +299,44 @@ const COLUMNA_AK = 36;
 
 let registrosPecom = [];
 let registrosCliente = [];
+  
+  let estadosNC = {};
+async function cargarEstadosNC() {
 
+  const { data, error } = await db
+    .from("uam_nc_estados_manuales")
+    .select("origen,codigo,estado");
+
+  if (error) {
+    throw new Error(
+      "No se pudieron consultar los estados de las NC: " +
+      error.message
+    );
+  }
+
+  estadosNC = {};
+
+  (data || []).forEach(registro => {
+    estadosNC[
+      registro.origen + ":" + registro.codigo
+    ] = registro.estado;
+  });
+
+}
 const $ = id => document.getElementById(id);
+document.addEventListener("change", function(evento) {
 
+  if (!evento.target.classList.contains("selectorEstadoNC")) {
+    return;
+  }
+
+  const codigo = evento.target.dataset.codigo;
+  const origen = evento.target.dataset.origen;
+  const estado = evento.target.value;
+
+  estadosNC[origen + ":" + codigo] = estado;
+
+});
 /* ==========================================
    NAVEGACIÓN
 ========================================== */
@@ -505,8 +542,9 @@ $("archivoPecom").addEventListener("change", async function(evento) {
       mapa.set(codigo, {codigo, datos});
     }
 
-    registrosPecom = [...mapa.values()];
+await cargarEstadosNC();
 
+registrosPecom = [...mapa.values()];
     mostrarResumen(
       "resumenPecom",
       filas.length,
@@ -515,15 +553,31 @@ $("archivoPecom").addEventListener("change", async function(evento) {
     );
 
     $("filasPecom").innerHTML = registrosPecom.slice(0,50)
-      .map(({datos}) => `
+      .map(({datos, codigo}) => `
         <tr>
           <td>${escapar(datos["Código"])}</td>
           <td>${escapar(datos["Tipo de Desvío"])}</td>
           <td>${escapar(datos["Estado actual"])}</td>
           <td>${escapar(datos["Descripción"])}</td>
+          <td>
+  <select
+    class="selectorEstadoNC"
+    data-codigo="${escapar(codigo)}"
+    data-origen="pecom"
+  >
+    <option value="Abierta"
+      ${estadosNC["pecom:" + codigo] === "Cerrada" ? "" : "selected"}>
+      Abierta
+    </option>
+    <option value="Cerrada"
+      ${estadosNC["pecom:" + codigo] === "Cerrada" ? "selected" : ""}>
+      Cerrada
+    </option>
+  </select>
+</td>
         </tr>
       `).join("") || `
-        <tr><td colspan="4">No se encontraron NC PECOM.</td></tr>
+        <tr><td colspan="5">No se encontraron NC PECOM.</td></tr>
       `;
 
     if (!registrosPecom.length) {
@@ -606,8 +660,9 @@ $("archivoCliente").addEventListener("change", async function(evento) {
       mapa.set(codigo, {codigo, datos});
     }
 
-    registrosCliente = [...mapa.values()];
+await cargarEstadosNC();
 
+registrosCliente = [...mapa.values()];
     mostrarResumen(
       "resumenCliente",
       filas.length,
@@ -616,17 +671,33 @@ $("archivoCliente").addEventListener("change", async function(evento) {
     );
 
     $("filasCliente").innerHTML = registrosCliente.slice(0,50)
-      .map(({datos}) => `
-        <tr>
+.map(({datos, codigo}) => `
+      <tr>
           <td>${escapar(datos["ID"])}</td>
           <td>${escapar(datos["Proyecto"])}</td>
           <td>${escapar(datos["Especialidad"])}</td>
           <td>${escapar(datos["Estado"])}</td>
           <td>${escapar(datos["Vencido"])}</td>
           <td>${escapar(datos["Observaciones"])}</td>
+          <td>
+  <select
+    class="selectorEstadoNC"
+    data-codigo="${escapar(codigo)}"
+    data-origen="cliente"
+  >
+    <option value="Abierta"
+  ${estadosNC["cliente:" + codigo] === "Cerrada" ? "" : "selected"}>
+  Abierta
+</option>
+<option value="Cerrada"
+  ${estadosNC["cliente:" + codigo] === "Cerrada" ? "selected" : ""}>
+  Cerrada
+</option>
+  </select>
+</td>
         </tr>
       `).join("") || `
-        <tr><td colspan="6">No se encontraron NC Cliente.</td></tr>
+<tr><td colspan="7">No se encontraron NC Cliente.</td></tr>
       `;
 
     if (!registrosCliente.length) {
@@ -717,7 +788,25 @@ async function confirmarReemplazo(tipo) {
         "Verificá los registros en Supabase."
       );
     }
+const cambiosEstados = registros.map(registro => ({
+  origen: tipo,
+  codigo: registro.codigo,
+  estado: estadosNC[tipo + ":" + registro.codigo]
+    || "Abierta"
+}));
 
+const { error: errorEstados } = await db
+  .from("uam_nc_estados_manuales")
+  .upsert(cambiosEstados, {
+    onConflict: "origen,codigo"
+  });
+
+if (errorEstados) {
+  throw new Error(
+    "El Excel se importó, pero no se pudieron guardar " +
+    "los estados de las NC: " + errorEstados.message
+  );
+}
     mostrarEstado(
       idEstado,
       "✓ Reemplazo completado correctamente.\n" +
